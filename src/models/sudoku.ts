@@ -5,7 +5,7 @@ export type CellValue = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | nu
 
 export class Sudoku {
   private solved: Cell[][]
-  public cells: Cell[][]
+  private cells: Cell[][]
   private currentHint: [number, number, CellValue] | null
 
   static createSudokuSkeleton(): Sudoku {
@@ -21,6 +21,10 @@ export class Sudoku {
     const cells = createSudokuAlgorithm(grid)
     const solved = solveAlgorithm([...cells].map(c => [...c]))
     return new Sudoku(cells, solved)
+  }
+
+  getCells(): Cell[][] {
+    return this.cells
   }
 
   updateCell(value: CellValue, row: number, col: number): Sudoku {

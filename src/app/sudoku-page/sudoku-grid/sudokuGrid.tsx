@@ -73,7 +73,7 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 function SudokuCell(props: SudokuCellProps) {
   const inputElement = useRef<HTMLInputElement>(null)
   const { sudoku, row, col, updateSudoku, hint, mistakes } = props
-  const cell = sudoku.cells[row][col]
+  const cell = sudoku.getCells()[row][col]
   
   if (inputElement.current) {
     inputElement.current.value = cell.value ?? ''

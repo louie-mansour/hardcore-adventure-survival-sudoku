@@ -22,7 +22,7 @@ describe('sudoku', () => {
       for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
           const testCell = getTestSudokuGrid()[r][c]
-          const sudokuCell = sudoku.cells[r][c]
+          const sudokuCell = sudoku.getCells()[r][c]
           expect(testCell).toEqual(sudokuCell.value)
 
           if (testCell) {
@@ -49,7 +49,7 @@ describe('sudoku', () => {
     const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
     it('Can update Variable cell type', () => {
       const udpatedSudoku = sudoku.updateCell('1', 0, 0)
-      expect(udpatedSudoku.cells[0][0].value).toEqual('1')
+      expect(udpatedSudoku.getCells()[0][0].value).toEqual('1')
     })
 
     it('Cannot update Fixed cell type', () => {
@@ -76,11 +76,11 @@ describe('sudoku', () => {
       const solved = sudoku.getSolution()
       for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
-          expect(solved.cells[r][c].value).toEqual(solvedGrid[r][c])
+          expect(solved.getCells()[r][c].value).toEqual(solvedGrid[r][c])
           if (getTestSudokuGrid()[r][c] === null) {
-            expect(solved.cells[r][c].cellType).toEqual(CellType.Variable)
+            expect(solved.getCells()[r][c].cellType).toEqual(CellType.Variable)
           } else {
-            expect(solved.cells[r][c].cellType).toEqual(CellType.Fixed)
+            expect(solved.getCells()[r][c].cellType).toEqual(CellType.Fixed)
           }
         }
       }
@@ -143,7 +143,7 @@ describe('sudoku', () => {
           sudoku.updateCell(v, r, c)
         }
       } catch (err) {
-        expect(sudoku.cells.flatMap(x => x).map(x => x.value)).toEqual(sudoku.getSolution().cells.flatMap(x => x).map(x => x.value))
+        expect(sudoku.getCells().flatMap(x => x).map(x => x.value)).toEqual(sudoku.getSolution().getCells().flatMap(x => x).map(x => x.value))
       }
     })
   })
