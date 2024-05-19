@@ -28,10 +28,9 @@ export function createSudokuAlgorithm(grid: CellValue[][]): Cell[][] {
 export function solveAlgorithm(cells: Cell[][]): Cell[][] {
   const flatMapGrid = cells.flatMap(x => x).map(x => x?.value ? Number.parseInt(x.value) - 1 : null)
   const solution = (sudoku.solvepuzzle(flatMapGrid) as number[]).map(x => (x + 1).toString() as CellValue)
-  const chunkSize = 9;
   const solvedGrid = []
-  for (let i = 0; i < solution.length; i += chunkSize) {
-    const chunk = solution.slice(i, i + chunkSize);
+  for (let i = 0; i < solution.length; i += 9) {
+    const chunk = solution.slice(i, i + 9);
     solvedGrid.push(chunk)
   }
 
@@ -75,7 +74,7 @@ export function getHintAlgorithm(cells: Cell[][], solved: Cell[][]): [number, nu
       if (!cells[r][c].value || cells[r][c].value !== solved[r][c].value) {
         continue
       }
-      possibilities = narrowDownPossibilities(possibilities, r, c, cells[r][c])
+      possibilities = removePossibilityFromOtherCells(possibilities, r, c, cells[r][c].value)
     }
   }
 
@@ -85,16 +84,21 @@ export function getHintAlgorithm(cells: Cell[][], solved: Cell[][]): [number, nu
         const value = [...possibilities[r][c]][0]
         return [r, c, value]
       }
+    //   if (possibilities[r][c].size === 0) continue
+
+    //   possibilities = narrowDownPossibilities(possibilities, r, c)
+    //   if (possibilities[r][c].size === 1) {
+    //     const value = [...possibilities[r][c]][0]
+    //     return [r, c, value]
+    //   }
+    // }
     }
   }
-
-  console.log(possibilities)
 
   throw new Error('Something went wrong. We couldn\'t get the hint')
 }
 
-function narrowDownPossibilities(possibilities: Set<CellValue>[][], r: number, c: number, cell: Cell): Set<CellValue>[][] {
-  const value = cell.value
+function removePossibilityFromOtherCells(possibilities: Set<CellValue>[][], r: number, c: number, value: CellValue): Set<CellValue>[][] {
   for (let rIterator = 0; rIterator < 9; rIterator++) {
     possibilities[rIterator][c].delete(value)
   }
@@ -114,6 +118,46 @@ function narrowDownPossibilities(possibilities: Set<CellValue>[][], r: number, c
   possibilities[r][c] = new Set()
   return possibilities
 }
+
+// function narrowDownPossibilities(possibilities: Set<CellValue>[][], r: number, c: number): Set<CellValue>[][] {
+//   let valuesInRow = new Set()
+//   for (let rIterator = 0; rIterator < 9; rIterator++) {
+//     valuesInRow = new Set(...possibilities[rIterator][c])
+//   }
+
+//   let valuesInCol = new Set()
+//   for (let cIterator = 0; cIterator < 9; cIterator++) {
+//     valuesInCol = new Set(...possibilities[r][cIterator])
+//   }
+
+//   let valuesIn3x3 = new Set()
+//   const [minR, maxR] = get3x3Range(r)
+//   const [minC, maxC] = get3x3Range(c)
+//   for (let rIterator = minR; rIterator <= maxR; rIterator++) {
+//     for (let cIterator = minC; cIterator <= maxC; cIterator++) {
+//       valuesIn3x3 = new Set(...possibilities[rIterator][cIterator])
+//     }
+//   }
+
+//   const possibleValuesInCell: CellValue[] = [...possibilities[r][c]]
+//   for (let i = 0; i < possibleValuesInCell.length; i++) {
+//     if ([...valuesInRow].includes(possibleValuesInCell[i]))
+//   }
+
+//   // get all cells in row
+//   // get all cells in col
+//   // get all cells in 3x3
+//   // for each possibility in the cell
+//     // see if it's the only one in the row
+//     // see if it's the only one in the col
+//     // see if it's the only one in the 3x3
+//     // see if it's the only one in the row+col
+//     // see if it's the only one in the row+3x3
+//     // see if it's the only one in the col+3x3
+//     // see if it's the only one in the row+col+3x3
+  
+//   // If not, then does this further narrow down the possibilities?
+// }
 
 function get3x3Range(rowOrCol: number): [number, number] {
   if (rowOrCol < 3) {

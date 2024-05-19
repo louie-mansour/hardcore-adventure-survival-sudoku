@@ -14,7 +14,7 @@ import Title from "./sudoku-page/title";
 
 
 export default function Home() {
-  // Game level
+  // Game states
   const [currentGameSettings, setCurrentGameSettings] = useState<GameSettings>({
     difficulty: GameDifficulty.Medium,
     state: GameState.Intial,
@@ -23,7 +23,7 @@ export default function Home() {
   const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(false)
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
 
-  // Sudoku level
+  // Sudoku states
   const [sudoku, setSudoku] = useState<Sudoku>(getSudoku())
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isFoundMistakes, setIsFoundMistakes] = useState(false)

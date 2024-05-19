@@ -1,7 +1,7 @@
 import { FormControlLabel, Switch } from '@mui/material';
 import { green, red } from '@mui/material/colors';
 import { alpha, styled } from '@mui/material/styles';
-
+import { config } from '../../config';
 
 interface Props {
   enableOngoingHintsMode: (_: boolean) => void,
@@ -16,16 +16,16 @@ export default function OptionsSelector({
   isHardCodeModeEnabled,
   isOngoingHintsModeEnabled,
 }: Props) {
-
   return (
     <div style={{
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'left',
-    }}>
-      <FormControlLabel control={<RedSwitch />} label="Hardcore mode" checked={isHardCodeModeEnabled} onChange={(_event, isChecked) => {
+    }}> {
+      config.isHardcoreModeAvailable && <FormControlLabel control={<RedSwitch />} label="Hardcore mode" checked={isHardCodeModeEnabled} onChange={(_event, isChecked) => {
         enableHardcoreMode(isChecked)
       }}/>
+    }
       <FormControlLabel control={<GreenSwitch />} label="Ongoing hints" checked={isOngoingHintsModeEnabled} onChange={(_event, isChecked) => {
         enableOngoingHintsMode(isChecked)
       }}/>

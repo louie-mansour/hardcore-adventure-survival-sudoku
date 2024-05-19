@@ -1,5 +1,6 @@
 import { CellType, CellValue, Sudoku } from "./sudoku"
-
+import fs, { linkSync } from 'fs'
+import path from 'path'
 
 function getTestSudokuGrid(): CellValue[][] {
   return [
@@ -146,6 +147,38 @@ describe('sudoku', () => {
         expect(sudoku.getCells().flatMap(x => x).map(x => x.value)).toEqual(sudoku.getSolution().getCells().flatMap(x => x).map(x => x.value))
       }
     })
+  })
+})
+
+describe('Can these imported sudokus be solved', () => {
+  const file = path.join(__dirname, "../", "sudokuflatfiles", "easy.txt");
+  const sudokusFile = fs.readFileSync(file, 'utf8')
+  const lines = sudokusFile.split(/\r?\n/)
+  const sudokus: Sudoku[] = []
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const encodedSudoku = line.split(' ')[1]
+    const cells: CellValue[][] = []
+    for (let j = 0; j < encodedSudoku.length; j += 9) {
+      const chunk = encodedSudoku
+      .slice(j, j + 9)
+      .split("")
+      .map(x => {
+        if (x === "0") return null as CellValue
+        return x as CellValue
+      })
+      cells.push(chunk)
+    }
+    sudokus.push(Sudoku.createSudoku(cells))
+  }
+  
+  it.each(sudokus)('Can these imported sudokus be solved', (sudoku: Sudoku) => {
+    while (!sudoku.isSolved()) {
+      sudoku.getHint()
+      const [r, c, v] = sudoku.revealHint()
+      sudoku.updateCell(v, r, c)
+    }
+    expect(sudoku.getCells().flatMap(x => x).map(x => x.value)).toEqual(sudoku.getSolution().getCells().flatMap(x => x).map(x => x.value))
   })
 })
 

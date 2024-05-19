@@ -1,0 +1,3 @@
+These are with thanks to the Sudoku Exchange puzzle bank which are dedicated to the public domain
+https://github.com/grantm/sudoku-exchange-puzzle-bank
+Contributions by https://github.com/grantm
