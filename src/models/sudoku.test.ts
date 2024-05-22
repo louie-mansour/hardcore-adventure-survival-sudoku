@@ -151,7 +151,7 @@ describe('sudoku', () => {
 })
 
 describe('Can these imported sudokus be solved', () => {
-  const file = path.join(__dirname, "../", "sudokuflatfiles", "easy.txt");
+  const file = path.join(__dirname, "../", "sudokuflatfiles", "hard.txt");
   const sudokusFile = fs.readFileSync(file, 'utf8')
   const lines = sudokusFile.split(/\r?\n/)
   const sudokus: Sudoku[] = []
@@ -172,13 +172,21 @@ describe('Can these imported sudokus be solved', () => {
     sudokus.push(Sudoku.createSudoku(cells))
   }
   
+  let line = 0
   it.each(sudokus)('Can these imported sudokus be solved', (sudoku: Sudoku) => {
-    while (!sudoku.isSolved()) {
-      sudoku.getHint()
-      const [r, c, v] = sudoku.revealHint()
-      sudoku.updateCell(v, r, c)
+    line++
+    try {
+      while (!sudoku.isSolved()) {
+        sudoku.getHint()
+        const [r, c, v] = sudoku.revealHint()
+        sudoku.updateCell(v, r, c)
+      }
+      expect(sudoku.getCells().flatMap(x => x).map(x => x.value)).toEqual(sudoku.getSolution().getCells().flatMap(x => x).map(x => x.value))
+    } catch(e: unknown) {
+      console.log(line)
+      console.log(sudoku.getCells().flatMap(x => x).map(x => x.value))
+      throw e
     }
-    expect(sudoku.getCells().flatMap(x => x).map(x => x.value)).toEqual(sudoku.getSolution().getCells().flatMap(x => x).map(x => x.value))
   })
 })
 

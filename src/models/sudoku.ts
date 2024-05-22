@@ -53,6 +53,7 @@ export class Sudoku {
       const mistakes = this.findMistakes()
       if (mistakes.length > 0) {
         this.currentHint = null
+        console.log(mistakes[0])
         throw new MistakeError(mistakes, 'There is a mistake in the sudoku')
       }
     }

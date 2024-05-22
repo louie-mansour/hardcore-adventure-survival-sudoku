@@ -78,24 +78,22 @@ export function getHintAlgorithm(cells: Cell[][], solved: Cell[][]): [number, nu
     }
   }
 
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      if (possibilities[r][c].size === 1) {
-        const value = [...possibilities[r][c]][0]
-        return [r, c, value]
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        if (possibilities[r][c].size === 1) {
+          const value = [...possibilities[r][c]][0]
+          return [r, c, value]
+        }
+        if (possibilities[r][c].size === 0) continue
+  
+        possibilities = narrowDownPossibilities(possibilities, cells, r, c)
+        if (possibilities[r][c].size === 1) {
+          const value = [...possibilities[r][c]][0]
+          return [r, c, value]
+        }
       }
-    //   if (possibilities[r][c].size === 0) continue
-
-    //   possibilities = narrowDownPossibilities(possibilities, r, c)
-    //   if (possibilities[r][c].size === 1) {
-    //     const value = [...possibilities[r][c]][0]
-    //     return [r, c, value]
-    //   }
-    // }
-    }
   }
-
-  throw new Error('Something went wrong. We couldn\'t get the hint')
+  return checkForOnlyPossibilties(possibilities)
 }
 
 function removePossibilityFromOtherCells(possibilities: Set<CellValue>[][], r: number, c: number, value: CellValue): Set<CellValue>[][] {
@@ -119,45 +117,93 @@ function removePossibilityFromOtherCells(possibilities: Set<CellValue>[][], r: n
   return possibilities
 }
 
-// function narrowDownPossibilities(possibilities: Set<CellValue>[][], r: number, c: number): Set<CellValue>[][] {
-//   let valuesInRow = new Set()
-//   for (let rIterator = 0; rIterator < 9; rIterator++) {
-//     valuesInRow = new Set(...possibilities[rIterator][c])
-//   }
+function narrowDownPossibilities(possibilities: Set<CellValue>[][], cells: Cell[][], r: number, c: number): Set<CellValue>[][] {
+  let valuesInRow = new Set()
+  for (let rIterator = 0; rIterator < 9; rIterator++) {
+    valuesInRow.add(cells[rIterator][c].value)
+  }
 
-//   let valuesInCol = new Set()
-//   for (let cIterator = 0; cIterator < 9; cIterator++) {
-//     valuesInCol = new Set(...possibilities[r][cIterator])
-//   }
+  let valuesInCol = new Set()
+  for (let cIterator = 0; cIterator < 9; cIterator++) {
+    valuesInCol.add(cells[r][cIterator].value)
+  }
 
-//   let valuesIn3x3 = new Set()
-//   const [minR, maxR] = get3x3Range(r)
-//   const [minC, maxC] = get3x3Range(c)
-//   for (let rIterator = minR; rIterator <= maxR; rIterator++) {
-//     for (let cIterator = minC; cIterator <= maxC; cIterator++) {
-//       valuesIn3x3 = new Set(...possibilities[rIterator][cIterator])
-//     }
-//   }
+  let valuesIn3x3 = new Set()
+  const [minR, maxR] = get3x3Range(r)
+  const [minC, maxC] = get3x3Range(c)
+  for (let rIterator = minR; rIterator <= maxR; rIterator++) {
+    for (let cIterator = minC; cIterator <= maxC; cIterator++) {
+      valuesIn3x3.add(cells[rIterator][cIterator].value)
+    }
+  }
 
-//   const possibleValuesInCell: CellValue[] = [...possibilities[r][c]]
-//   for (let i = 0; i < possibleValuesInCell.length; i++) {
-//     if ([...valuesInRow].includes(possibleValuesInCell[i]))
-//   }
+  const possibleValuesInCell = [...possibilities[r][c]]
+  const impossibleValues = new Set([...valuesInRow, ...valuesInCol, ...valuesIn3x3])
 
-//   // get all cells in row
-//   // get all cells in col
-//   // get all cells in 3x3
-//   // for each possibility in the cell
-//     // see if it's the only one in the row
-//     // see if it's the only one in the col
-//     // see if it's the only one in the 3x3
-//     // see if it's the only one in the row+col
-//     // see if it's the only one in the row+3x3
-//     // see if it's the only one in the col+3x3
-//     // see if it's the only one in the row+col+3x3
-  
-//   // If not, then does this further narrow down the possibilities?
-// }
+  // if (r === 0 && c === 6) {
+  //   console.log(possibleValuesInCell)
+  //   console.log(impossibleValues)
+  // }
+  for (let i = 0; i < possibleValuesInCell.length; i++) {
+    if (impossibleValues.has(possibleValuesInCell[i])) {
+      possibilities[r][c].delete(possibleValuesInCell[i])
+    }
+  }
+
+  return possibilities
+}
+
+function checkForOnlyPossibilties(possibilities: Set<CellValue>[][]):[number, number, CellValue] {
+  const values = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+  for (let c = 0; c < 9; c++) {
+    let valuesInRow: [number, number, CellValue][] = []
+    for (let rIterator = 0; rIterator < 9; rIterator++) {
+      valuesInRow = [...valuesInRow, ...[...possibilities[rIterator][c]].map(x => [rIterator, c, x]) as [number, number, CellValue][]]
+    }
+    for (let i = 0; i < 9; i++) {
+      const value = values[i]
+      if (valuesInRow.filter(x => x[2] === value).length === 1) {
+        return valuesInRow.filter(x => x[2] === value)[0]
+      }
+    }
+  }
+
+  for (let r = 0; r < 9; r++) {
+    let valuesInCol: [number, number, CellValue][] = []
+    for (let cIterator = 0; cIterator < 9; cIterator++) {
+      valuesInCol = [...valuesInCol, ...[...possibilities[r][cIterator]].map(x => [r, cIterator, x]) as [number, number, CellValue][]]
+    }
+    for (let i = 0; i < 9; i++) {
+      const value = values[i]
+      if (valuesInCol.filter(x => x[2] === value).length === 1) {
+        return valuesInCol.filter(x => x[2] === value)[0]
+      }
+    }
+  }
+
+  for (let r = 0; r < 9; r += 3) {
+    for (let c = 0; c < 9; c+= 3) {
+      let valuesIn3x3: [number, number, CellValue][] = []
+      const [minR, maxR] = get3x3Range(r)
+      const [minC, maxC] = get3x3Range(c)
+
+      for (let i = minR; i <= maxR; i++) {
+        for (let j = minC; j <= maxC; j++) {
+          valuesIn3x3 = [...valuesIn3x3, ...[...possibilities[i][j]].map(x => [i, j, x]) as [number, number, CellValue][]]
+        }
+      }
+      for (let i = 0; i < 9; i++) {
+        const value = values[i]
+        if (valuesIn3x3.filter(x => x[2] === value).length === 1) {
+          return valuesIn3x3.filter(x => x[2] === value)[0]
+        }
+      }
+    }
+  }
+
+  throw new Error('Nada')
+}
 
 function get3x3Range(rowOrCol: number): [number, number] {
   if (rowOrCol < 3) {
