@@ -2,6 +2,7 @@
 
 import { CellValue, Sudoku } from "@/models/Sudoku";
 import { getSudoku } from "@/services/sudokuService";
+import { setRef } from "@mui/material";
 import { useEffect, useState } from "react";
 import { MistakeError } from "../errors/mistake";
 import DifficultySelector from "./sudoku-page/difficultySelector";
@@ -14,7 +15,7 @@ import Title from "./sudoku-page/title";
 export default function Home() {
   // Game states
   const [currentGameSettings, setCurrentGameSettings] = useState<GameSettings>({
-    difficulty: GameDifficulty.Medium,
+    difficulty: GameDifficulty.Easy,
     state: GameState.Intial,
   })
   const [newGameSettings, setNewGameSettings] = useState<GameSettings | null>(null)
@@ -152,7 +153,12 @@ export default function Home() {
     })
     setMistakes(prevMistakes => {
       if (prevMistakes.map(m => `${m[0]}${m[1]}`).includes(`${row}${col}`)) {
-        return prevMistakes.filter(m => m[0] !== row || m[1] !== col)
+        const newMistakes = prevMistakes.filter(m => m[0] !== row || m[1] !== col)
+
+        if (newMistakes.length === 0) {
+          setIsRevealMistakes(false)
+        }
+        return newMistakes
       }
       return prevMistakes
     })
@@ -198,6 +204,10 @@ export default function Home() {
 
   function solveSudoku() {
     setSudoku(sudoku.getSolution())
+    setMistakes([])
+    setIsOngoingHintsModeEnabled(false)
+    setIsRevealMistakes(false)
+    setHint(null)
   }
 
   function enableOngoingHintsMode(isEnable: boolean) {

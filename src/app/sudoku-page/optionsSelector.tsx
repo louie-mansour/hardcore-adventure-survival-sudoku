@@ -30,7 +30,7 @@ export default function OptionsSelector({
         enableHardcoreMode(isChecked)
       }}/>
     }
-      <FormControlLabel control={<GreenSwitch />} label="Ongoing hints" checked={isOngoingHintsModeEnabled} onChange={(_event, isChecked) => {
+      <FormControlLabel control={<GreenSwitch />} label="Ongoing Hints" checked={isOngoingHintsModeEnabled} onChange={(_event, isChecked) => {
         enableOngoingHintsMode(isChecked)
       }}/>
     </div>
