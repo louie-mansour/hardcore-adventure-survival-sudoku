@@ -183,8 +183,6 @@ describe('Can these imported sudokus be solved', () => {
       }
       expect(sudoku.getCells().flatMap(x => x).map(x => x.value)).toEqual(sudoku.getSolution().getCells().flatMap(x => x).map(x => x.value))
     } catch(e: unknown) {
-      console.log(line)
-      console.log(sudoku.getCells().flatMap(x => x).map(x => x.value))
       throw e
     }
   })

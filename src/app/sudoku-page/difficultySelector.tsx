@@ -10,7 +10,6 @@ export default function DifficultySelector({
   difficulty,
 }: Props) {
 
-  console.log(difficulty + ' is this')
   return (
     <div style={{
       display: 'flex',

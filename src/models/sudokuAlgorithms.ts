@@ -140,10 +140,6 @@ function narrowDownPossibilities(possibilities: Set<CellValue>[][], cells: Cell[
   const possibleValuesInCell = [...possibilities[r][c]]
   const impossibleValues = new Set([...valuesInRow, ...valuesInCol, ...valuesIn3x3])
 
-  // if (r === 0 && c === 6) {
-  //   console.log(possibleValuesInCell)
-  //   console.log(impossibleValues)
-  // }
   for (let i = 0; i < possibleValuesInCell.length; i++) {
     if (impossibleValues.has(possibleValuesInCell[i])) {
       possibilities[r][c].delete(possibleValuesInCell[i])

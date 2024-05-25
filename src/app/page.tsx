@@ -4,12 +4,9 @@ import { CellValue, Sudoku } from "@/models/Sudoku";
 import { getSudoku } from "@/services/sudokuService";
 import { useEffect, useState } from "react";
 import { MistakeError } from "../errors/mistake";
-import CheckButton from "./sudoku-page/checkButton";
 import DifficultySelector from "./sudoku-page/difficultySelector";
-import HintButton from "./sudoku-page/hintButton";
 import HintPanel from "./sudoku-page/hintPanel";
 import OptionsSelector from "./sudoku-page/optionsSelector";
-import SolveButton from "./sudoku-page/solveSudoku";
 import Sudoku9x9Grid from "./sudoku-page/sudoku-grid/sudokuGrid";
 import Title from "./sudoku-page/title";
 
@@ -27,7 +24,7 @@ export default function Home() {
   // Sudoku states
   const [sudoku, setSudoku] = useState<Sudoku>(getSudoku())
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
-  const [isFoundMistakes, setIsFoundMistakes] = useState(false)
+  const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
 
   useEffect(() => {
@@ -96,10 +93,10 @@ export default function Home() {
             justifyContent: 'center',
             alignItems: 'center',
           }}>
-            <Sudoku9x9Grid sudoku={sudoku} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes}/>
+            <Sudoku9x9Grid sudoku={sudoku} updateSudoku={updateSudoku} hint={hint} mistakes={isRevealMistakes ? mistakes : []}/>
           </div>
           <HintPanel
-            checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundMistakes={isFoundMistakes}
+            checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundMistakes={mistakes.length > 0}
             getHint={getHint} revealHint={revealHint} isFoundHint={!!hint}
             solveSudoku={solveSudoku}
           />
@@ -109,7 +106,6 @@ export default function Home() {
   )
 
   function requestNewGame(difficulty: GameDifficulty) {
-    console.log(difficulty)
     setNewGameSettings({
       difficulty: difficulty,
       state: GameState.Intial,
@@ -162,11 +158,11 @@ export default function Home() {
   }
 
   function checkForMistakes() {
-    setIsFoundMistakes(sudoku.findMistakes().length > 0)
+    setMistakes(sudoku.findMistakes())
   }
 
   function revealMistakes() {
-    setMistakes(sudoku.findMistakes())
+    setIsRevealMistakes(sudoku.findMistakes().length > 0)
   }
 
   function getHint() {
@@ -174,7 +170,7 @@ export default function Home() {
       setHint(sudoku.getHint())
     } catch (err: unknown) {
       if (err instanceof MistakeError) {
-        setIsFoundMistakes(true)
+        setIsRevealMistakes(true)
       }
     }
   }

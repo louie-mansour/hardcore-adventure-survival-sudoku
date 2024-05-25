@@ -45,7 +45,7 @@ export default function HintPanel({
           isFoundMistakes &&
             <p style={{ margin: 0, textAlign: 'center' }} >We found a mistake. Click <a
               style={{
-                color: 'grey',
+                color: 'red',
               }}
               onClick={() => revealMistakes()}>
                 here
@@ -53,13 +53,13 @@ export default function HintPanel({
         }
         {
           isFoundHint &&
-            <p style={{ margin: 0, textAlign: 'center' }} >Click <a
+            <p style={{ margin: 0, textAlign: 'center' }} >Here's a hint. Click <a
             style={{
-              color: 'grey'
+              color: 'green'
             }}
             onClick={() => revealHint()}>
               here
-            </a> to reveal the value of the hint.</p>
+            </a> to reveal its value.</p>
         }
         </div>
       </div>
