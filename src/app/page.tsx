@@ -96,7 +96,7 @@ export default function Home() {
             <Sudoku9x9Grid sudoku={sudoku} updateSudoku={updateSudoku} hint={hint} mistakes={isRevealMistakes ? mistakes : []}/>
           </div>
           <HintPanel
-            checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundMistakes={mistakes.length > 0}
+            checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundMistakes={isOngoingHintsModeEnabled ? false : mistakes.length > 0}
             getHint={getHint} revealHint={revealHint} isFoundHint={!!hint}
             solveSudoku={solveSudoku}
           />
@@ -139,8 +139,9 @@ export default function Home() {
     })
 
     if (isOngoingHintsModeEnabled) {
-      setHint(newSudoku.getHint({ allowMistakes: true }))
       setMistakes(newSudoku.findMistakes())
+      setIsRevealMistakes(true)
+      setHint(newSudoku.getHint({ allowMistakes: true }))
       return
     }
     setHint(prevHint => {
@@ -162,7 +163,7 @@ export default function Home() {
   }
 
   function revealMistakes() {
-    setIsRevealMistakes(sudoku.findMistakes().length > 0)
+    setIsRevealMistakes(true)
   }
 
   function getHint() {
@@ -170,21 +171,29 @@ export default function Home() {
       setHint(sudoku.getHint())
     } catch (err: unknown) {
       if (err instanceof MistakeError) {
-        setIsRevealMistakes(true)
+        setMistakes(err.mistakes)
       }
     }
   }
 
   function revealHint() {
     const revealedHint = sudoku.revealHint()
-    setSudoku(sudoku.updateCell(revealedHint[2], revealedHint[0], revealedHint[1]))
-    setHint(null)
+    const newSudoku = sudoku.updateCell(revealedHint[2], revealedHint[0], revealedHint[1])
+    setSudoku(newSudoku)
     setCurrentGameSettings(prevGameSettings => {
       return {
         ...prevGameSettings,
         state: GameState.InProgress,
       }
     })
+
+    if (isOngoingHintsModeEnabled) {
+      setMistakes(newSudoku.findMistakes())
+      setHint(newSudoku.getHint({ allowMistakes: true }))
+      return
+    }
+
+    setHint(null)
   }
 
   function solveSudoku() {
@@ -197,16 +206,13 @@ export default function Home() {
     if (!isEnable) {
       setHint(null)
       setMistakes([])
+      setIsRevealMistakes(false)
       return
     }
 
-    try {
-      setHint(sudoku.getHint({ allowMistakes: true }))
-    } catch (err: unknown) {
-      if (err instanceof MistakeError) {
-        setMistakes(err.mistakes)
-      }
-    }
+    setMistakes(sudoku.findMistakes())
+    setHint(sudoku.getHint({ allowMistakes: true }))
+    setIsRevealMistakes(true)
   }
 }
 

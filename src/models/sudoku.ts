@@ -41,9 +41,9 @@ export class Sudoku {
   findMistakes(): [number, number, CellValue][] {
     const mistakes = findMistakesAlgorithm(this.cells, this.solved)
 
-    if (mistakes.length > 0) {
-      this.currentHint = null
-    }
+    // if (mistakes.length > 0) {
+    //   this.currentHint = null
+    // }
 
     return [ ...mistakes ]
   }
@@ -56,7 +56,6 @@ export class Sudoku {
         throw new MistakeError(mistakes, 'There is a mistake in the sudoku')
       }
     }
-
 
     const [r, c, value] = getHintAlgorithm(this.cells, this.solved)
     this.currentHint = [r, c, value]
