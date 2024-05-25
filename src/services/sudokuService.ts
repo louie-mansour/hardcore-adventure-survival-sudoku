@@ -1,7 +1,33 @@
-import { CellValue, Sudoku } from "..//models/Sudoku";
+import { easySudokus } from "./easy";
+import { mediumSudokus } from "./medium";
+import { hardSudokus } from "./hard";
+import { CellValue, Sudoku } from "../models/Sudoku";
+import { GameDifficulty } from "../app/page";
 
-export function getSudoku(): Sudoku {
-  const encodedSudoku = '500700032100326000000000000020070058010803040890040070000000000000654001230009005'
+const easySudokuList = easySudokus
+  .trim()
+  .split(/\r?\n/)
+  .map(s => s.split(' ')[1])
+
+const mediumSudokuList = mediumSudokus
+.trim()
+.split(/\r?\n/)
+.map(s => s.split(' ')[1])
+
+const hardSudokuList = hardSudokus
+.trim()
+.split(/\r?\n/)
+.map(s => s.split(' ')[1])
+
+interface Args {
+  index?: number,
+  difficulty: GameDifficulty
+}
+
+export function getSudoku({ difficulty, index }: Args): Sudoku {
+  const sudokuList = chooseSudokuList(difficulty)
+  const sudokuIndex = index ?? Math.round(Math.random() * sudokuList.length - 1)
+  const encodedSudoku = easySudokuList[sudokuIndex]
   const cells: CellValue[][] = []
   for (let j = 0; j < encodedSudoku.length; j += 9) {
     const chunk = encodedSudoku
@@ -14,16 +40,12 @@ export function getSudoku(): Sudoku {
     cells.push(chunk)
   }
   return Sudoku.createSudoku(cells)
+}
 
-  // return Sudoku.createSudoku([
-  //   [null, null, "4",  null, "5",  null, null, null, null],
-  //   ["9",  null, null, "7",  "3",  "4",  "6",  null, null],
-  //   [null, null, "3",  null, "2",  "1",  null, "4",  "9" ],
-  //   [null, "3",  "5",  null, "9",  null, "4",  "8",  null],
-  //   [null, "9",  null, null, null, null, null, "3",  null],
-  //   [null, "7",  "6",  null, "1",  null, "9",  "2",  null],
-  //   ["3",  "1",  null, "9",  "7",  null,  "2",  null, null],
-  //   [null, null, "9",  "1",  "8",  "2",  null, null, "3" ],
-  //   [null, null, null, null, "6",  null, "1",  null, null],
-  // ])
+function chooseSudokuList(difficulty: GameDifficulty): string[] {
+  switch (difficulty) {
+    case GameDifficulty.Easy: return easySudokuList
+    case GameDifficulty.Medium: return mediumSudokuList
+    case GameDifficulty.Hard: return hardSudokuList
+  }
 }

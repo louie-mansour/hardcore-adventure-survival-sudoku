@@ -2,7 +2,6 @@
 
 import { CellValue, Sudoku } from "@/models/Sudoku";
 import { getSudoku } from "@/services/sudokuService";
-import { setRef } from "@mui/material";
 import { useEffect, useState } from "react";
 import { MistakeError } from "../errors/mistake";
 import DifficultySelector from "./sudoku-page/difficultySelector";
@@ -23,7 +22,7 @@ export default function Home() {
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
 
   // Sudoku states
-  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku())
+  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku({ difficulty: currentGameSettings.difficulty, index: 9 }))
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
@@ -44,10 +43,9 @@ export default function Home() {
       difficulty: newGameSettings.difficulty,
       state: GameState.Intial,
     })
-    setNewGameSettings(null)
 
-    const sudoku = getSudoku()
-    setSudoku(sudoku)
+    setNewGameSettings(null)
+    setSudoku(getSudoku({ difficulty: newGameSettings.difficulty }))
   }, [newGameSettings, currentGameSettings.state])
 
   return (

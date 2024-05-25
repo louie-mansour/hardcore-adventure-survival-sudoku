@@ -1,6 +1,7 @@
 import { CellType, CellValue, Sudoku } from "./sudoku"
 import fs, { linkSync } from 'fs'
 import path from 'path'
+import { easySudokus } from "@/services/easy"
 
 function getTestSudokuGrid(): CellValue[][] {
   return [
@@ -151,8 +152,7 @@ describe('sudoku', () => {
 })
 
 describe('Can these imported sudokus be solved', () => {
-  const file = path.join(__dirname, "../", "sudokuflatfiles", "medium.txt");
-  const sudokusFile = fs.readFileSync(file, 'utf8')
+  const sudokusFile = easySudokus
   const lines = sudokusFile.split(/\r?\n/)
   const sudokus: Sudoku[] = []
   for (let i = 0; i < lines.length; i++) {

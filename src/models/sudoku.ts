@@ -7,6 +7,7 @@ export class Sudoku {
   private solved: Cell[][]
   private cells: Cell[][]
   private currentHint: [number, number, CellValue] | null
+  public isSkeleton: boolean | undefined
 
   static createSudokuSkeleton(): Sudoku {
     const mockCells = Array.from(
@@ -14,7 +15,9 @@ export class Sudoku {
         { length: 9 }, _c => Cell.createVariable(null)
       )
     )
-    return new Sudoku(mockCells, mockCells)
+    const s = new Sudoku(mockCells, mockCells)
+    s.isSkeleton = true
+    return s
   }
 
   static createSudoku(grid: CellValue[][]): Sudoku {
