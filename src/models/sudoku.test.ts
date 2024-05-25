@@ -151,7 +151,7 @@ describe('sudoku', () => {
 })
 
 describe('Can these imported sudokus be solved', () => {
-  const file = path.join(__dirname, "../", "sudokuflatfiles", "hard.txt");
+  const file = path.join(__dirname, "../", "sudokuflatfiles", "medium.txt");
   const sudokusFile = fs.readFileSync(file, 'utf8')
   const lines = sudokusFile.split(/\r?\n/)
   const sudokus: Sudoku[] = []

@@ -22,7 +22,11 @@ export default function OptionsSelector({
       flexDirection: 'column',
       justifyContent: 'left',
     }}> {
-      config.isHardcoreModeAvailable && <FormControlLabel control={<RedSwitch />} label="Hardcore mode" checked={isHardCodeModeEnabled} onChange={(_event, isChecked) => {
+      <FormControlLabel control={<RedSwitch />}
+      label={config.isHardcoreModeAvailable ? 'Hardcore Adventure Survival Mode' : 'Hardcore Adventure Survival Mode (coming soon)'}
+      checked={isHardCodeModeEnabled}
+      disabled={!config.isHardcoreModeAvailable}
+      onChange={(_event, isChecked) => {
         enableHardcoreMode(isChecked)
       }}/>
     }

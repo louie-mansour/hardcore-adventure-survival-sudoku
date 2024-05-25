@@ -2,12 +2,15 @@ import { GameDifficulty } from "../page"
 
 interface Props {
   requestNewGame: (_: GameDifficulty) => void
+  difficulty: GameDifficulty
 } 
 
 export default function DifficultySelector({
   requestNewGame,
+  difficulty,
 }: Props) {
 
+  console.log(difficulty + ' is this')
   return (
     <div style={{
       display: 'flex',
@@ -19,7 +22,16 @@ export default function DifficultySelector({
       {
         Object.values(GameDifficulty).map((difficultyValue: GameDifficulty) => {
           return (
-            <p key={difficultyValue} onClick={() => requestNewGame(difficultyValue) } ><a>{displayDifficulty(difficultyValue)}</a></p>
+            <p
+              key={difficultyValue}
+              onClick={() => requestNewGame(difficultyValue) }
+              style={{
+                color: difficultyValue === difficulty ? 'black' : 'darkgray',
+                fontWeight: 700,
+              }}
+            >
+              <a>{displayDifficulty(difficultyValue)}</a>
+            </p>
           )
         })
       }

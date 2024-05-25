@@ -7,6 +7,7 @@ import { MistakeError } from "../errors/mistake";
 import CheckButton from "./sudoku-page/checkButton";
 import DifficultySelector from "./sudoku-page/difficultySelector";
 import HintButton from "./sudoku-page/hintButton";
+import HintPanel from "./sudoku-page/hintPanel";
 import OptionsSelector from "./sudoku-page/optionsSelector";
 import SolveButton from "./sudoku-page/solveSudoku";
 import Sudoku9x9Grid from "./sudoku-page/sudoku-grid/sudokuGrid";
@@ -35,11 +36,17 @@ export default function Home() {
     }
 
     if ([GameState.InProgress, GameState.Paused].includes(currentGameSettings.state)) {
-      const isConfirmGetNewGame = confirm('are you sure?')
+      const isConfirmGetNewGame = confirm('That will end your current game.\nAre you sure?')
       if (!isConfirmGetNewGame) {
         return
       }
     }
+
+    setCurrentGameSettings({
+      difficulty: newGameSettings.difficulty,
+      state: GameState.Intial,
+    })
+    setNewGameSettings(null)
 
     const sudoku = getSudoku()
     setSudoku(sudoku)
@@ -77,7 +84,7 @@ export default function Home() {
           }}>
             <Title />
           </div>
-          <DifficultySelector requestNewGame={requestNewGame}/>
+          <DifficultySelector requestNewGame={requestNewGame} difficulty={currentGameSettings.difficulty} />
           <OptionsSelector
             enableOngoingHintsMode={enableOngoingHintsMode}
             enableHardcoreMode={setIsHardcoreModeEnabled}
@@ -91,15 +98,18 @@ export default function Home() {
           }}>
             <Sudoku9x9Grid sudoku={sudoku} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes}/>
           </div>
-          <CheckButton checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundErrors={isFoundMistakes}/>
-          <HintButton getHint={getHint} revealHint={revealHint} isFoundHint={!!hint} />
-          <SolveButton solveSudoku={solveSudoku} />
+          <HintPanel
+            checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundMistakes={isFoundMistakes}
+            getHint={getHint} revealHint={revealHint} isFoundHint={!!hint}
+            solveSudoku={solveSudoku}
+          />
         </div>
       </div>
     </div>
   )
 
   function requestNewGame(difficulty: GameDifficulty) {
+    console.log(difficulty)
     setNewGameSettings({
       difficulty: difficulty,
       state: GameState.Intial,
@@ -107,8 +117,30 @@ export default function Home() {
   }
 
   function updateSudoku(value: CellValue, row: number, col: number) {
+    // Interesting scenario to fix here
+    // setSudoku depends on the current sudoku state, so it should use setSudoku(prevSudoku => { prevSudoku.updateCell(...)})
+    // but all the other states (e.g. setHint, setMistakes, etc) also depend on new Sudoku
+    // can these all go inside the setSukoku callback?
+    // Or does this point towards a design problem?
     const newSudoku = sudoku.updateCell(value, row, col)
     setSudoku(newSudoku)
+
+    if (newSudoku.isSolved()) {
+      setCurrentGameSettings(prevGameSettings => {
+        return {
+          ...prevGameSettings,
+          state: GameState.Success,
+        }
+      })
+      return
+    }
+
+    setCurrentGameSettings(prevGameSettings => {
+      return {
+        ...prevGameSettings,
+        state: GameState.InProgress,
+      }
+    })
 
     if (isOngoingHintsModeEnabled) {
       setHint(newSudoku.getHint({ allowMistakes: true }))
@@ -151,6 +183,12 @@ export default function Home() {
     const revealedHint = sudoku.revealHint()
     setSudoku(sudoku.updateCell(revealedHint[2], revealedHint[0], revealedHint[1]))
     setHint(null)
+    setCurrentGameSettings(prevGameSettings => {
+      return {
+        ...prevGameSettings,
+        state: GameState.InProgress,
+      }
+    })
   }
 
   function solveSudoku() {

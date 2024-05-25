@@ -1,7 +1,7 @@
 import { CellValue, Sudoku } from "..//models/Sudoku";
 
 export function getSudoku(): Sudoku {
-  const encodedSudoku = '080200400570000100002300000820090005000715000700020041000006700003000018007009050'
+  const encodedSudoku = '600050007030000000080409200015300000008000300000007590009501030000000080200070004'
   const cells: CellValue[][] = []
   for (let j = 0; j < encodedSudoku.length; j += 9) {
     const chunk = encodedSudoku

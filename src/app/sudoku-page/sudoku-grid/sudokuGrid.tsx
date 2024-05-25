@@ -123,7 +123,8 @@ function SudokuCell(props: SudokuCellProps) {
           border:0,
           outline:0,
           textAlign: 'center',
-          fontWeight: cell.cellType === CellType.Fixed ? 1000 : 400,
+          fontWeight: cell.cellType === CellType.Fixed ? 600 : 0,
+          fontSize: '25px',
           }}>
       </input>
     </div>
