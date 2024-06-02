@@ -23,7 +23,7 @@ export default function Home() {
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
 
   // Sudoku states
-  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku({ difficulty: currentGameSettings.difficulty }))
+  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku({ difficulty: currentGameSettings.difficulty, index: 4 }))
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
@@ -35,7 +35,7 @@ export default function Home() {
     }
 
     if ([GameState.InProgress, GameState.Paused].includes(currentGameSettings.state)) {
-      const isConfirmGetNewGame = confirm('That will end your current game.\nAre you sure?')
+      const isConfirmGetNewGame = confirm('this will end your current game.\nAre you sure?')
       if (!isConfirmGetNewGame) {
         return
       }
@@ -48,6 +48,10 @@ export default function Home() {
 
     setNewGameSettings(null)
     setSudoku(getSudoku({ difficulty: newGameSettings.difficulty }))
+    setMistakes([])
+    setHint(null)
+    setSelectedCell(null)
+    setIsOngoingHintsModeEnabled(false)
   }, [newGameSettings, currentGameSettings.state])
 
   return (
