@@ -1,4 +1,11 @@
-export default function Toolbox() {
+import { CellValue } from "@/models/sudoku"
+
+interface ToolboxProps {
+  putValueInCell: (value: CellValue) => void
+}
+
+export default function Toolbox(props: ToolboxProps) {
+  const { putValueInCell } = props
   return (
     <div style={{
       display: 'flex',
@@ -7,7 +14,7 @@ export default function Toolbox() {
     }}>
       { ['1','2','3','4','5','6','7','8','9'].map(el =>
         <div
-          onClick={() => console.log('write')}
+          onClick={ () => putValueInCell(el as CellValue) }
         >
           <p style={{
             fontSize: '40px',

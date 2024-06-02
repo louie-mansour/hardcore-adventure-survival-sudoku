@@ -100,7 +100,7 @@ export default function Home() {
           }}>
             <Sudoku9x9Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} updateSudoku={updateSudoku} hint={hint} mistakes={isRevealMistakes ? mistakes : []}/>
           </div>
-          <Toolbox />
+          <Toolbox putValueInCell={putValueInCell}/>
           <HintPanel
             checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundMistakes={isOngoingHintsModeEnabled ? false : mistakes.length > 0}
             getHint={getHint} revealHint={revealHint} isFoundHint={!!hint}
@@ -250,6 +250,16 @@ export default function Home() {
 
   function selectCell(cell: [number, number]) {
     setSelectedCell(cell)
+  }
+
+  function putValueInCell(value: CellValue) {
+    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+      return
+    }
+    if (!selectedCell) {
+      return
+    }
+    setSudoku(prevSudoku => prevSudoku.updateCell(value, selectedCell[0], selectedCell[1]))
   }
 }
 

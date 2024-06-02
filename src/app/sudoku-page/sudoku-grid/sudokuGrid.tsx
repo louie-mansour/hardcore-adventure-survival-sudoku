@@ -1,5 +1,5 @@
 import { CellType, CellValue, Sudoku } from "@/models/Sudoku"
-import { useRef, useState } from "react"
+import { useRef } from "react"
 
 interface Sudoku9x9GridProps {
   selectCell: (cell: [number, number]) => void
