@@ -8,7 +8,7 @@ interface Props {
   enableHardcoreMode: (_: boolean) => void,
   isHardCodeModeEnabled: boolean,
   isOngoingHintsModeEnabled: boolean,
-} 
+}
 
 export default function OptionsSelector({
   enableHardcoreMode,

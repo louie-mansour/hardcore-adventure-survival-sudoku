@@ -9,6 +9,7 @@ import HintPanel from "./sudoku-page/hintPanel";
 import OptionsSelector from "./sudoku-page/optionsSelector";
 import Sudoku9x9Grid from "./sudoku-page/sudoku-grid/sudokuGrid";
 import Title from "./sudoku-page/title";
+import Toolbox from "./sudoku-page/toolbox";
 
 
 export default function Home() {
@@ -22,10 +23,11 @@ export default function Home() {
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
 
   // Sudoku states
-  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku({ difficulty: currentGameSettings.difficulty, index: 9 }))
+  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku({ difficulty: currentGameSettings.difficulty }))
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
+  const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null)
 
   useEffect(() => {
     if (!newGameSettings) {
@@ -92,8 +94,9 @@ export default function Home() {
             justifyContent: 'center',
             alignItems: 'center',
           }}>
-            <Sudoku9x9Grid sudoku={sudoku} updateSudoku={updateSudoku} hint={hint} mistakes={isRevealMistakes ? mistakes : []}/>
+            <Sudoku9x9Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} updateSudoku={updateSudoku} hint={hint} mistakes={isRevealMistakes ? mistakes : []}/>
           </div>
+          <Toolbox />
           <HintPanel
             checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundMistakes={isOngoingHintsModeEnabled ? false : mistakes.length > 0}
             getHint={getHint} revealHint={revealHint} isFoundHint={!!hint}
@@ -112,6 +115,9 @@ export default function Home() {
   }
 
   function updateSudoku(value: CellValue, row: number, col: number) {
+    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+      return
+    }
     // Interesting scenario to fix here
     // setSudoku depends on the current sudoku state, so it should use setSudoku(prevSudoku => { prevSudoku.updateCell(...)})
     // but all the other states (e.g. setHint, setMistakes, etc) also depend on new Sudoku
@@ -163,14 +169,23 @@ export default function Home() {
   }
 
   function checkForMistakes() {
+    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+      return
+    }
     setMistakes(sudoku.findMistakes())
   }
 
   function revealMistakes() {
+    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+      return
+    }
     setIsRevealMistakes(true)
   }
 
   function getHint() {
+    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+      return
+    }
     try {
       setHint(sudoku.getHint())
     } catch (err: unknown) {
@@ -181,6 +196,9 @@ export default function Home() {
   }
 
   function revealHint() {
+    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+      return
+    }
     const revealedHint = sudoku.revealHint()
     const newSudoku = sudoku.updateCell(revealedHint[2], revealedHint[0], revealedHint[1])
     setSudoku(newSudoku)
@@ -209,6 +227,9 @@ export default function Home() {
   }
 
   function enableOngoingHintsMode(isEnable: boolean) {
+    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+      return
+    }
     setIsOngoingHintsModeEnabled(isEnable)
 
     if (!isEnable) {
@@ -221,6 +242,10 @@ export default function Home() {
     setMistakes(sudoku.findMistakes())
     setHint(sudoku.getHint({ allowMistakes: true }))
     setIsRevealMistakes(true)
+  }
+
+  function selectCell(cell: [number, number]) {
+    setSelectedCell(cell)
   }
 }
 

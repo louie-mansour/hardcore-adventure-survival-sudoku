@@ -1,6 +1,5 @@
 import { Cell, CellType, CellValue } from "./sudoku";
 import * as sudoku from 'sudoku';
-import { MistakeError } from "../errors/mistake";
 
 export function createSudokuAlgorithm(grid: CellValue[][]): Cell[][] {
   if (grid.length != 9) {
@@ -63,6 +62,85 @@ export function findErrorsAlgorithm(cells: Cell[][], solution: Cell[][]): [numbe
 }
 
 export function getHintAlgorithm(cells: Cell[][], solved: Cell[][]): [number, number, CellValue] {
+  console.log('hint')
+  let currentSudokuWithoutErrors: CellValue[][] = Array.from(
+    { length: 9 }, _r => Array.from(
+      { length: 9 }, _c => null
+    )
+  )
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (cells[r][c].value && cells[r][c].value === solved[r][c].value) {
+        currentSudokuWithoutErrors[r][c] = cells[r][c].value
+      }
+    }
+  }
+  console.log('here')
+  let hint = lastFreeCell(currentSudokuWithoutErrors)
+  console.log(hint)
+  if (hint) return hint
+  throw new Error('Not found')
+}
+
+function lastFreeCell(sudoku: CellValue[][]): [number, number, CellValue] | null {
+  // check rows
+  for (let r = 0; r < 9; r++) {
+    let freeCell: [number, number]
+    const cellValues = new Set<CellValue>(['1', '2', '3', '4', '5', '6', '7', '8', '9'])
+    for (let c = 0; c < 9; c++) {
+      cellValues.delete(sudoku[r][c])
+      if (!sudoku[r][c]) {
+        freeCell = [r, c]
+      }
+    }
+    if (cellValues.size === 1) {
+      return [freeCell![0], freeCell![1], [...cellValues][0]]
+    }
+  }
+
+  // check columns
+  for (let c = 0; c < 9; c++) {
+    let freeCell: [number, number]
+    const cellValues = new Set<CellValue>(['1', '2', '3', '4', '5', '6', '7', '8', '9'])
+    for (let r = 0; r < 9; r++) {
+      cellValues.delete(sudoku[r][c])
+      if (!sudoku[r][c]) {
+        freeCell = [r, c]
+      }
+    }
+    if (cellValues.size === 1) {
+      return [freeCell![0], freeCell![1], [...cellValues][0]]
+    }
+  }
+
+  // check squares
+  for (let r = 0; r < 9; r += 3) {
+    for (let c = 0; c < 9; c+= 3) {
+      const [minR, maxR] = get3x3Range(r)
+      const [minC, maxC] = get3x3Range(c)
+
+      let freeCell: [number, number]
+      const cellValues = new Set<CellValue>(['1', '2', '3', '4', '5', '6', '7', '8', '9'])
+
+      for (let i = minR; i <= maxR; i++) {
+        for (let j = minC; j <= maxC; j++) {
+          cellValues.delete(sudoku[i][j])
+          if (!sudoku[i][j]) {
+            freeCell = [i, j]
+          }
+        }
+      }
+      console.log(cellValues)
+      if (cellValues.size === 1) {
+        return [freeCell![0], freeCell![1], [...cellValues][0]]
+      }
+    }
+  }
+  return null
+}
+
+
+export function getHintAlgorithmDeprecated(cells: Cell[][], solved: Cell[][]): [number, number, CellValue] {
   let possibilities = Array.from(
     { length: 9 }, _r => Array.from(
       { length: 9 }, _c => new Set<CellValue>(['1', '2', '3', '4', '5', '6', '7', '8', '9'])

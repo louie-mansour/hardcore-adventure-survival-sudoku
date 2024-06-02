@@ -1,5 +1,5 @@
 import { MistakeError } from '../errors/mistake';
-import { createSudokuAlgorithm, findErrorsAlgorithm as findMistakesAlgorithm, getHintAlgorithm, solveAlgorithm } from './sudokuAlgorithms';
+import { createSudokuAlgorithm, findErrorsAlgorithm as findMistakesAlgorithm, getHintAlgorithmDeprecated, solveAlgorithm } from './sudokuAlgorithms';
 
 export type CellValue = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | null
 
@@ -43,11 +43,6 @@ export class Sudoku {
 
   findMistakes(): [number, number, CellValue][] {
     const mistakes = findMistakesAlgorithm(this.cells, this.solved)
-
-    // if (mistakes.length > 0) {
-    //   this.currentHint = null
-    // }
-
     return [ ...mistakes ]
   }
 
@@ -60,7 +55,7 @@ export class Sudoku {
       }
     }
 
-    const [r, c, value] = getHintAlgorithm(this.cells, this.solved)
+    const [r, c, value] = getHintAlgorithmDeprecated(this.cells, this.solved)
     this.currentHint = [r, c, value]
     return [r, c, null]
   }
