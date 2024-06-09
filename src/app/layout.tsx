@@ -20,10 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className} style={{
-        padding: '0',
-        margin: '0',
-      }}>{children}</body>
+      <body className={`${inter.className} m-0 p-0`}>{children}</body>
     </html>
   );
 }

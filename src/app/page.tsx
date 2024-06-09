@@ -55,55 +55,35 @@ export default function Home() {
   }, [newGameSettings, currentGameSettings.state])
 
   return (
-    <div style={{
-      width: '100%',
-      height: '100vh',
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      backgroundColor: 'lightyellow',
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        width: '100%',
-        maxWidth: '700px',
-      }}>
-        <div style={{
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-evenly',
-          margin: '0 80px',
-        }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'white',
-            width: '100%',
-            maxWidth: '700px',
-          }}>
-            <Title />
-          </div>
+    <div className="w-full h-screen	flex flex-row justify-center bg-yellow-50">
+      <div className="bg-white w-full max-w-2xl">
+        <div className='h-full flex flex-col justify-evenly my-0 mx-16'>
+          <Title />
           <DifficultySelector requestNewGame={requestNewGame} difficulty={currentGameSettings.difficulty} />
           <OptionsSelector
             enableOngoingHintsMode={enableOngoingHintsMode}
             enableHardcoreMode={setIsHardcoreModeEnabled}
             isHardCodeModeEnabled={isHardcoreModeEnabled}
-            isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}/>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-            <Sudoku9x9Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} updateSudoku={updateSudoku} hint={hint} mistakes={isRevealMistakes ? mistakes : []}/>
+            isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
+          />
+          <div className='flex flex-col justify-center items-center'>
+            <Sudoku9x9Grid
+              selectedCell={selectedCell}
+              selectCell={selectCell}
+              sudoku={sudoku}
+              updateSudoku={updateSudoku}
+              hint={hint}
+              mistakes={isRevealMistakes ? mistakes : []}
+            />
           </div>
           <Toolbox putValueInCell={putValueInCell}/>
           <HintPanel
-            checkForMistakes={checkForMistakes} revealMistakes={revealMistakes} isFoundMistakes={isOngoingHintsModeEnabled ? false : mistakes.length > 0}
-            getHint={getHint} revealHint={revealHint} isFoundHint={!!hint}
+            checkForMistakes={checkForMistakes}
+            revealMistakes={revealMistakes}
+            isFoundMistakes={isOngoingHintsModeEnabled ? false : mistakes.length > 0}
+            getHint={getHint}
+            revealHint={revealHint}
+            isFoundHint={!!hint}
             solveSudoku={solveSudoku}
           />
         </div>

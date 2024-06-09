@@ -35,10 +35,9 @@ interface SudokuCellProps {
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const { sudoku, updateSudoku, hint, mistakes, selectCell, selectedCell } = props
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateRows: '150px 150px 150px',
-      gridTemplateColumns: '150px 150px 150px',
+    <div className='grid' style={{
+      gridTemplateRows: '9rem 9rem 9rem',
+      gridTemplateColumns: '9rem 9rem 9rem',
     }}>
       <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[0, 1, 2]} cols={[0, 1, 2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} />
       <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[0, 1, 2]} cols={[3, 4, 5]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} />
@@ -56,13 +55,7 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
   const { sudoku, rows, cols, updateSudoku, hint, mistakes, selectCell, selectedCell } = props
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateRows: '50px 50px 50px',
-      gridTemplateColumns: '50px 50px 50px',
-      border: 'black 1px solid',
-      boxSizing: 'border-box',
-    }}>
+    <div className='grid border border-black grid-cols-3'>
       <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[0]} col={cols[0]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} />
       <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[0]} col={cols[1]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} />
       <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[0]} col={cols[2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} />
@@ -87,26 +80,20 @@ function SudokuCell(props: SudokuCellProps) {
 
   let backgroundColor = undefined
   if (mistakes.map(([r, c, _v]) => `${r}${c}`).includes(`${row}${col}`)) {
-    backgroundColor = 'red'
+    backgroundColor = 'bg-red-500'
   } else if (hint && hint[0] === row && hint[1] === col) {
-    backgroundColor = 'green'
+    backgroundColor = 'bg-green-500'
   } else if (selectedCell && selectedCell[0] === row && selectedCell[1] === col) {
-    backgroundColor = 'blue'
+    backgroundColor = 'bg-blue-500'
   } else if (selectedCell && (selectedCell[0] === row || selectedCell[1] === col || (get3x3Range(selectedCell[0]).includes(row) && get3x3Range(selectedCell[1]).includes(col))))  {
-    backgroundColor = 'lightblue'
+    backgroundColor = 'bg-blue-100'
   }
 
   return(
-    <div style={{
-      border: 'black 1px solid',
-      boxSizing: 'border-box',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: backgroundColor
-
-    }}>
+    <div className={`box-border border border-black flex items-center justify-center ${backgroundColor}`}>
       <input
+        className={`w-10 h-10 border-0 outline-none text-center text-lg cursor-pointer ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
+        style={{ caretColor: 'transparent;'}}
         ref={inputElement}
         maxLength={1}
         type='text'
@@ -128,15 +115,7 @@ function SudokuCell(props: SudokuCellProps) {
         readOnly={ cell.cellType === CellType.Fixed }
         defaultValue={ cell.value ?? '' }
         value={ cell.cellType === CellType.Fixed ? cell.value ?? undefined : undefined }
-        style={{
-          width: '40px',
-          height: '40px',
-          border:0,
-          outline:0,
-          textAlign: 'center',
-          fontWeight: cell.cellType === CellType.Fixed ? 600 : 0,
-          fontSize: '25px',
-          }}>
+      >
       </input>
     </div>
   )

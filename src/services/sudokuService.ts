@@ -26,7 +26,7 @@ interface Args {
 
 export function getSudoku({ difficulty, index }: Args): Sudoku {
   const sudokuList = chooseSudokuList(difficulty)
-  const sudokuIndex = index ?? Math.round(Math.random() * sudokuList.length - 1)
+  const sudokuIndex = index ?? Math.round(Math.random() * sudokuList.length - 2)
   const encodedSudoku = easySudokuList[sudokuIndex]
   const cells: CellValue[][] = []
   for (let j = 0; j < encodedSudoku.length; j += 9) {

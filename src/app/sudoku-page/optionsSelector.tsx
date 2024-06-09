@@ -17,11 +17,7 @@ export default function OptionsSelector({
   isOngoingHintsModeEnabled,
 }: Props) {
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'left',
-    }}> {
+    <div className='flex flex-col justify-left'> {
       <FormControlLabel control={<RedSwitch />}
       label={config.isHardcoreModeAvailable ? 'Hardcore Adventure Survival Mode' : 'Hardcore Adventure Survival Mode (coming soon)'}
       checked={isHardCodeModeEnabled}
@@ -37,6 +33,7 @@ export default function OptionsSelector({
   )
 }
 
+// hmm don't love this
 const RedSwitch = styled(Switch)(({ theme }) => ({
   '& .MuiSwitch-switchBase.Mui-checked': {
     color: red[600],

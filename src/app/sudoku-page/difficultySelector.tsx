@@ -10,13 +10,9 @@ export default function DifficultySelector({
   difficulty,
 }: Props) {
 
+
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'left',
-      gap: '20px',
-    }}>
+    <div className="flex flex-row justify-start gap-x-20">
       <p>Difficulty:</p>
       {
         Object.values(GameDifficulty).map((difficultyValue: GameDifficulty) => {
@@ -24,12 +20,10 @@ export default function DifficultySelector({
             <p
               key={difficultyValue}
               onClick={() => requestNewGame(difficultyValue) }
-              style={{
-                color: difficultyValue === difficulty ? 'black' : 'darkgray',
-                fontWeight: 700,
-              }}
             >
-              <a>{displayDifficulty(difficultyValue)}</a>
+              <a
+                className={`font-medium cursor-pointer ${difficultyValue === difficulty ? 'text-black' : 'text-gray-500'}`}
+              >{displayDifficulty(difficultyValue)}</a>
             </p>
           )
         })
