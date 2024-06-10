@@ -4,12 +4,12 @@ import { CellValue, Sudoku } from "@/models/Sudoku";
 import { getSudoku } from "@/services/sudokuService";
 import { useEffect, useState } from "react";
 import { MistakeError } from "../errors/mistake";
-import DifficultySelector from "./sudoku-page/difficultySelector";
-import HintPanel from "./sudoku-page/hintPanel";
-import OptionsSelector from "./sudoku-page/optionsSelector";
-import Sudoku9x9Grid from "./sudoku-page/sudoku-grid/sudokuGrid";
-import Title from "./sudoku-page/title";
-import Toolbox from "./sudoku-page/toolbox";
+import DifficultySelector from "./sudoku/difficultySelector";
+import HintPanel from "./sudoku/hintPanel";
+import OptionsSelector from "./sudoku/optionsSelector";
+import Sudoku9x9Grid from "./sudoku/sudoku-grid/sudokuGrid";
+import Title from "./sudoku/title";
+import Toolbox from "./sudoku/toolbox";
 
 
 export default function Home() {
