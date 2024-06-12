@@ -1,6 +1,8 @@
 'use client'
 
-import { CellValue, Sudoku } from "@/models/Sudoku";
+import { EndGameError } from "@/errors/endGame";
+import { Game, GameDifficulty, GameState } from "@/models/game";
+import { CellValue, Sudoku } from "@/models/sudoku";
 import { getSudoku } from "@/services/sudokuService";
 import { useEffect, useState } from "react";
 import { MistakeError } from "../errors/mistake";
@@ -14,52 +16,50 @@ import Toolbox from "./sudoku/toolbox";
 
 export default function Home() {
   // Game states
-  const [currentGameSettings, setCurrentGameSettings] = useState<GameSettings>({
-    difficulty: GameDifficulty.Easy,
-    state: GameState.Intial,
-  })
-  const [newGameSettings, setNewGameSettings] = useState<GameSettings | null>(null)
+  const [game, setGame] = useState<Game>(new Game())
+  const [newGame, setNewGame] = useState<Game | null>(null)
   const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(false)
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
 
   // Sudoku states
-  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku({ difficulty: currentGameSettings.difficulty, index: 4 }))
+  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku({ difficulty: game.difficulty, index: 4 }))
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null)
 
   useEffect(() => {
-    if (!newGameSettings) {
+    if (!newGame) {
       return
     }
 
-    if ([GameState.InProgress, GameState.Paused].includes(currentGameSettings.state)) {
-      const isConfirmGetNewGame = confirm('this will end your current game.\nAre you sure?')
-      if (!isConfirmGetNewGame) {
-        return
+    try {
+      setGame(game => game.newGame(newGame.difficulty))
+    } catch (e: unknown) {
+      if (e instanceof EndGameError) {
+        const isConfirmGetNewGame = confirm(e.message)
+        if (!isConfirmGetNewGame) {
+          setGame(e.game)
+        }
+      } else {
+        throw e
       }
     }
 
-    setCurrentGameSettings({
-      difficulty: newGameSettings.difficulty,
-      state: GameState.Intial,
-    })
-
-    setNewGameSettings(null)
-    setSudoku(getSudoku({ difficulty: newGameSettings.difficulty }))
+    setNewGame(null)
+    setSudoku(getSudoku({ difficulty: newGame.difficulty }))
     setMistakes([])
     setHint(null)
     setSelectedCell(null)
     setIsOngoingHintsModeEnabled(false)
-  }, [newGameSettings, currentGameSettings.state])
+  }, [newGame, game.state])
 
   return (
     <div className="w-full h-screen	flex flex-row justify-center bg-yellow-50">
       <div className="bg-white w-full max-w-2xl">
         <div className='h-full flex flex-col justify-evenly my-0 mx-16'>
           <Title />
-          <DifficultySelector requestNewGame={requestNewGame} difficulty={currentGameSettings.difficulty} />
+          <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />
           <OptionsSelector
             enableOngoingHintsMode={enableOngoingHintsMode}
             enableHardcoreMode={setIsHardcoreModeEnabled}
@@ -92,14 +92,11 @@ export default function Home() {
   )
 
   function requestNewGame(difficulty: GameDifficulty) {
-    setNewGameSettings({
-      difficulty: difficulty,
-      state: GameState.Intial,
-    })
+    setNewGame(new Game(difficulty))
   }
 
   function updateSudoku(value: CellValue, row: number, col: number) {
-    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
       return
     }
     // Interesting scenario to fix here
@@ -111,21 +108,10 @@ export default function Home() {
     setSudoku(newSudoku)
 
     if (newSudoku.isSolved()) {
-      setCurrentGameSettings(prevGameSettings => {
-        return {
-          ...prevGameSettings,
-          state: GameState.Success,
-        }
-      })
-      return
+      return setGame(game => game.complete())
     }
 
-    setCurrentGameSettings(prevGameSettings => {
-      return {
-        ...prevGameSettings,
-        state: GameState.InProgress,
-      }
-    })
+    setGame(game => game.start())
 
     if (isOngoingHintsModeEnabled) {
       setMistakes(newSudoku.findMistakes())
@@ -153,21 +139,21 @@ export default function Home() {
   }
 
   function checkForMistakes() {
-    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
       return
     }
     setMistakes(sudoku.findMistakes())
   }
 
   function revealMistakes() {
-    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
       return
     }
     setIsRevealMistakes(true)
   }
 
   function getHint() {
-    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
       return
     }
     try {
@@ -180,18 +166,13 @@ export default function Home() {
   }
 
   function revealHint() {
-    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
       return
     }
     const revealedHint = sudoku.revealHint()
     const newSudoku = sudoku.updateCell(revealedHint[2], revealedHint[0], revealedHint[1])
     setSudoku(newSudoku)
-    setCurrentGameSettings(prevGameSettings => {
-      return {
-        ...prevGameSettings,
-        state: GameState.InProgress,
-      }
-    })
+    setGame(game => game.start())
 
     if (isOngoingHintsModeEnabled) {
       setMistakes(newSudoku.findMistakes())
@@ -211,7 +192,7 @@ export default function Home() {
   }
 
   function enableOngoingHintsMode(isEnable: boolean) {
-    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
       return
     }
     setIsOngoingHintsModeEnabled(isEnable)
@@ -233,7 +214,7 @@ export default function Home() {
   }
 
   function putValueInCell(value: CellValue) {
-    if (![GameState.Intial, GameState.InProgress].includes(currentGameSettings.state)) {
+    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
       return
     }
     if (!selectedCell) {
@@ -241,28 +222,4 @@ export default function Home() {
     }
     setSudoku(prevSudoku => prevSudoku.updateCell(value, selectedCell[0], selectedCell[1]))
   }
-}
-
-export enum GameDifficulty {
-  Easy = 'easy',
-  Medium = 'medium',
-  Hard = 'hard',
-}
-
-export enum GameState {
-  Intial = 'initial',
-  InProgress = 'inProgress',
-  Paused = 'paused',
-  Success = 'success',
-  Fail = 'fail',
-}
-
-export enum GameOption {
-  HardcoreMode = 'hardcoreMode',
-  OngoingHintsMode = 'ongoingHintsMode',
-}
-
-export interface GameSettings {
-  difficulty: GameDifficulty,
-  state: GameState,
 }

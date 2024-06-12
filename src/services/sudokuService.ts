@@ -1,8 +1,8 @@
 import { easySudokus } from "./easy";
 import { mediumSudokus } from "./medium";
 import { hardSudokus } from "./hard";
-import { CellValue, Sudoku } from "../models/Sudoku";
-import { GameDifficulty } from "../app/page";
+import { CellValue, Sudoku } from "../models/sudoku";
+import { GameDifficulty } from "@/models/game";
 
 const easySudokuList = easySudokus
   .trim()

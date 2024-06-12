@@ -1,4 +1,4 @@
-import { GameDifficulty } from "../page"
+import { GameDifficulty } from "@/models/game"
 
 interface Props {
   requestNewGame: (_: GameDifficulty) => void

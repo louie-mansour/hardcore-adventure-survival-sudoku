@@ -3,6 +3,11 @@ import { green, red } from '@mui/material/colors';
 import { alpha, styled } from '@mui/material/styles';
 import { config } from '../../config';
 
+export enum GameOption {
+  HardcoreMode = 'hardcoreMode',
+  OngoingHintsMode = 'ongoingHintsMode',
+}
+
 interface Props {
   enableOngoingHintsMode: (_: boolean) => void,
   enableHardcoreMode: (_: boolean) => void,

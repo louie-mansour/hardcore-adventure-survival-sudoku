@@ -1,4 +1,4 @@
-import { CellType, CellValue, Sudoku } from "@/models/Sudoku"
+import { CellType, CellValue, Sudoku } from "@/models/sudoku"
 import { useRef } from "react"
 
 interface Sudoku9x9GridProps {
