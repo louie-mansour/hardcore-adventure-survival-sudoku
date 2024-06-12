@@ -1,7 +1,6 @@
 import { FormControlLabel, Switch } from '@mui/material';
 import { green, red } from '@mui/material/colors';
 import { alpha, styled } from '@mui/material/styles';
-import { config } from '../../config';
 
 export enum GameOption {
   HardcoreMode = 'hardcoreMode',
@@ -11,29 +10,35 @@ export enum GameOption {
 interface Props {
   enableOngoingHintsMode: (_: boolean) => void,
   enableHardcoreMode: (_: boolean) => void,
-  isHardCodeModeEnabled: boolean,
+  isHardcoreModeEnabled: boolean,
   isOngoingHintsModeEnabled: boolean,
 }
 
 export default function OptionsSelector({
   enableHardcoreMode,
   enableOngoingHintsMode,
-  isHardCodeModeEnabled,
+  isHardcoreModeEnabled,
   isOngoingHintsModeEnabled,
 }: Props) {
   return (
-    <div className='flex flex-col justify-left'> {
+    <div className='flex flex-col justify-left'>
       <FormControlLabel control={<RedSwitch />}
-      label={config.isHardcoreModeAvailable ? 'Hardcore Adventure Survival Mode' : 'Adventure (coming soon)'}
-      checked={isHardCodeModeEnabled}
-      disabled={!config.isHardcoreModeAvailable}
-      onChange={(_event, isChecked) => {
-        enableHardcoreMode(isChecked)
-      }}/>
-    }
-      <FormControlLabel control={<GreenSwitch />} label="Ongoing Hints" checked={isOngoingHintsModeEnabled} onChange={(_event, isChecked) => {
-        enableOngoingHintsMode(isChecked)
-      }}/>
+        label='Hardcore Adventure Survival Mode'
+        checked={isHardcoreModeEnabled}
+        disabled={isOngoingHintsModeEnabled}
+        onChange={(_event, isChecked) => {
+          enableHardcoreMode(isChecked)
+        }}
+    />
+    
+      <FormControlLabel control={<GreenSwitch />}
+        label="Ongoing Hints"
+        checked={isOngoingHintsModeEnabled}
+        disabled={isHardcoreModeEnabled}
+        onChange={(_event, isChecked) => {
+          enableOngoingHintsMode(isChecked)
+        }}
+      />
     </div>
   )
 }

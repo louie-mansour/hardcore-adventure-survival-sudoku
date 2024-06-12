@@ -18,7 +18,7 @@ export default function Home() {
   // Game states
   const [game, setGame] = useState<Game>(new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
-  const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(false)
+  const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(true)
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
 
   // Sudoku states
@@ -62,12 +62,12 @@ export default function Home() {
     <div className="w-full h-full	flex flex-row justify-center bg-yellow-50 h-svh">
       <div className="bg-white w-full max-w-2xl">
         <div className='h-screen flex flex-col justify-evenly my-0 mx-5 h-svh'>
-          <Title />
+          <Title isHardcoreModeEnabled={isHardcoreModeEnabled} isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}/>
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />
           <OptionsSelector
             enableOngoingHintsMode={enableOngoingHintsMode}
             enableHardcoreMode={setIsHardcoreModeEnabled}
-            isHardCodeModeEnabled={isHardcoreModeEnabled}
+            isHardcoreModeEnabled={isHardcoreModeEnabled}
             isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
           />
           <div className='flex flex-col justify-center items-center'>
@@ -87,6 +87,8 @@ export default function Home() {
             revealHint={revealHint}
             isFoundHint={!!hint}
             useTool={useTool}
+            isHardcoreModeEnabled={isHardcoreModeEnabled}
+            isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
           />
         </div>
       </div>
@@ -222,9 +224,25 @@ export default function Home() {
   function useTool(value: string) {
     switch (value) {
       case '🗑️': return updateSudoku(null, selectedCell[0], selectedCell[1])
-      case '🧩': return getHint()
-      case '🔍': return checkForMistakes()
+      case '🔍': {
+        if (mistakes.length > 0) {
+          return revealMistakes()
+        }
+        if (hint) {
+          return revealHint()
+        }
+      }
+        return getHint()
+      case '🍼':
+        return revealHint()
       case '🏳️': return solveSudoku()
+      case '✏️':
+      case '🧯': 
+      case '🪄':
+      case '🔮':
+      case '🔦':
+      case '☀️':
+        return alert('Not implemented yet')
     }
   }
 }

@@ -3,7 +3,9 @@ interface Props {
   isFoundMistakes: boolean,
   revealHint: () => void,
   isFoundHint: boolean,
-  useTool: (value: string) => void
+  useTool: (value: string) => void,
+  isHardcoreModeEnabled: boolean,
+  isOngoingHintsModeEnabled: boolean,
 } 
 
 export default function HintPanel({
@@ -12,24 +14,29 @@ export default function HintPanel({
   revealHint,
   isFoundHint,
   useTool,
+  isHardcoreModeEnabled,
+  isOngoingHintsModeEnabled,
 }: Props) {
+
+  function helperText(isOngoingHintsModeEnabled: boolean, isFoundMistakes: boolean, isFoundHint: boolean) {
+    if (isOngoingHintsModeEnabled) {
+      return (
+        <p className='m-0 text-center'>Wittle baby wants a bottle? 🍼</p>
+      )
+    }
+
+      if (isFoundMistakes) {
+        return <p className='m-0 text-center'>We found a mistake. Click 🔍 again to reveal the square(s)</p>
+      }
+      if (isFoundHint) {
+        return <p className='m-0 text-center'>Here&lsquo;s a hint. Click 🔍 again to reveal its value</p>
+      }
+  }
 
   return (
     <div className='h-32'>
       <div className="flex flex-row justify-evenly">   
-      { [{
-          emoji: '🗑️',
-          text: 'Erase',
-        },{
-          emoji: '🧩',
-          text: 'Clue',
-        },{
-          emoji: '🔍',
-          text: 'Check',
-        },{
-          emoji: '🏳️',
-          text: 'Solve',
-        }].map(el => // Eventually we want to support drafts (pencil emoji)
+      { getTools(isHardcoreModeEnabled, isOngoingHintsModeEnabled).map(el =>
         <div
           className="cursor-pointer"
           key={el.emoji}
@@ -48,20 +55,65 @@ export default function HintPanel({
       </div>
       <div className='flex flex-row justify-center'>
         <div className='flex flex-col justify-center'>
-        {
-          isFoundMistakes &&
-            <p className='m-0 text-center'>We found a mistake. Click <a
-              className='text-red-500' onClick={() => revealMistakes()}>here</a> to reveal the square(s).
-            </p>
-        }
-        {
-          isFoundHint &&
-            <p className='m-0 text-center'>Here&lsquo;s a hint. Click <a
-              className='text-green-500' onClick={() => revealHint()}>here</a> to reveal its value.
-            </p>
-        }
+        { helperText(isOngoingHintsModeEnabled, isFoundMistakes, isFoundHint) }
         </div>
       </div>
     </div>
   )
+}
+
+interface Tool {
+  emoji: string
+  text: string
+}
+
+const coreTools = [{
+  emoji: '🗑️',
+  text: '',
+}, {
+  emoji: '✏️',
+  text: '',
+}]
+
+const normalTools = [{
+  emoji: '🔍',
+  text: '',
+}, {
+  emoji: '🏳️',
+  text: '',
+}]
+
+const onGoingHintsModeTools = [{
+  emoji: '🍼',
+  text: '',
+}, {
+  emoji: '🏳️',
+  text: '',
+}]
+
+const hardcoreModeTools = [{
+  emoji: '🧯',
+  text: '',
+}, {
+  emoji: '🪄',
+  text: '',
+}, {
+  emoji: '🔮',
+  text: '',
+}, {
+  emoji: '🔦',
+  text: '',
+}, {
+  emoji: '☀️',
+  text: '',
+}]
+
+function getTools(isHardcoreModeEnabled: boolean, isOngoingHintsModeEnabled: boolean): Tool[] {
+  if (isHardcoreModeEnabled) {
+    return [...coreTools, ...hardcoreModeTools]
+  }
+  if (isOngoingHintsModeEnabled) {
+    return [...coreTools, ...onGoingHintsModeTools]
+  }
+  return [...coreTools, ...normalTools]
 }
