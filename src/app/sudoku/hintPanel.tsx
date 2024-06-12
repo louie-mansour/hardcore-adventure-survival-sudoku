@@ -1,31 +1,50 @@
-import { Button } from "@mui/material";
-
 interface Props {
-  checkForMistakes: () => void,
   revealMistakes: () => void,
   isFoundMistakes: boolean,
-  getHint: () => void,
   revealHint: () => void,
   isFoundHint: boolean,
-  solveSudoku: () => void,
+  useTool: (value: string) => void
 } 
 
 export default function HintPanel({
-  checkForMistakes,
   revealMistakes,
   isFoundMistakes,
-  getHint,
   revealHint,
   isFoundHint,
-  solveSudoku,
+  useTool,
 }: Props) {
 
   return (
-    <>
-      <div className='flex flex-row place-content-evenly'>
-        <Button className='w-40' type='button' onClick={() => checkForMistakes()} >Check Inputs</Button>
-        <Button className='w-40' type='button' onClick={() => getHint()} >Get Hint</Button>
-        <Button className='w-40' type='button' onClick={() => solveSudoku()} >Solve</Button>
+    <div className='h-32'>
+      <div className="flex flex-row justify-evenly">   
+      { [{
+          emoji: '🗑️',
+          text: 'Erase',
+        },{
+          emoji: '🧩',
+          text: 'Clue',
+        },{
+          emoji: '🔍',
+          text: 'Check',
+        },{
+          emoji: '🏳️',
+          text: 'Solve',
+        }].map(el => // Eventually we want to support drafts (pencil emoji)
+        <div
+          className="cursor-pointer"
+          key={el.emoji}
+          onClick={ () => useTool(el.emoji) }
+        >
+          <div>
+            <p className="text-5xl text-center">
+              {el.emoji}
+            </p>
+            <p className='text-s text-center p-2 font-semibold'>
+              {el.text}
+            </p>
+          </div>
+        </div>
+      )}
       </div>
       <div className='flex flex-row justify-center'>
         <div className='flex flex-col justify-center'>
@@ -43,6 +62,6 @@ export default function HintPanel({
         }
         </div>
       </div>
-    </>
+    </div>
   )
 }

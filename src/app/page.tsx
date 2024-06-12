@@ -26,38 +26,42 @@ export default function Home() {
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
-  const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null)
+  const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
 
   useEffect(() => {
     if (!newGame) {
       return
     }
 
-    try {
-      setGame(game => game.newGame(newGame.difficulty))
-    } catch (e: unknown) {
-      if (e instanceof EndGameError) {
-        const isConfirmGetNewGame = confirm(e.message)
-        if (!isConfirmGetNewGame) {
-          setGame(e.game)
+      setGame(game => {
+        try {
+          return game.newGame(newGame.difficulty)
+        } catch (e: unknown) {
+          if (e instanceof EndGameError) {
+            const isConfirmGetNewGame = confirm(e.message)
+            if (!isConfirmGetNewGame) {
+              return e.game
+            }
+            return game
+          } else {
+            throw e
+          }
         }
-      } else {
-        throw e
-      }
-    }
+      })
+  
 
     setNewGame(null)
     setSudoku(getSudoku({ difficulty: newGame.difficulty }))
     setMistakes([])
     setHint(null)
-    setSelectedCell(null)
+    setSelectedCell([0, 0])
     setIsOngoingHintsModeEnabled(false)
   }, [newGame, game.state])
 
   return (
-    <div className="w-full h-screen	flex flex-row justify-center bg-yellow-50">
+    <div className="w-full h-full	flex flex-row justify-center bg-yellow-50 h-svh">
       <div className="bg-white w-full max-w-2xl">
-        <div className='h-full flex flex-col justify-evenly my-0 mx-16'>
+        <div className='h-screen flex flex-col justify-evenly my-0 mx-5 h-svh'>
           <Title />
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />
           <OptionsSelector
@@ -76,15 +80,13 @@ export default function Home() {
               mistakes={isRevealMistakes ? mistakes : []}
             />
           </div>
-          <Toolbox putValueInCell={putValueInCell}/>
+          <Toolbox putValueInCell={putValueInCell} />
           <HintPanel
-            checkForMistakes={checkForMistakes}
             revealMistakes={revealMistakes}
             isFoundMistakes={isOngoingHintsModeEnabled ? false : mistakes.length > 0}
-            getHint={getHint}
             revealHint={revealHint}
             isFoundHint={!!hint}
-            solveSudoku={solveSudoku}
+            useTool={useTool}
           />
         </div>
       </div>
@@ -214,12 +216,15 @@ export default function Home() {
   }
 
   function putValueInCell(value: CellValue) {
-    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
-      return
+    updateSudoku(value, selectedCell[0], selectedCell[1])
+  }
+
+  function useTool(value: string) {
+    switch (value) {
+      case '🗑️': return updateSudoku(null, selectedCell[0], selectedCell[1])
+      case '🧩': return getHint()
+      case '🔍': return checkForMistakes()
+      case '🏳️': return solveSudoku()
     }
-    if (!selectedCell) {
-      return
-    }
-    setSudoku(prevSudoku => prevSudoku.updateCell(value, selectedCell[0], selectedCell[1]))
   }
 }

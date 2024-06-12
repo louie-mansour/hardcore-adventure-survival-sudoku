@@ -36,8 +36,8 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const { sudoku, updateSudoku, hint, mistakes, selectCell, selectedCell } = props
   return (
     <div className='grid' style={{
-      gridTemplateRows: '9rem 9rem 9rem',
-      gridTemplateColumns: '9rem 9rem 9rem',
+      gridTemplateRows: '8rem 8rem 8rem',
+      gridTemplateColumns: '8rem 8rem 8rem',
     }}>
       <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[0, 1, 2]} cols={[0, 1, 2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} />
       <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[0, 1, 2]} cols={[3, 4, 5]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} />
@@ -92,7 +92,7 @@ function SudokuCell(props: SudokuCellProps) {
   return(
     <div className={`box-border border border-black flex items-center justify-center ${backgroundColor}`}>
       <input
-        className={`w-10 h-10 border-0 outline-none text-center text-lg cursor-pointer ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
+        className={`w-8 h-8 border-0 outline-none text-center text-lg cursor-pointer ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
         style={{ caretColor: 'transparent;'}}
         ref={inputElement}
         maxLength={1}
@@ -112,6 +112,7 @@ function SudokuCell(props: SudokuCellProps) {
           }
           event.preventDefault();
         }}
+        onFocus={(e) => e.target.readOnly = true}
         readOnly={ cell.cellType === CellType.Fixed }
         defaultValue={ cell.value ?? '' }
         value={ cell.cellType === CellType.Fixed ? cell.value ?? undefined : undefined }

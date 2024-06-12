@@ -21,20 +21,6 @@ export default function Toolbox(props: ToolboxProps) {
           </div>
         )}
       </div>
-      <div className="flex flex-row justify-evenly">
-        
-      { ['🗑️'].map(el => // Eventually we want to support drafts (pencil emoji)
-        <div
-          className="cursor-pointer"
-          key={el}
-          onClick={ () => putValueInCell(null) }
-        >
-          <p className="text-5xl">
-            {el}
-          </p>
-        </div>
-      )}
-    </div>
-  </>
+    </>
   )
 }

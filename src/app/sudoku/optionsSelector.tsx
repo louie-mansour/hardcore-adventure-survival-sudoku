@@ -24,7 +24,7 @@ export default function OptionsSelector({
   return (
     <div className='flex flex-col justify-left'> {
       <FormControlLabel control={<RedSwitch />}
-      label={config.isHardcoreModeAvailable ? 'Hardcore Adventure Survival Mode' : 'Hardcore Adventure Survival Mode (coming soon)'}
+      label={config.isHardcoreModeAvailable ? 'Hardcore Adventure Survival Mode' : 'Adventure (coming soon)'}
       checked={isHardCodeModeEnabled}
       disabled={!config.isHardcoreModeAvailable}
       onChange={(_event, isChecked) => {

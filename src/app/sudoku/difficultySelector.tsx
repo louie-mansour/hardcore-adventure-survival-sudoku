@@ -12,7 +12,7 @@ export default function DifficultySelector({
 
 
   return (
-    <div className="flex flex-row justify-start gap-x-20">
+    <div className="flex flex-row justify-start gap-x-9">
       <p>Difficulty:</p>
       {
         Object.values(GameDifficulty).map((difficultyValue: GameDifficulty) => {
