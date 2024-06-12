@@ -101,7 +101,8 @@ export class Cell {
 
   updateValue(value: CellValue): Cell {
     if (this.cellType === CellType.Fixed) {
-      throw new Error('A fixed cell cannot be updated')
+      console.log('Cannot update a fixed cell')
+      return this
     }
     return new Cell(CellType.Variable, value)
   }
