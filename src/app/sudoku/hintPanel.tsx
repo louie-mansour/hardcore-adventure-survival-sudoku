@@ -1,19 +1,15 @@
 interface Props {
-  revealMistakes: () => void,
   isFoundMistakes: boolean,
-  revealHint: () => void,
   isFoundHint: boolean,
-  useTool: (value: string) => void,
+  useItem: (value: string) => void,
   isHardcoreModeEnabled: boolean,
   isOngoingHintsModeEnabled: boolean,
 } 
 
 export default function HintPanel({
-  revealMistakes,
   isFoundMistakes,
-  revealHint,
   isFoundHint,
-  useTool,
+  useItem,
   isHardcoreModeEnabled,
   isOngoingHintsModeEnabled,
 }: Props) {
@@ -36,11 +32,11 @@ export default function HintPanel({
   return (
     <div className='h-32'>
       <div className="flex flex-row justify-evenly">   
-      { getTools(isHardcoreModeEnabled, isOngoingHintsModeEnabled).map(el =>
+      { getItems(isHardcoreModeEnabled, isOngoingHintsModeEnabled).map(el =>
         <div
           className="cursor-pointer"
           key={el.emoji}
-          onClick={ () => useTool(el.emoji) }
+          onClick={ () => useItem(el.emoji) }
         >
           <div>
             <p className="text-5xl text-center">
@@ -68,9 +64,6 @@ interface Tool {
 }
 
 const coreTools = [{
-  emoji: '🗑️',
-  text: '',
-}, {
   emoji: '✏️',
   text: '',
 }]
@@ -84,6 +77,9 @@ const normalTools = [{
 }]
 
 const onGoingHintsModeTools = [{
+  emoji: '🗑️',
+  text: '',
+}, {
   emoji: '🍼',
   text: '',
 }, {
@@ -94,21 +90,9 @@ const onGoingHintsModeTools = [{
 const hardcoreModeTools = [{
   emoji: '🧯',
   text: '',
-}, {
-  emoji: '🪄',
-  text: '',
-}, {
-  emoji: '🔮',
-  text: '',
-}, {
-  emoji: '🔦',
-  text: '',
-}, {
-  emoji: '☀️',
-  text: '',
 }]
 
-function getTools(isHardcoreModeEnabled: boolean, isOngoingHintsModeEnabled: boolean): Tool[] {
+function getItems(isHardcoreModeEnabled: boolean, isOngoingHintsModeEnabled: boolean): Tool[] {
   if (isHardcoreModeEnabled) {
     return [...coreTools, ...hardcoreModeTools]
   }

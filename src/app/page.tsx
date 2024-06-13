@@ -2,9 +2,9 @@
 
 import { EndGameError } from "@/errors/endGame";
 import { Game, GameDifficulty, GameState } from "@/models/game";
-import { CellValue, Sudoku } from "@/models/sudoku";
+import { CellType, CellValue, Sudoku } from "@/models/sudoku";
 import { getSudoku } from "@/services/sudokuService";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useReducer } from "react";
 import { MistakeError } from "../errors/mistake";
 import DifficultySelector from "./sudoku/difficultySelector";
 import HintPanel from "./sudoku/hintPanel";
@@ -13,50 +13,54 @@ import Sudoku9x9Grid from "./sudoku/sudoku-grid/sudokuGrid";
 import Title from "./sudoku/title";
 import Toolbox from "./sudoku/toolbox";
 
-
+interface SudokuAndItemLocations {
+  sudoku: Sudoku
+  itemLocations: [string, number, number][]
+}
 export default function Home() {
   // Game states
-  const [game, setGame] = useState<Game>(new Game())
+  const [game, setGame] = useState<Game>(() => new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
   const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(true)
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
 
   // Sudoku states
-  const [sudoku, setSudoku] = useState<Sudoku>(getSudoku({ difficulty: game.difficulty, index: 4 }))
+  const [sudoku, setSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
+  const [itemLocations, setItemLocations] = useState<[string, number, number][]>([])
+
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
 
   useEffect(() => {
+    if (sudoku && itemLocations.length === 0) {
+      setItemLocations(determineItemLocations(sudoku))
+    }
+  }, [sudoku])
+
+  useEffect(() => {
     if (!newGame) {
       return
     }
 
-      setGame(game => {
-        try {
-          return game.newGame(newGame.difficulty)
-        } catch (e: unknown) {
-          if (e instanceof EndGameError) {
-            const isConfirmGetNewGame = confirm(e.message)
-            if (!isConfirmGetNewGame) {
-              return e.game
-            }
-            return game
-          } else {
-            throw e
-          }
+    setGame(g => {
+      try {
+        const nGame = g.newGame(newGame.difficulty)
+        reset(nGame)
+        return nGame
+      } catch (e: unknown) {
+        if (!(e instanceof EndGameError)) {
+          return g
         }
-      })
-  
-
-    setNewGame(null)
-    setSudoku(getSudoku({ difficulty: newGame.difficulty }))
-    setMistakes([])
-    setHint(null)
-    setSelectedCell([0, 0])
-    setIsOngoingHintsModeEnabled(false)
-  }, [newGame, game.state])
+        if (!confirm(e.message)) { // TODO: this is broken
+          return g
+        }
+        reset(e.game)
+        return e.game
+      }
+    })
+  }, [newGame])
 
   return (
     <div className="w-full h-full	flex flex-row justify-center bg-yellow-50 h-svh">
@@ -78,15 +82,16 @@ export default function Home() {
               updateSudoku={updateSudoku}
               hint={hint}
               mistakes={isRevealMistakes ? mistakes : []}
+              isHardcoreModeEnabled={isHardcoreModeEnabled}
+              isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
+              itemLocations={itemLocations}
             />
           </div>
           <Toolbox putValueInCell={putValueInCell} />
           <HintPanel
-            revealMistakes={revealMistakes}
             isFoundMistakes={isOngoingHintsModeEnabled ? false : mistakes.length > 0}
-            revealHint={revealHint}
             isFoundHint={!!hint}
-            useTool={useTool}
+            useItem={useItem}
             isHardcoreModeEnabled={isHardcoreModeEnabled}
             isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
           />
@@ -97,6 +102,16 @@ export default function Home() {
 
   function requestNewGame(difficulty: GameDifficulty) {
     setNewGame(new Game(difficulty))
+  }
+
+  function reset(newGame: Game) {
+    const newSudoku = getSudoku({ difficulty: newGame.difficulty })
+    setNewGame(null)
+    setSudoku(newSudoku)
+    setMistakes([])
+    setHint(null)
+    setSelectedCell([0, 0])
+    setItemLocations(determineItemLocations(newSudoku))
   }
 
   function updateSudoku(value: CellValue, row: number, col: number) {
@@ -140,13 +155,6 @@ export default function Home() {
       }
       return prevMistakes
     })
-  }
-
-  function checkForMistakes() {
-    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
-      return
-    }
-    setMistakes(sudoku.findMistakes())
   }
 
   function revealMistakes() {
@@ -221,7 +229,30 @@ export default function Home() {
     updateSudoku(value, selectedCell[0], selectedCell[1])
   }
 
-  function useTool(value: string) {
+  function determineItemLocations(sudoku: Sudoku): [string, number, number][] {
+    if (!sudoku) return []
+    const availableLocations: [number, number][] = []
+    const cells = sudoku.getCells()
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        if (cells[r][c].cellType === CellType.Variable) {
+          availableLocations.push([r, c])
+        }
+      }
+    }
+
+    const itemsToDistribute = ['🛡️', '🪄', '🔮', '🔦', '☀️', '🌱', '❄️']
+    const itemLocations: [string, number, number][] = []
+    for (let i = 0; i < itemsToDistribute.length; i++) {
+      const locationIndex = Math.floor(Math.random() * availableLocations.length)
+      const location = availableLocations[locationIndex]
+      itemLocations.push([itemsToDistribute[i], location[0], location[1]])
+      availableLocations.splice(locationIndex, 1)
+    }
+    return itemLocations
+  }
+
+  function useItem(value: string) {
     switch (value) {
       case '🗑️': return updateSudoku(null, selectedCell[0], selectedCell[1])
       case '🔍': {
