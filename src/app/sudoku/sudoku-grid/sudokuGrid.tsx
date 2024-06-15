@@ -1,5 +1,6 @@
-import { Cell, CellType, CellValue, Sudoku } from "@/models/sudoku"
+import { CellType, CellValue, Sudoku } from "@/models/sudoku"
 import { useEffect, useRef, useState } from "react"
+import { createContext, useContext } from 'react';
 
 interface Sudoku9x9GridProps {
   selectCell: (cell: [number, number]) => void
@@ -9,97 +10,120 @@ interface Sudoku9x9GridProps {
   hint: [number, number, CellValue] | null
   mistakes: [number, number, CellValue][]
   itemLocations: [string, number, number][]
+  gameover: () => void
+  hasLives: boolean
 }
 
 interface Sudoku3x3GridProps {
-  selectCell: (cell: [number, number]) => void
-  selectedCell: [number, number] | null
-  sudoku: Sudoku
   rows: [number, number, number]
   cols: [number, number, number]
-  updateSudoku: (value: CellValue, row: number, col: number) => void
-  hint: [number, number, CellValue] | null
-  mistakes: [number, number, CellValue][]
-  itemLocations: [string, number, number][]
-  isMaskItems: boolean
 }
 
 interface SudokuCellProps {
-  selectCell: (cell: [number, number]) => void
-  selectedCell: [number, number] | null
-  sudoku: Sudoku
   row: number
   col: number
-  updateSudoku: (value: CellValue, row: number, col: number) => void
-  hint: [number, number, CellValue] | null
-  mistakes: [number, number, CellValue][]
-  itemLocations: [string, number, number][]
-  isMaskItems: boolean
-} 
+}
+
+// TODO: Bit of a hack with the typing here
+// setNumberOfLives might be best passed in as a prop
+// isMaskItems might also be best passed in as a prop and determined via the Game model's state
+const SudokuContext = createContext<Sudoku9x9GridProps & { decreaseLife: () => void, isMaskItems: boolean } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const [isMaskItems, setIsMaskItems] = useState(false)
-  const { sudoku, updateSudoku, hint, mistakes, selectCell, selectedCell, itemLocations } = props
+  const [numberOfLives, setNumberOfLives] = useState<number>(2)
+  const { itemLocations, gameover, hasLives } = props
+
+  useEffect(() => {
+    if (!hasLives) return
+    if (numberOfLives === 0) gameover()
+  }, [numberOfLives, hasLives])
 
   useEffect(() => {
     setIsMaskItems(false)
-    setTimeout(() => { setIsMaskItems(true) }, 3000)
+    setTimeout(() => { setIsMaskItems(true) }, 3000) // TODO: Bug here where masked items flash when itemLocations changes frequently
   }, [itemLocations])
+
   return (
     <div className='w-fit'>
-    {
+    { hasLives &&
       <div>
-        ❤️❤️
+        {
+          numberOfLives === 0 ? '☠️' : '❤️'.repeat(numberOfLives)
+        }
       </div>
     }
       <div className='grid' style={{
-        gridTemplateRows: '8rem 8rem 8rem',
-        gridTemplateColumns: '8rem 8rem 8rem',
+        gridTemplateRows: '8.1rem 8.1rem 8.1rem',
+        gridTemplateColumns: '8.1rem 8.1rem 8.1rem',
       }}>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[0, 1, 2]} cols={[0, 1, 2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[0, 1, 2]} cols={[3, 4, 5]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[0, 1, 2]} cols={[6, 7, 8]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[3, 4, 5]} cols={[0, 1, 2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[3, 4, 5]} cols={[3, 4, 5]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[3, 4, 5]} cols={[6, 7, 8]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[6, 7, 8]} cols={[0, 1, 2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[6, 7, 8]} cols={[3, 4, 5]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
-        <Sudoku3x3Grid selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} rows={[6, 7, 8]} cols={[6, 7, 8]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems}/>
+        <SudokuContext.Provider value={{ ...props, decreaseLife, isMaskItems }} >
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} />
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} />
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} />
+        </SudokuContext.Provider>
       </div>
     </div>
   )
+
+  function decreaseLife() {
+    setNumberOfLives(l => l - 1)
+  }
 }
 
 function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
-  const { sudoku, rows, cols, updateSudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems } = props
+  const { rows, cols } = props
   return (
     <div className='grid border border-black grid-cols-3'>
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[0]} col={cols[0]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[0]} col={cols[1]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[0]} col={cols[2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[1]} col={cols[0]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[1]} col={cols[1]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[1]} col={cols[2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[2]} col={cols[0]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[2]} col={cols[1]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
-      <SudokuCell selectedCell={selectedCell} selectCell={selectCell} sudoku={sudoku} row={rows[2]} col={cols[2]} updateSudoku={updateSudoku} hint={hint} mistakes={mistakes} itemLocations={itemLocations} isMaskItems={isMaskItems} />
+      <SudokuCell row={rows[0]} col={cols[0]} />
+      <SudokuCell row={rows[0]} col={cols[1]} />
+      <SudokuCell row={rows[0]} col={cols[2]} />
+      <SudokuCell row={rows[1]} col={cols[0]} />
+      <SudokuCell row={rows[1]} col={cols[1]} />
+      <SudokuCell row={rows[1]} col={cols[2]} />
+      <SudokuCell row={rows[2]} col={cols[0]} />
+      <SudokuCell row={rows[2]} col={cols[1]} />
+      <SudokuCell row={rows[2]} col={cols[2]} />
     </div>
   )
 }
 
 function SudokuCell(props: SudokuCellProps) {
   const inputElement = useRef<HTMLInputElement>(null)
-  const { sudoku, row, col, updateSudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems } = props
+  const context = useContext(SudokuContext)!
+  const { sudoku, updateSudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems, decreaseLife, hasLives } = context
+  const { row, col } = props
+  const [isError, setIsError] = useState(false)
   const cell = sudoku.getCells()[row][col]
+
+  useEffect(() => { // TODO: This needs fixing
+    if (mistakes.map(([r, c, _v]) => `${r}${c}`).includes(`${row}${col}`)) {
+      setIsError(true)
+      if (hasLives) {
+        updateSudoku(null, row, col)
+        decreaseLife()
+      }
+    } else  {
+      if (hasLives) {
+        setTimeout(() => setIsError(false), 3000)
+        return
+      }
+      setIsError(false)
+    }
+  }, [mistakes])
 
   if (inputElement.current) {
     inputElement.current.value = cell.value ?? ''
   }
 
-  let backgroundColor = undefined
-  if (mistakes.map(([r, c, _v]) => `${r}${c}`).includes(`${row}${col}`)) {
-    backgroundColor = 'bg-red-500'
-  } else if (hint && hint[0] === row && hint[1] === col) {
+  let backgroundColor = 'bg-transparent'
+  if (hint && hint[0] === row && hint[1] === col) {
     backgroundColor = 'bg-green-500'
   } else if (selectedCell && selectedCell[0] === row && selectedCell[1] === col) {
     backgroundColor = 'bg-blue-500'
@@ -109,15 +133,19 @@ function SudokuCell(props: SudokuCellProps) {
     backgroundColor = 'bg-blue-100'
   }
 
+  if (isError) {
+    backgroundColor = 'bg-red-500 transition'
+  }
+
   const item = itemLocations.find(el => el[1] === row && el[2] === col)?.[0]
-
   const textTransparency = isTransparentText(cell.value, item, isMaskItems) ? 'text-transparent' : 'text-black'
+  const transitionColor = isError ? 'transition' : ''
 
-  // TODO: Ideally find a way to make the items fade to transparent
-  return(
-    <div className={`box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency}`}>
+  // TODO: I probably want to make the state of this fully controlled by React, that would fix a few problems
+  return (
+    <div className={`box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency} ${transitionColor}`}>
       <input
-        className={`w-8 h-8 border-0 outline-none text-center text-lg cursor-pointer ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
+        className={`w-8 h-8 border-0 outline-none text-center text-lg cursor-pointer ${transitionColor} ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
         style={{ caretColor: 'transparent;'}}
         ref={inputElement}
         maxLength={1}

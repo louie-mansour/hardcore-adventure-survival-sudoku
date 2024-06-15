@@ -13,10 +13,6 @@ import Sudoku9x9Grid from "./sudoku/sudoku-grid/sudokuGrid";
 import Title from "./sudoku/title";
 import Toolbox from "./sudoku/toolbox";
 
-interface SudokuAndItemLocations {
-  sudoku: Sudoku
-  itemLocations: [string, number, number][]
-}
 export default function Home() {
   // Game states
   const [game, setGame] = useState<Game>(() => new Game())
@@ -82,9 +78,9 @@ export default function Home() {
               updateSudoku={updateSudoku}
               hint={hint}
               mistakes={isRevealMistakes ? mistakes : []}
-              isHardcoreModeEnabled={isHardcoreModeEnabled}
-              isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
-              itemLocations={itemLocations}
+              itemLocations={isHardcoreModeEnabled ? itemLocations : []}
+              gameover={gameover}
+              hasLives={isHardcoreModeEnabled}
             />
           </div>
           <Toolbox putValueInCell={putValueInCell} />
@@ -114,10 +110,11 @@ export default function Home() {
     setItemLocations(determineItemLocations(newSudoku))
   }
 
+  function gameover() {
+    setGame(g => g.fail())
+  }
+
   function updateSudoku(value: CellValue, row: number, col: number) {
-    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
-      return
-    }
     // Interesting scenario to fix here
     // setSudoku depends on the current sudoku state, so it should use setSudoku(prevSudoku => { prevSudoku.updateCell(...)})
     // but all the other states (e.g. setHint, setMistakes, etc) also depend on new Sudoku
@@ -136,6 +133,11 @@ export default function Home() {
       setMistakes(newSudoku.findMistakes())
       setIsRevealMistakes(true)
       setHint(newSudoku.getHint({ allowMistakes: true }))
+      return
+    }
+    if (isHardcoreModeEnabled) {
+      setMistakes(newSudoku.findMistakes())
+      setIsRevealMistakes(true)
       return
     }
     setHint(prevHint => {
@@ -158,16 +160,10 @@ export default function Home() {
   }
 
   function revealMistakes() {
-    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
-      return
-    }
     setIsRevealMistakes(true)
   }
 
   function getHint() {
-    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
-      return
-    }
     try {
       setHint(sudoku.getHint())
     } catch (err: unknown) {
@@ -178,9 +174,6 @@ export default function Home() {
   }
 
   function revealHint() {
-    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
-      return
-    }
     const revealedHint = sudoku.revealHint()
     const newSudoku = sudoku.updateCell(revealedHint[2], revealedHint[0], revealedHint[1])
     setSudoku(newSudoku)
@@ -204,9 +197,6 @@ export default function Home() {
   }
 
   function enableOngoingHintsMode(isEnable: boolean) {
-    if (![GameState.Intial, GameState.InProgress].includes(game.state)) {
-      return
-    }
     setIsOngoingHintsModeEnabled(isEnable)
 
     if (!isEnable) {
@@ -241,7 +231,7 @@ export default function Home() {
       }
     }
 
-    const itemsToDistribute = ['🛡️', '🪄', '🔮', '🔦', '☀️', '🌱', '❄️']
+    const itemsToDistribute = ['🛡️', '🪄', '🔮', '🔦', '☀️', '🌱', '❄️', '🚒']
     const itemLocations: [string, number, number][] = []
     for (let i = 0; i < itemsToDistribute.length; i++) {
       const locationIndex = Math.floor(Math.random() * availableLocations.length)
@@ -267,12 +257,7 @@ export default function Home() {
       case '🍼':
         return revealHint()
       case '🏳️': return solveSudoku()
-      case '✏️':
-      case '🧯': 
-      case '🪄':
-      case '🔮':
-      case '🔦':
-      case '☀️':
+      default:
         return alert('Not implemented yet')
     }
   }
