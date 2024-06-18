@@ -14,20 +14,24 @@ import Title from "./sudoku/title";
 import Toolbox from "./sudoku/toolbox";
 
 export default function Home() {
-  // Game states
+  // These don't change as a game is progressing
   const [game, setGame] = useState<Game>(() => new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
   const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(true)
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
-
-  // Sudoku states
   const [sudoku, setSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
   const [itemLocations, setItemLocations] = useState<[string, number, number][]>([])
 
+  // These do change as a game is progressing
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
+  const [items, setItems] = useState(() => getItems(isHardcoreModeEnabled, isOngoingHintsModeEnabled))
+
+  useEffect(() => {
+    setItems(getItems(isHardcoreModeEnabled, isOngoingHintsModeEnabled))
+  }, [isHardcoreModeEnabled, isOngoingHintsModeEnabled])
 
   useEffect(() => {
     if (sudoku && itemLocations.length === 0) {
@@ -88,8 +92,9 @@ export default function Home() {
             isFoundMistakes={isOngoingHintsModeEnabled ? false : mistakes.length > 0}
             isFoundHint={!!hint}
             useItem={useItem}
-            isHardcoreModeEnabled={isHardcoreModeEnabled}
             isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
+            isHardcoreModeEnabled={isHardcoreModeEnabled}
+            items={items}
           />
         </div>
       </div>
@@ -121,25 +126,39 @@ export default function Home() {
     // can these all go inside the setSukoku callback?
     // Or does this point towards a design problem?
     const newSudoku = sudoku.updateCell(value, row, col)
-    setSudoku(newSudoku)
 
     if (newSudoku.isSolved()) {
+      setSudoku(newSudoku)
       return setGame(game => game.complete())
     }
 
     setGame(game => game.start())
 
     if (isOngoingHintsModeEnabled) {
-      setMistakes(newSudoku.findMistakes())
+      if (mistakes.length === 0) {
+        setSudoku(newSudoku)
+        return
+      }
+      setMistakes(mistakes)
       setIsRevealMistakes(true)
       setHint(newSudoku.getHint({ allowMistakes: true }))
       return
     }
     if (isHardcoreModeEnabled) {
+      const mistakes = newSudoku.findMistakes()
+      if (mistakes.length === 0) {
+        setSudoku(newSudoku)
+        const itemLocation = itemLocations.find(el => el[1] === row && el[2] === col)
+        if (value && itemLocation) {
+          setItems(i => [...new Set([...i, itemLocation[0]])])
+        }
+        return
+      }
       setMistakes(newSudoku.findMistakes())
       setIsRevealMistakes(true)
       return
     }
+    setSudoku(newSudoku)
     setHint(prevHint => {
       if (prevHint && prevHint[0] === row && prevHint[1] === col) {
         return null
@@ -241,6 +260,16 @@ export default function Home() {
     }
     return itemLocations
   }
+
+function getItems(isHardcoreModeEnabled: boolean, isOngoingHintsModeEnabled: boolean): string[] {
+  if (isHardcoreModeEnabled) {
+    return ['✏️', '🧯']
+  }
+  if (isOngoingHintsModeEnabled) {
+    return ['✏️', '🗑️', '🍼', '🏳️']
+  }
+  return ['✏️', '🔍', '🏳️']
+}
 
   function useItem(value: string) {
     switch (value) {

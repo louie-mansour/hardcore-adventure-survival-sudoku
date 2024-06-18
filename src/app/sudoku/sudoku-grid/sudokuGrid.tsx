@@ -95,7 +95,6 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 }
 
 function SudokuCell(props: SudokuCellProps) {
-  const inputElement = useRef<HTMLInputElement>(null)
   const context = useContext(SudokuContext)!
   const { sudoku, updateSudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems, decreaseLife, hasLives } = context
   const { row, col } = props
@@ -118,10 +117,6 @@ function SudokuCell(props: SudokuCellProps) {
     }
   }, [mistakes])
 
-  if (inputElement.current) {
-    inputElement.current.value = cell.value ?? ''
-  }
-
   let backgroundColor = 'bg-transparent'
   if (hint && hint[0] === row && hint[1] === col) {
     backgroundColor = 'bg-green-500'
@@ -141,17 +136,15 @@ function SudokuCell(props: SudokuCellProps) {
   const textTransparency = isTransparentText(cell.value, item, isMaskItems) ? 'text-transparent' : 'text-black'
   const transitionColor = isError ? 'transition' : ''
 
-  // TODO: I probably want to make the state of this fully controlled by React, that would fix a few problems
   return (
     <div className={`box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency} ${transitionColor}`}>
       <input
-        className={`w-8 h-8 border-0 outline-none text-center text-lg cursor-pointer ${transitionColor} ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
-        style={{ caretColor: 'transparent;'}}
-        ref={inputElement}
+        className={`w-8 h-8 border-0 outline-none text-center text-lg cursor-pointer caret-transparent ${transitionColor} ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
         maxLength={1}
         type='text'
         onClick={() => selectCell([row, col])}
         onKeyDown={(event) => {
+          event.preventDefault();
           const key = event.key
 
           if (['Backspace', 'Delete'].includes(key)) {
@@ -163,12 +156,10 @@ function SudokuCell(props: SudokuCellProps) {
             updateSudoku(key.toString() as CellValue, row, col)
             return
           }
-          event.preventDefault();
         }}
         onFocus={(e) => e.target.readOnly = true}
-        readOnly={ cell.cellType === CellType.Fixed }
-        defaultValue={ cell.value ?? '' }
-        value={ cell.value ?? item}
+        readOnly={true}
+        value={ cell.value ?? item ?? ''}
       >
       </input>
     </div>
