@@ -19,6 +19,7 @@ export default function Home() {
   const [newGame, setNewGame] = useState<Game | null>(null)
   const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(true)
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
+  // TODO: this renders multiple times. The hack is to set the index explicitly so it's idemptotent
   const [sudoku, setSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
   const [itemLocations, setItemLocations] = useState<[string, number, number][]>([])
 
@@ -27,10 +28,12 @@ export default function Home() {
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
-  const [items, setItems] = useState(() => getItems(isHardcoreModeEnabled, isOngoingHintsModeEnabled))
+  const [items, setItems] = useState(() => initItems(isHardcoreModeEnabled, isOngoingHintsModeEnabled))
+  const [notes, setNotes] = useState(() => initNotes())
+  const [enabledItem, setEnabledItem] = useState<string>()
 
   useEffect(() => {
-    setItems(getItems(isHardcoreModeEnabled, isOngoingHintsModeEnabled))
+    setItems(initItems(isHardcoreModeEnabled, isOngoingHintsModeEnabled))
   }, [isHardcoreModeEnabled, isOngoingHintsModeEnabled])
 
   useEffect(() => {
@@ -85,6 +88,8 @@ export default function Home() {
               itemLocations={isHardcoreModeEnabled ? itemLocations : []}
               gameover={gameover}
               hasLives={isHardcoreModeEnabled}
+              notes={notes}
+              toggleNoteValue={enabledItem === '✏️' ? toggleNoteValue : undefined}
             />
           </div>
           <Toolbox putValueInCell={putValueInCell} />
@@ -95,6 +100,8 @@ export default function Home() {
             isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
             isHardcoreModeEnabled={isHardcoreModeEnabled}
             items={items}
+            enabledItem={enabledItem}
+            chooseEnabledItem={chooseEnabledItem}
           />
         </div>
       </div>
@@ -235,7 +242,20 @@ export default function Home() {
   }
 
   function putValueInCell(value: CellValue) {
-    updateSudoku(value, selectedCell[0], selectedCell[1])
+    if (enabledItem === '✏️') {
+      toggleNoteValue(selectedCell[0], selectedCell[1], value)
+    } else {
+      updateSudoku(value, selectedCell[0], selectedCell[1])
+    }
+  }
+
+  function toggleNoteValue(row: number, col: number, noteValue: CellValue) {
+    if (notes[row][col].has(noteValue)) {
+      notes[row][col].delete(noteValue)
+    } else {
+      notes[row][col].add(noteValue)
+    }
+    setNotes([...notes])
   }
 
   function determineItemLocations(sudoku: Sudoku): [string, number, number][] {
@@ -250,7 +270,7 @@ export default function Home() {
       }
     }
 
-    const itemsToDistribute = ['🛡️', '🪄', '🔮', '🔦', '☀️', '🌱', '❄️', '🚒']
+    const itemsToDistribute = ['🛡️', '🪄', '🔮', '🔦', '☀️', '🌱', '❄️', '🚒', '🧀', '🖐️']
     const itemLocations: [string, number, number][] = []
     for (let i = 0; i < itemsToDistribute.length; i++) {
       const locationIndex = Math.floor(Math.random() * availableLocations.length)
@@ -258,18 +278,29 @@ export default function Home() {
       itemLocations.push([itemsToDistribute[i], location[0], location[1]])
       availableLocations.splice(locationIndex, 1)
     }
+
+    const negativeEffectsToDistribute = ['🗡️', '🔥', '🐢', '🌋', '🔦', '🪞', '🐀', '😵‍💫']
     return itemLocations
   }
 
-function getItems(isHardcoreModeEnabled: boolean, isOngoingHintsModeEnabled: boolean): string[] {
-  if (isHardcoreModeEnabled) {
-    return ['✏️', '🧯']
+  function initItems(isHardcoreModeEnabled: boolean, isOngoingHintsModeEnabled: boolean): string[] {
+    if (isHardcoreModeEnabled) {
+      return ['✏️', '🧯']
+    }
+    if (isOngoingHintsModeEnabled) {
+      return ['✏️', '🗑️', '🍼', '🏳️']
+    }
+    return ['✏️', '🔍', '🏳️']
   }
-  if (isOngoingHintsModeEnabled) {
-    return ['✏️', '🗑️', '🍼', '🏳️']
+
+  function chooseEnabledItem(item: string) {
+    setEnabledItem(i => {
+      if (item === i) {
+        return undefined
+      }
+      return item
+    })
   }
-  return ['✏️', '🔍', '🏳️']
-}
 
   function useItem(value: string) {
     switch (value) {
@@ -289,5 +320,13 @@ function getItems(isHardcoreModeEnabled: boolean, isOngoingHintsModeEnabled: boo
       default:
         return alert('Not implemented yet')
     }
+  }
+
+  function initNotes(): Set<CellValue>[][] {
+    return Array.from(
+      { length: 9 }, _r => Array.from(
+        { length: 9 }, _c => new Set<CellValue>([])
+      )
+    )
   }
 }

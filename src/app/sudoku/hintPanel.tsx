@@ -5,6 +5,8 @@ interface Props {
   isOngoingHintsModeEnabled: boolean,
   isHardcoreModeEnabled: boolean,
   items: string[],
+  enabledItem: string | undefined,
+  chooseEnabledItem: (item: string) => void,
 } 
 
 export default function HintPanel({
@@ -14,6 +16,8 @@ export default function HintPanel({
   isOngoingHintsModeEnabled,
   isHardcoreModeEnabled,
   items,
+  enabledItem,
+  chooseEnabledItem,
 }: Props) {
 
   function helperText(isOngoingHintsModeEnabled: boolean, isFoundMistakes: boolean, isFoundHint: boolean) {
@@ -38,11 +42,23 @@ export default function HintPanel({
   return (
     <div className='h-32'>
       <div className="flex flex-row justify-evenly">   
-      { items.map(el =>
-        <div
+      { items.map(el => {
+        let className: string
+        if (el === enabledItem) {
+          className = "cursor-pointer border border-blue-500 border-2"
+        } else {
           className="cursor-pointer"
+        }
+        return <div
+          className={`${className}`}
           key={el}
-          onClick={ () => useItem(el) }
+          onClick={ () => {
+            if (el === '✏️') {
+              chooseEnabledItem('✏️')
+              return
+            }
+            useItem(el)
+          } }
         >
           <div>
             <p className="text-5xl text-center">
@@ -50,6 +66,7 @@ export default function HintPanel({
             </p>
           </div>
         </div>
+      }
       )}
       </div>
       <div className='flex flex-row justify-center'>

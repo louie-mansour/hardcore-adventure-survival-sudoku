@@ -12,6 +12,8 @@ interface Sudoku9x9GridProps {
   itemLocations: [string, number, number][]
   gameover: () => void
   hasLives: boolean
+  notes: Set<CellValue>[][]
+  toggleNoteValue: ((row: number, col: number, cellValue: CellValue) =>  void) | undefined
 }
 
 interface Sudoku3x3GridProps {
@@ -53,10 +55,12 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
         }
       </div>
     }
-      <div className='grid' style={{
-        gridTemplateRows: '8.1rem 8.1rem 8.1rem',
-        gridTemplateColumns: '8.1rem 8.1rem 8.1rem',
-      }}>
+      <div className='grid'
+        style={{
+          gridTemplateRows: '7.1rem 7.1rem 7.1rem', // TODO: The sizes aren't correct - need to revisit this to make it better
+          gridTemplateColumns: '7.1rem 7.1rem 7.1rem',
+        }}
+      >
         <SudokuContext.Provider value={{ ...props, decreaseLife, isMaskItems }} >
           <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} />
           <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} />
@@ -96,7 +100,7 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 
 function SudokuCell(props: SudokuCellProps) {
   const context = useContext(SudokuContext)!
-  const { sudoku, updateSudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems, decreaseLife, hasLives } = context
+  const { sudoku, updateSudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems, decreaseLife, hasLives, notes, toggleNoteValue } = context
   const { row, col } = props
   const [isError, setIsError] = useState(false)
   const cell = sudoku.getCells()[row][col]
@@ -136,16 +140,57 @@ function SudokuCell(props: SudokuCellProps) {
   const textTransparency = isTransparentText(cell.value, item, isMaskItems) ? 'text-transparent' : 'text-black'
   const transitionColor = isError ? 'transition' : ''
 
+  const notesInCell = notes[row][col]
+
   return (
-    <div className={`box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency} ${transitionColor}`}>
-      <input
-        className={`w-8 h-8 border-0 outline-none text-center text-lg cursor-pointer caret-transparent ${transitionColor} ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
-        maxLength={1}
-        type='text'
+    <div className="m-0 p-0 w-9 h-9">
+      { (cell.value || (item && !isMaskItems)) ?
+        <div className={`absolute box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency} ${transitionColor}`}>
+          <input
+            className={`w-9 h-9 border-0 outline-none text-center text-lg cursor-pointer caret-transparent ${transitionColor} ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
+            maxLength={1}
+            type='text'
+            onClick={() => selectCell([row, col])}
+            onKeyDown={(event) => {
+              event.preventDefault();
+              const key = event.key
+
+              if (['Backspace', 'Delete'].includes(key)) {
+                updateSudoku(null, row, col)
+                return
+              }
+
+              if (/[0-9]/.test(key)) {
+                updateSudoku(key.toString() as CellValue, row, col)
+                return
+              }
+            }}
+            onFocus={(e) => e.target.readOnly = true}
+            readOnly={true}
+            value={ cell.value ?? item ?? ''}
+          >
+          </input>
+        </div>
+      :
+      <div className='grid grid-cols-3 absolute box-border border border-black cursor-pointer items-center justify-center'
+        tabIndex={-1}
         onClick={() => selectCell([row, col])}
         onKeyDown={(event) => {
           event.preventDefault();
           const key = event.key
+
+          if (toggleNoteValue) {
+            if (['Backspace', 'Delete'].includes(key)) {
+              toggleNoteValue(row, col, null)
+              return
+            }
+
+            if (/[0-9]/.test(key)) {
+              toggleNoteValue(row, col, key.toString() as CellValue)
+              return
+            }
+            return
+          }
 
           if (['Backspace', 'Delete'].includes(key)) {
             updateSudoku(null, row, col)
@@ -157,11 +202,19 @@ function SudokuCell(props: SudokuCellProps) {
             return
           }
         }}
-        onFocus={(e) => e.target.readOnly = true}
-        readOnly={true}
-        value={ cell.value ?? item ?? ''}
       >
-      </input>
+        <NoteCell note={notesInCell.has('1') ? '1' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('2') ? '2' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('3') ? '3' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('4') ? '4' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('5') ? '5' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('6') ? '6' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('7') ? '7' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('8') ? '8' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('9') ? '9' : null} backgroundColor={backgroundColor} />
+      </div>
+      }
+
     </div>
   )
 }
@@ -184,4 +237,18 @@ function get3x3Range(rowOrCol: number): [number, number, number] {
     return [3, 4, 5]
   }
   return [6, 7, 8]
+}
+
+interface NoteCellProps {
+  note: CellValue
+  backgroundColor: string
+}
+
+function NoteCell(props: NoteCellProps) {
+  const { note, backgroundColor } = props
+  return (
+    <div className={`w-3 h-3 items-center text-center align-middle text-xs pointer-events-none ${backgroundColor}`} > 
+      { note }
+    </div>
+  )
 }

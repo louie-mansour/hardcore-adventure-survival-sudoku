@@ -75,9 +75,7 @@ export function getHintAlgorithm(cells: Cell[][], solved: Cell[][]): [number, nu
       }
     }
   }
-  console.log('here')
   let hint = lastFreeCell(currentSudokuWithoutErrors)
-  console.log(hint)
   if (hint) return hint
   throw new Error('Not found')
 }
