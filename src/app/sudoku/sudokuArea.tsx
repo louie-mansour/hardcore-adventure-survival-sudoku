@@ -1,5 +1,6 @@
 'use client'
 
+import { MistakeError } from "@/errors/mistake";
 import { CellValue, Sudoku } from "@/models/sudoku";
 import { useEffect, useState } from "react";
 import { GameMode } from "../playarea/playArea";
@@ -26,7 +27,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
-  const [items, setItems] = useState(() => initItems(gameMode))
+  const [items, setItems] = useState(initItems(gameMode))
   const [enabledItem, setEnabledItem] = useState<string>()
 
   useEffect(() => {
@@ -34,12 +35,16 @@ export default function SudokuArea(props: SudokuAreaProps) {
       gameComplete()
       return
     }
-    gameStart()
+    gameStart() // TODO: This constantly puts the game into inProgress mode. There's probably a better way of doing thiss
   }, [sudoku])
 
   useEffect(() => {
     reset()
   }, [initialSudoku])
+
+  useEffect(() => {
+    setItems(initItems(gameMode))
+  }, [gameMode])
 
   return (
     <>
@@ -58,16 +63,16 @@ export default function SudokuArea(props: SudokuAreaProps) {
           toggleNoteValue={enabledItem === '✏️' ? toggleNoteValue : undefined}
         />
       </div>
-      <Toolbox putValueInCell={putValueInCell} />
+      <Toolbox
+        putValueInCell={putValueInCell}
+        items={items}
+        useItem={useItem}
+        enabledItem={enabledItem}
+      />
       <HintPanel
         isFoundMistakes={gameMode === GameMode.OngoingHints ? false : mistakes.length > 0}
         isFoundHint={!!hint}
-        useItem={useItem}
-        isOngoingHintsModeEnabled={gameMode === GameMode.OngoingHints}
-        isHardcoreModeEnabled={gameMode === GameMode.Hardcore}
-        items={items}
-        enabledItem={enabledItem}
-        chooseEnabledItem={chooseEnabledItem}
+        gameMode={gameMode}
       />
     </>
   )
@@ -149,6 +154,16 @@ export default function SudokuArea(props: SudokuAreaProps) {
     })
   }
 
+  function getHint() {
+    try {
+      setHint(sudoku.getHint())
+    } catch (err: unknown) {
+      if (err instanceof MistakeError) {
+        setMistakes(err.mistakes)
+      }
+    }
+  }
+
   function revealHint() {
     const revealedHint = sudoku.revealHint()
     const newSudoku = sudoku.updateCell(revealedHint[2], revealedHint[0], revealedHint[1])
@@ -204,6 +219,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   function useItem(value: string) {
     switch (value) {
       case '🗑️': return updateSudoku(null, selectedCell[0], selectedCell[1])
+      case '✏️': return chooseEnabledItem('✏️')
       case '🔍': {
         if (mistakes.length > 0) {
           return setIsRevealMistakes(true)
@@ -213,6 +229,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         }
       }
       case '🍼':
+        getHint()
         return revealHint()
       case '🏳️': return solveSudoku()
       default:
@@ -225,8 +242,8 @@ export default function SudokuArea(props: SudokuAreaProps) {
       return ['✏️', '🧯']
     }
     if (gameMode === GameMode.OngoingHints) {
-      return ['✏️', '🗑️', '🍼', '🏳️']
+      return ['🗑️', '✏️', '🍼', '🏳️']
     }
-    return ['✏️', '🔍', '🏳️']
+    return [ '🗑️', '✏️', '🔍', '🏳️']
   }
 }

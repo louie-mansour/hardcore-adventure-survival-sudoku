@@ -2,10 +2,13 @@ import { CellValue } from "@/models/sudoku"
 
 interface ToolboxProps {
   putValueInCell: (value: CellValue) => void
+  items: string[]
+  enabledItem: string | undefined,
+  useItem: (value: string) => void,
 }
 
 export default function Toolbox(props: ToolboxProps) {
-  const { putValueInCell } = props
+  const { putValueInCell, items, enabledItem, useItem } = props
   return (
     <>
       <div className="flex flex-row justify-evenly">
@@ -20,6 +23,31 @@ export default function Toolbox(props: ToolboxProps) {
             </p>
           </div>
         )}
+      </div>
+      <div className='h-32'>
+        <div className="flex flex-row justify-evenly">   
+        { items.map(el => {
+          let className: string
+          if (el === enabledItem) {
+            className = "cursor-pointer border border-blue-500 border-2"
+          } else {
+            className="cursor-pointer"
+          }
+          return <div
+            className={`${className}`}
+            key={el}
+            onClick={ () => {
+              useItem(el)
+            } }
+          >
+            <div>
+              <p className="text-5xl text-center">
+                {el}
+              </p>
+            </div>
+          </div>
+        })}
+        </div>
       </div>
     </>
   )
