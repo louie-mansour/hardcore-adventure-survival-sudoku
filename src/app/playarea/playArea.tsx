@@ -19,7 +19,7 @@ export default function PlayArea() {
   const [newGame, setNewGame] = useState<Game | null>(null)
   const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(true)
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
-  // TODO: this renders multiple times. The hack is to set the index explicitly so it's idemptotent
+  // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
   const [initialSudoku, setInitialSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
   const [itemLocations, setItemLocations] = useState<[string, number, number][]>([])
 
@@ -148,7 +148,6 @@ export default function PlayArea() {
       itemLocations.push([negativeEffectsToDistribute[i], location[0], location[1]])
       availableLocations.splice(locationIndex, 1)
     }
-    console.log(itemLocations)
     return itemLocations
   }
 }

@@ -62,7 +62,6 @@ export function findErrorsAlgorithm(cells: Cell[][], solution: Cell[][]): [numbe
 }
 
 export function getHintAlgorithm(cells: Cell[][], solved: Cell[][]): [number, number, CellValue] {
-  console.log('hint')
   let currentSudokuWithoutErrors: CellValue[][] = Array.from(
     { length: 9 }, _r => Array.from(
       { length: 9 }, _c => null
@@ -128,7 +127,6 @@ function lastFreeCell(sudoku: CellValue[][]): [number, number, CellValue] | null
           }
         }
       }
-      console.log(cellValues)
       if (cellValues.size === 1) {
         return [freeCell![0], freeCell![1], [...cellValues][0]]
       }

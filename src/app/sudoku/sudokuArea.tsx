@@ -58,7 +58,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
           mistakes={isRevealMistakes ? mistakes : []}
           itemLocations={itemLocations}
           gameover={gameOver}
-          hasLives={gameMode === GameMode.Hardcore}
           notes={notes}
           toggleNoteValue={enabledItem === '✏️' ? toggleNoteValue : undefined}
         />
@@ -100,16 +99,21 @@ export default function SudokuArea(props: SudokuAreaProps) {
       const newSudoku = s.updateCell(value, row, col)
       const mistakes = newSudoku.findMistakes()
 
-      if (mistakes.length === 0) {
-        const itemLocation = itemLocations.find(el => el[1] === row && el[2] === col)
-        if (value && itemLocation) {
-          setItems(i => [...new Set([...i, itemLocation[0]])])
-        }
-        return newSudoku
+      if (mistakes.length > 0) {
+        setMistakes(mistakes)
+        setIsRevealMistakes(true)
+        // TODO: This is fine but not ideal
+        // Ideally the model methods are immutable and we can just return s
+        // Until then, this workaround will work without issues
+        return s.updateCell(null, row, col)
       }
-      setMistakes(mistakes)
-      setIsRevealMistakes(true)
-      return s
+
+      const itemLocation = itemLocations.find(el => el[1] === row && el[2] === col)
+      if (value && itemLocation) {
+        setItems(i => [...new Set([...i, itemLocation[0]])])
+      }
+      return newSudoku
+
     })
   }
 
