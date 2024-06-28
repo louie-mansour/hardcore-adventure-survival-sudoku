@@ -13,6 +13,7 @@ interface Sudoku9x9GridProps {
   gameover: () => void
   notes: Set<CellValue>[][]
   toggleNoteValue: ((row: number, col: number, cellValue: CellValue) =>  void) | undefined
+  numberOfShields: number
 }
 
 interface Sudoku3x3GridProps {
@@ -38,7 +39,7 @@ const SudokuContext = createContext<Sudoku9x9GridProps & { decreaseLife: () => v
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [numberOfLives, setNumberOfLives] = useState<number | null>(2)
-  const { itemLocations, gameover } = props
+  const { itemLocations, gameover, numberOfShields } = props
   const maskTimeoutId = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
@@ -59,6 +60,9 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
       <div>
         {
           numberOfLives === 0 ? '☠️' : '❤️'.repeat(numberOfLives)
+        }
+        {
+          '🛡️'.repeat(numberOfShields)
         }
       </div>
     }

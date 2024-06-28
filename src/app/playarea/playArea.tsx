@@ -1,6 +1,6 @@
 import { EndGameError } from "@/errors/endGame";
 import { Game, GameDifficulty } from "@/models/game";
-import { CellType, CellValue, Sudoku } from "@/models/sudoku";
+import { CellType, Sudoku } from "@/models/sudoku";
 import { getSudoku } from "@/services/sudokuService";
 import { useEffect, useState } from "react";
 import SudokuArea from "../sudoku/sudokuArea";

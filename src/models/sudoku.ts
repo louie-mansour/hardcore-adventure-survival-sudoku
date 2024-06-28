@@ -4,7 +4,7 @@ import { createSudokuAlgorithm, findErrorsAlgorithm as findMistakesAlgorithm, ge
 export type CellValue = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | null
 
 export class Sudoku {
-  private solved: Cell[][]
+  public solved: Cell[][]
   private cells: Cell[][]
   private currentHint: [number, number, CellValue] | null
   public isSkeleton: boolean | undefined

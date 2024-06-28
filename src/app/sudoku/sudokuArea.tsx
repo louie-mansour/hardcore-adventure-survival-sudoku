@@ -29,10 +29,11 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [items, setItems] = useState(initItems(gameMode))
   const [enabledItem, setEnabledItem] = useState<string>()
+  const [numberOfShields, setNumberOfShields] = useState(0)
 
   useEffect(() => {
     if(sudoku.isSolved()) {
-      gameComplete()
+      // gameComplete()
       return
     }
     gameStart() // TODO: This constantly puts the game into inProgress mode. There's probably a better way of doing thiss
@@ -60,6 +61,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
           gameover={gameOver}
           notes={notes}
           toggleNoteValue={enabledItem === '✏️' ? toggleNoteValue : undefined}
+          numberOfShields={numberOfShields}
         />
       </div>
       <Toolbox
@@ -221,8 +223,10 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   function useItem(value: string) {
+    const row = selectedCell[0]
+    const col = selectedCell[1]
     switch (value) {
-      case '🗑️': return updateSudoku(null, selectedCell[0], selectedCell[1])
+      case '🗑️': return updateSudoku(null,row, col)
       case '✏️': return chooseEnabledItem('✏️')
       case '🔍': {
         if (mistakes.length > 0) {
@@ -232,9 +236,14 @@ export default function SudokuArea(props: SudokuAreaProps) {
           return revealHint()
         }
       }
+      case '🔮':
       case '🍼':
         getHint()
         return revealHint()
+      case '🪄':
+        return updateSudoku(sudoku.solved[row][col].value, row, col)
+      case '🛡️':
+        return increaseNumberOfShields()
       case '🏳️': return solveSudoku()
       default:
         return alert('Not implemented yet')
@@ -243,11 +252,17 @@ export default function SudokuArea(props: SudokuAreaProps) {
 
   function initItems(gameMode: GameMode): string[] {
     if (gameMode === GameMode.Hardcore) {
-      return ['✏️', '🧯']
+      return ['✏️', '🧯', '🍼', '🏳️', '🛡️', '🪄', '🔮', '🔦', '☀️', '🌱', '❄️', '🚒', '🧀', '🖐️']
     }
     if (gameMode === GameMode.OngoingHints) {
       return ['🗑️', '✏️', '🍼', '🏳️']
     }
     return [ '🗑️', '✏️', '🔍', '🏳️']
+  }
+
+  function increaseNumberOfShields() {
+    setNumberOfShields(s => {
+      return s + 1
+    })
   }
 }
