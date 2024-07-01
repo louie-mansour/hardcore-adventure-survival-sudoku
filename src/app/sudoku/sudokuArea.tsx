@@ -54,13 +54,12 @@ export default function SudokuArea(props: SudokuAreaProps) {
           selectedCell={selectedCell}
           selectCell={selectCell}
           sudoku={sudoku}
-          updateSudoku={updateSudoku}
           hint={hint}
           mistakes={isRevealMistakes ? mistakes : []}
           itemLocations={itemLocations}
           gameover={gameOver}
           notes={notes}
-          toggleNoteValue={enabledItem === '✏️' ? toggleNoteValue : undefined}
+          putValueInCell={putValueInCell}
           numberOfShields={numberOfShields}
         />
       </div>

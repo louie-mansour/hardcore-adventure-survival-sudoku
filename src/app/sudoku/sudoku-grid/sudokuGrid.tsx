@@ -6,13 +6,12 @@ interface Sudoku9x9GridProps {
   selectCell: (cell: [number, number]) => void
   selectedCell: [number, number] | null
   sudoku: Sudoku
-  updateSudoku: (value: CellValue, row: number, col: number) => void
   hint: [number, number, CellValue] | null
   mistakes: [number, number, CellValue][]
   itemLocations: [string, number, number][]
   gameover: () => void
   notes: Set<CellValue>[][]
-  toggleNoteValue: ((row: number, col: number, cellValue: CellValue) =>  void) | undefined
+  putValueInCell: ((cellValue: CellValue) =>  void)
   numberOfShields: number
 }
 
@@ -26,11 +25,6 @@ interface SudokuCellProps {
   col: number
 }
 
-interface NoteCellProps {
-  note: CellValue
-  backgroundColor: string
-}
-
 // TODO: Bit of a hack with the typing here
 // setNumberOfLives might be best passed in as a prop
 // isMaskItems might also be best passed in as a prop and determined via the Game model's state
@@ -39,19 +33,20 @@ const SudokuContext = createContext<Sudoku9x9GridProps & { decreaseLife: () => v
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [numberOfLives, setNumberOfLives] = useState<number | null>(2)
-  const { itemLocations, gameover, numberOfShields } = props
-  const maskTimeoutId = useRef<NodeJS.Timeout>()
+  const { itemLocations, gameover } = props
+  const maskStRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
-    if (numberOfLives === 0) {
-      gameover()
-    }
+    if (numberOfLives === 0) gameover()
   }, [numberOfLives])
 
   useEffect(() => {
+    if (maskStRef.current) {
+      clearTimeout(maskStRef.current)
+    }
+
     setIsMaskItems(false)
-    clearTimeout(maskTimeoutId.current)
-    maskTimeoutId.current = setTimeout(() => { setIsMaskItems(true) }, 3000)
+    maskStRef.current = setTimeout(() => { setIsMaskItems(true) }, 3000)
   }, [itemLocations])
 
   return (
@@ -60,9 +55,6 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
       <div>
         {
           numberOfLives === 0 ? '☠️' : '❤️'.repeat(numberOfLives)
-        }
-        {
-          '🛡️'.repeat(numberOfShields)
         }
       </div>
     }
@@ -92,12 +84,13 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
       if (l === null) {
         return null
       }
-      if (l > 0) {
-        return l - 1
+      if (l === 0) {
+        return 0
       }
-      return 0
+      return l - 1
     })
   }
+}
 
 function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
   const { rows, cols } = props
@@ -118,11 +111,11 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 
 function SudokuCell(props: SudokuCellProps) {
   const context = useContext(SudokuContext)!
-  const { sudoku, updateSudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems, decreaseLife, notes, toggleNoteValue } = context
+  const { sudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems, decreaseLife, notes, putValueInCell } = context
   const { row, col } = props
   const [isError, setIsError] = useState(false)
   const cell = sudoku.getCells()[row][col]
-  const errorSetTimeoutId = useRef<NodeJS.Timeout>()
+  const errorStRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
     if (!mistakes.map(([r, c, _v]) => `${r}${c}`).includes(`${row}${col}`)) {
@@ -130,26 +123,30 @@ function SudokuCell(props: SudokuCellProps) {
     }
 
     setIsError(true)
-    clearTimeout(errorSetTimeoutId.current)
-    errorSetTimeoutId.current = setTimeout(() => { setIsError(false) }, 3000)
-    decreaseLife()
+    errorStRef.current = setTimeout(() => { setIsError(false) }, 3000)
+    decreaseLife() // TODO: Maybe this should be done at a higher level, take a way a life if there's a mistake
   }, [mistakes])
 
   const backgroundColor = determineBackgroundColor()
+
   const item = itemLocations.find(el => el[1] === row && el[2] === col)?.[0]
   const textTransparency = isTransparentText(cell.value, item, isMaskItems) ? 'text-transparent' : 'text-black'
+  const transitionColor = isError ? 'transition' : ''
+
   const notesInCell = notes[row][col]
 
   return (
-    <div className="m-0 p-0 w-9 h-9">
+    <div
+      className="m-0 p-0 w-9 h-9">
       { (cell.value || (item && !isMaskItems)) ?
-        <div className={`absolute box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency}`}>
+        <div className={`absolute box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency} ${transitionColor}`}>
           <input
-            className={`w-9 h-9 border-0 outline-none text-center text-lg cursor-pointer caret-transparent ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
+            className={`w-9 h-9 border-0 outline-none text-center text-lg cursor-pointer caret-transparent ${transitionColor} ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
             maxLength={1}
             type='text'
             onClick={() => selectCell([row, col])}
-            onKeyDown={e => onKeyDownEvent(e)}
+            tabIndex={-1}
+            onKeyDown={onKeyDownEvent} // TODO: A problem with this keyDownEvent or the one below. It doesn't register until after a few clicks
             onFocus={(e) => e.target.readOnly = true}
             readOnly={true}
             value={ cell.value ?? item ?? ''}
@@ -160,13 +157,17 @@ function SudokuCell(props: SudokuCellProps) {
       <div className='grid grid-cols-3 absolute box-border border border-black cursor-pointer items-center justify-center'
         tabIndex={-1}
         onClick={() => selectCell([row, col])}
-        onKeyDown={e => onKeyDownEvent(e)}
+        onKeyDown={onKeyDownEvent}
       >
-        {
-          (['1', '2', '3', '4', '5', '6', '7', '8', '9'] as CellValue[]).map(el => {
-            return <NoteCell key={el} note={notesInCell.has(el) ? el : null} backgroundColor={backgroundColor} />
-          })
-        }
+        <NoteCell note={notesInCell.has('1') ? '1' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('2') ? '2' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('3') ? '3' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('4') ? '4' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('5') ? '5' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('6') ? '6' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('7') ? '7' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('8') ? '8' : null} backgroundColor={backgroundColor} />
+        <NoteCell note={notesInCell.has('9') ? '9' : null} backgroundColor={backgroundColor} />
       </div>
       }
 
@@ -176,6 +177,7 @@ function SudokuCell(props: SudokuCellProps) {
   function onKeyDownEvent(event: any) {
     event.preventDefault();
     const key = event.key
+    console.log('KEYDOWN')
 
     let value: CellValue | null
     if (['Backspace', 'Delete'].includes(key)) {
@@ -186,10 +188,7 @@ function SudokuCell(props: SudokuCellProps) {
       return
     }
 
-    if (toggleNoteValue) {
-      return toggleNoteValue(row, col, value)
-    }
-    return updateSudoku(key.toString() as CellValue, row, col)
+    putValueInCell(value)
   }
 
   function determineBackgroundColor(): string {
@@ -212,32 +211,36 @@ function SudokuCell(props: SudokuCellProps) {
   }
 }
 
-  function isTransparentText(cellValue: CellValue, item: string | undefined, isMaskItems: boolean): boolean {
-    if (cellValue) {
-      return false
-    }
-    if (item && isMaskItems) {
-      return true
-    }
+function isTransparentText(cellValue: CellValue, item: string | undefined, isMaskItems: boolean): boolean {
+  if (cellValue) {
     return false
   }
-
-  function get3x3Range(rowOrCol: number): [number, number, number] {
-    if (rowOrCol < 3) {
-      return [0, 1, 2]
-    }
-    if (rowOrCol < 6) {
-      return [3, 4, 5]
-    }
-    return [6, 7, 8]
+  if (item && isMaskItems) {
+    return true
   }
+  return false
+}
 
-  function NoteCell(props: NoteCellProps) {
-    const { note, backgroundColor } = props
-    return (
-      <div className={`w-3 h-3 items-center text-center align-middle text-xs pointer-events-none ${backgroundColor}`} > 
-        { note }
-      </div>
-    )
+function get3x3Range(rowOrCol: number): [number, number, number] {
+  if (rowOrCol < 3) {
+    return [0, 1, 2]
   }
+  if (rowOrCol < 6) {
+    return [3, 4, 5]
+  }
+  return [6, 7, 8]
+}
+
+interface NoteCellProps {
+  note: CellValue
+  backgroundColor: string
+}
+
+function NoteCell(props: NoteCellProps) {
+  const { note, backgroundColor } = props
+  return (
+    <div className={`w-3 h-3 items-center text-center align-middle text-xs pointer-events-none ${backgroundColor}`} > 
+      { note }
+    </div>
+  )
 }
