@@ -1,6 +1,8 @@
 'use client'
 
 import { MistakeError } from "@/errors/mistake";
+import { EffectEmoji } from "@/models/effect";
+import { ItemEmoji } from "@/models/item";
 import { CellValue, Sudoku } from "@/models/sudoku";
 import { useEffect, useState } from "react";
 import { GameMode } from "../playarea/playArea";
@@ -30,6 +32,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [items, setItems] = useState(initItems(gameMode))
   const [enabledItem, setEnabledItem] = useState<string>()
   const [numberOfShields, setNumberOfShields] = useState(0)
+  const [emojiLocations, setEmojiLocations] = useState<[ItemEmoji, number, number][]>([])
 
   useEffect(() => {
     if(sudoku.isSolved()) {
@@ -61,6 +64,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
           notes={notes}
           putValueInCell={putValueInCell}
           numberOfShields={numberOfShields}
+          emojiLocations={emojiLocations}
         />
       </div>
       <Toolbox
@@ -93,6 +97,12 @@ export default function SudokuArea(props: SudokuAreaProps) {
       case GameMode.OngoingHints: return updateSudokuOngoingHintsBehaviour(value, row, col)
       case GameMode.Normal: return updateSudokuNormalBehaviour(value, row, col)
     }
+  }
+
+  function putEmoji(emoji: ItemEmoji, row: number, col: number) {
+    setEmojiLocations(e => {
+      return [[emoji, row, col], ...e]
+    })
   }
 
   function updateSudokuHardcoreBehaviour(value: CellValue, row: number, col: number) {
@@ -144,15 +154,15 @@ export default function SudokuArea(props: SudokuAreaProps) {
         return h
       })
       setMistakes(m => {
-        if (m.map(m => `${m[0]}${m[1]}`).includes(`${row}${col}`)) {
-          const newMistakes = m.filter(m => m[0] !== row || m[1] !== col)
-  
-          if (newMistakes.length === 0) {
-            setIsRevealMistakes(false)
-          }
-          return newMistakes
+        if (!m.map(m => `${m[0]}${m[1]}`).includes(`${row}${col}`)) {
+          return m
         }
-        return m
+        
+        const newMistakes = m.filter(m => m[0] !== row || m[1] !== col)
+        if (newMistakes.length === 0) {
+          setIsRevealMistakes(false)
+        }
+        return newMistakes
       })
 
       return newSudoku
@@ -235,15 +245,27 @@ export default function SudokuArea(props: SudokuAreaProps) {
           return revealHint()
         }
       }
-      case '🔮':
       case '🍼':
         getHint()
         return revealHint()
+      case '🏳️':
+        return solveSudoku()
+      case '🔮':
+        return getHint()
       case '🪄':
         return updateSudoku(sudoku.solved[row][col].value, row, col)
       case '🛡️':
         return increaseNumberOfShields()
-      case '🏳️': return solveSudoku()
+      case '🌱':
+        putEmoji(ItemEmoji.Plant, row, col)
+        setTimeout(() => { // TODO: Promises with await or then would be nicer
+          putEmoji(ItemEmoji.PlantMedium, row, col)
+          setTimeout(() => {
+            putEmoji(ItemEmoji.PlantLarge, row, col)
+            setTimeout(() => updateSudoku(sudoku.solved[row][col].value, row, col), 5000)
+          }, 5000)
+        }, 5000)
+        return
       default:
         return alert('Not implemented yet')
     }
@@ -251,7 +273,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
 
   function initItems(gameMode: GameMode): string[] {
     if (gameMode === GameMode.Hardcore) {
-      return ['✏️', '🧯', '🍼', '🏳️', '🛡️', '🪄', '🔮', '🔦', '☀️', '🌱', '❄️', '🚒', '🧀', '🖐️']
+      return ['🗑️', '✏️', '🧯', '🍼', '🏳️', '🛡️', '🪄', '🔮', '🔦', '☀️', '🌱', '❄️', '🚒', '🧀', '🖐️']
     }
     if (gameMode === GameMode.OngoingHints) {
       return ['🗑️', '✏️', '🍼', '🏳️']
