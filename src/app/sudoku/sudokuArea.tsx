@@ -13,7 +13,7 @@ import Toolbox from "../sudoku/toolbox";
 interface SudokuAreaProps {
   initialSudoku: Sudoku
   gameMode: GameMode
-  itemLocations: [string, number, number][],
+  emojiLocations: [string, number, number][],
   solveSudoku: () => void
   gameStart: () => void
   gameOver: () => void
@@ -21,7 +21,7 @@ interface SudokuAreaProps {
 }
 
 export default function SudokuArea(props: SudokuAreaProps) {
-  const { initialSudoku, gameMode, itemLocations, solveSudoku, gameStart, gameOver, gameComplete } = props
+  const { initialSudoku, gameMode, emojiLocations, solveSudoku, gameStart, gameOver, gameComplete } = props
 
   const [sudoku, setSudoku] = useState<Sudoku>(() => initialSudoku)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
@@ -30,9 +30,11 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [items, setItems] = useState(initItems(gameMode))
+  const [placedItemLocations, setPlacedItemLocations] = useState<[ItemEmoji, number, number][]>([])
+  const [effects, setEffects] = useState<EffectEmoji[]>(initEffects(gameMode))
+  const [placedEffectLocations, setPlacedEffectLocations] = useState<[EffectEmoji, number, number][]>([])
   const [enabledItem, setEnabledItem] = useState<string>()
   const [numberOfShields, setNumberOfShields] = useState(0)
-  const [emojiLocations, setEmojiLocations] = useState<[ItemEmoji, number, number][]>([])
 
   useEffect(() => {
     if(sudoku.isSolved()) {
@@ -59,12 +61,13 @@ export default function SudokuArea(props: SudokuAreaProps) {
           sudoku={sudoku}
           hint={hint}
           mistakes={isRevealMistakes ? mistakes : []}
-          itemLocations={itemLocations}
+          emojiLocations={emojiLocations}
           gameover={gameOver}
           notes={notes}
           putValueInCell={putValueInCell}
           numberOfShields={numberOfShields}
-          emojiLocations={emojiLocations}
+          placedItemLocations={placedItemLocations}
+          placedEffectLocations={placedEffectLocations}
         />
       </div>
       <Toolbox
@@ -72,6 +75,8 @@ export default function SudokuArea(props: SudokuAreaProps) {
         items={items}
         useItem={useItem}
         enabledItem={enabledItem}
+        effects={effects}
+        enableEffect={enableEffect}
       />
       <HintPanel
         isFoundMistakes={gameMode === GameMode.OngoingHints ? false : mistakes.length > 0}
@@ -99,8 +104,14 @@ export default function SudokuArea(props: SudokuAreaProps) {
     }
   }
 
-  function putEmoji(emoji: ItemEmoji, row: number, col: number) {
-    setEmojiLocations(e => {
+  function placeItem(emoji: ItemEmoji, row: number, col: number) {
+    setPlacedItemLocations(e => {
+      return [[emoji, row, col], ...e]
+    })
+  }
+
+  function placeEffect(emoji: EffectEmoji, row: number, col: number) {
+    setPlacedEffectLocations(e => {
       return [[emoji, row, col], ...e]
     })
   }
@@ -119,7 +130,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         return s.updateCell(null, row, col)
       }
 
-      const itemLocation = itemLocations.find(el => el[1] === row && el[2] === col)
+      const itemLocation = emojiLocations.find(el => el[1] === row && el[2] === col)
       if (value && itemLocation) {
         setItems(i => [...new Set([...i, itemLocation[0]])])
       }
@@ -157,7 +168,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         if (!m.map(m => `${m[0]}${m[1]}`).includes(`${row}${col}`)) {
           return m
         }
-        
+
         const newMistakes = m.filter(m => m[0] !== row || m[1] !== col)
         if (newMistakes.length === 0) {
           setIsRevealMistakes(false)
@@ -257,11 +268,11 @@ export default function SudokuArea(props: SudokuAreaProps) {
       case '🛡️':
         return increaseNumberOfShields()
       case '🌱':
-        putEmoji(ItemEmoji.Plant, row, col)
-        setTimeout(() => { // TODO: Promises with await or then would be nicer
-          putEmoji(ItemEmoji.PlantMedium, row, col)
+        placeItem(ItemEmoji.Plant, row, col)
+        setTimeout(() => { // TODO: Promises with await/then would be nicer
+          placeItem(ItemEmoji.PlantMedium, row, col)
           setTimeout(() => {
-            putEmoji(ItemEmoji.PlantLarge, row, col)
+            placeItem(ItemEmoji.PlantLarge, row, col)
             setTimeout(() => updateSudoku(sudoku.solved[row][col].value, row, col), 5000)
           }, 5000)
         }, 5000)
@@ -286,4 +297,61 @@ export default function SudokuArea(props: SudokuAreaProps) {
       return s + 1
     })
   }
+
+  function initEffects(gameMode: GameMode): EffectEmoji[] {
+    if (gameMode === GameMode.Hardcore) {
+      return ['🔥', '🐢', '🌋', '🌑', '🪞', '🐀', '😵‍💫', '🗡️'] as EffectEmoji[]
+    }
+    return []
+  }
+
+  // Fire = '🔥',
+  // Turtle = '🐢',
+  // Volcano = '🌋',
+  // Darkness = '🌑',
+  // Mirror = '🪞',
+  // Rat = '🐀',
+  // Dizzy = '😵‍💫',
+  // Dagger = '🗡️',
+
+  async function enableEffect(value: EffectEmoji) {
+    switch (value) {
+      case '🔥':
+        const queue: [number, number][] = [[selectedCell[0], selectedCell[1]]]
+        const visited = new Set<string>([])
+        while (queue.length > 0) {
+          shuffle(queue)
+          const el = queue.shift()
+          if (!el) return
+          const [r, c] = el
+          if (r < 0 || r > 8 || c < 0 || c > 8) continue
+          if (visited.has(`${r}${c}`)) continue
+          await new Promise(resolve => setTimeout(() => {
+            resolve(placeEffect(EffectEmoji.Fire, r, c))
+          }, 1000))
+
+          visited.add(`${r}${c}`)
+          queue.push([r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1])
+        }
+        break
+      default:
+        return alert('Not implemented yet')
+    }
+  }
+
+  function shuffle(array: unknown[]) {
+  let currentIndex = array.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+}
 }

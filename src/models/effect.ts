@@ -53,7 +53,7 @@ export enum EffectEmoji {
   Fire = '🔥',
   Turtle = '🐢',
   Volcano = '🌋',
-  Darkness = '🔦',
+  Darkness = '🌑',
   Mirror = '🪞',
   Rat = '🐀',
   Dizzy = '😵‍💫',

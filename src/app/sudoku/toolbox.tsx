@@ -1,3 +1,4 @@
+import { EffectEmoji } from "@/models/effect"
 import { CellValue } from "@/models/sudoku"
 
 interface ToolboxProps {
@@ -5,10 +6,12 @@ interface ToolboxProps {
   items: string[]
   enabledItem: string | undefined,
   useItem: (value: string) => void,
+  effects: EffectEmoji[],
+  enableEffect: (value: EffectEmoji) => void,
 }
 
 export default function Toolbox(props: ToolboxProps) {
-  const { putValueInCell, items, enabledItem, useItem } = props
+  const { putValueInCell, items, enabledItem, useItem, effects, enableEffect } = props
   return (
     <>
       <div className="flex flex-row justify-evenly">
@@ -38,6 +41,25 @@ export default function Toolbox(props: ToolboxProps) {
             key={el}
             onClick={ () => {
               useItem(el)
+            } }
+          >
+            <div>
+              <p className="text-5xl text-center">
+                {el}
+              </p>
+            </div>
+          </div>
+        })}
+        </div>
+      </div>
+      <div className='h-32'>
+        <div className="flex flex-row justify-evenly">   
+        { effects.map(el => {
+          return <div
+            className='cursor-pointer'
+            key={el}
+            onClick={ () => {
+              enableEffect(el)
             } }
           >
             <div>

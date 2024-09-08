@@ -1,3 +1,4 @@
+import { EffectEmoji } from "@/models/effect";
 import { ItemEmoji } from "@/models/item";
 import { CellType, CellValue, Sudoku } from "@/models/sudoku"
 import { useEffect, useRef, useState } from "react"
@@ -9,12 +10,13 @@ interface Sudoku9x9GridProps {
   sudoku: Sudoku
   hint: [number, number, CellValue] | null
   mistakes: [number, number, CellValue][]
-  itemLocations: [string, number, number][]
+  emojiLocations: [string, number, number][]
   gameover: () => void
   notes: Set<CellValue>[][]
   putValueInCell: ((cellValue: CellValue) =>  void)
   numberOfShields: number
-  emojiLocations: [ItemEmoji, number, number][]
+  placedItemLocations: [ItemEmoji, number, number][]
+  placedEffectLocations: [EffectEmoji, number, number][]
 }
 
 interface Sudoku3x3GridProps {
@@ -35,7 +37,7 @@ const SudokuContext = createContext<Sudoku9x9GridProps & { decreaseLife: () => v
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [numberOfLives, setNumberOfLives] = useState<number | null>(2)
-  const { itemLocations, gameover, numberOfShields } = props
+  const { emojiLocations, gameover, numberOfShields } = props
   const maskStRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 
     setIsMaskItems(false)
     maskStRef.current = setTimeout(() => { setIsMaskItems(true) }, 3000)
-  }, [itemLocations])
+  }, [emojiLocations])
 
   return (
     <div className='w-fit'>
@@ -116,7 +118,7 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 
 function SudokuCell(props: SudokuCellProps) {
   const context = useContext(SudokuContext)!
-  const { sudoku, hint, mistakes, selectCell, selectedCell, itemLocations, isMaskItems, decreaseLife, notes, putValueInCell, emojiLocations } = context
+  const { sudoku, hint, mistakes, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations } = context
   const { row, col } = props
   const [isError, setIsError] = useState(false)
   const cell = sudoku.getCells()[row][col]
@@ -134,16 +136,17 @@ function SudokuCell(props: SudokuCellProps) {
 
   const backgroundColor = determineBackgroundColor()
 
-  const item = itemLocations.find(el => el[1] === row && el[2] === col)?.[0]
   const emoji = emojiLocations.find(el => el[1] === row && el[2] === col)?.[0]
-  const textTransparency = isTransparentText(cell.value, item, isMaskItems, emoji) ? 'text-transparent' : 'text-black'
+  const placedItem = placedItemLocations.find(el => el[1] === row && el[2] === col)?.[0]
+  const placedEffect = placedEffectLocations.find(el => el[1] === row && el[2] === col)?.[0]
+  const textTransparency = isTransparentText(cell.value, emoji, isMaskItems, placedItem) ? 'text-transparent' : 'text-black'
 
   const notesInCell = notes[row][col]
 
   return (
     <div
       className="m-0 p-0 w-9 h-9">
-      { (cell.value || (item && !isMaskItems)) || emoji ?
+      { (cell.value || (emoji && !isMaskItems)) || placedItem || placedEffect?
         <div className={`absolute box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency}`}>
           <input
             className={`w-9 h-9 border-0 outline-none text-center text-lg cursor-pointer caret-transparent ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
@@ -154,7 +157,7 @@ function SudokuCell(props: SudokuCellProps) {
             onKeyDown={onKeyDownEvent} // TODO: A problem with this keyDownEvent or the one below. It doesn't register until after a few clicks
             onFocus={(e) => e.target.readOnly = true}
             readOnly={true}
-            value={ cell.value ?? emoji ?? item ?? ''}
+            value={ placedEffect ?? cell.value ?? placedItem ?? emoji ?? ''}
           >
           </input>
         </div>
@@ -175,7 +178,6 @@ function SudokuCell(props: SudokuCellProps) {
         <NoteCell note={notesInCell.has('9') ? '9' : null} backgroundColor={backgroundColor} />
       </div>
       }
-
     </div>
   )
 
@@ -206,7 +208,7 @@ function SudokuCell(props: SudokuCellProps) {
     if (selectedCell && selectedCell[0] === row && selectedCell[1] === col) {
       return 'bg-blue-500'
     }
-    if (itemLocations.find(el => el[1] === row && el[2] === col)) {
+    if (emojiLocations.find(el => el[1] === row && el[2] === col)) {
       return 'bg-yellow-100'
     }
     if (selectedCell && (selectedCell[0] === row || selectedCell[1] === col || (get3x3Range(selectedCell[0]).includes(row) && get3x3Range(selectedCell[1]).includes(col))))  {
@@ -216,11 +218,11 @@ function SudokuCell(props: SudokuCellProps) {
   }
 }
 
-function isTransparentText(cellValue: CellValue, item: string | undefined, isMaskItems: boolean, emoji: ItemEmoji | undefined): boolean {
-  if (cellValue || emoji) {
+function isTransparentText(cellValue: CellValue, emoji: ItemEmoji | undefined, isMaskItems: boolean, placedItem: string | undefined): boolean {
+  if (cellValue || emoji || placedItem) {
     return false
   }
-  if (item && isMaskItems) {
+  if (emoji && isMaskItems) {
     return true
   }
   return false

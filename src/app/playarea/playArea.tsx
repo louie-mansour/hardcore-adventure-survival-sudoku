@@ -21,11 +21,11 @@ export default function PlayArea() {
   const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
   // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
   const [initialSudoku, setInitialSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
-  const [itemLocations, setItemLocations] = useState<[string, number, number][]>([])
+  const [emojiLocations, setEmojiLocations] = useState<[string, number, number][]>([])
 
   useEffect(() => {
-    if (initialSudoku && itemLocations.length === 0) {
-      setItemLocations(determineItemLocations(initialSudoku))
+    if (initialSudoku && emojiLocations.length === 0) {
+      setEmojiLocations(determineEmojiLocations(initialSudoku))
     }
   }, [initialSudoku])
 
@@ -68,7 +68,7 @@ export default function PlayArea() {
             <SudokuArea
               initialSudoku={initialSudoku}
               gameMode={getMode(isHardcoreModeEnabled, isOngoingHintsModeEnabled)}
-              itemLocations={isHardcoreModeEnabled ? itemLocations : []}
+              emojiLocations={isHardcoreModeEnabled ? emojiLocations : []}
               solveSudoku={solveSudoku}
               gameStart={gameStart}
               gameOver={gameOver}
@@ -119,7 +119,7 @@ export default function PlayArea() {
     setGame(g => g.complete())
   }
 
-  function determineItemLocations(sudoku: Sudoku): [string, number, number][] {
+  function determineEmojiLocations(sudoku: Sudoku): [string, number, number][] {
     if (!sudoku) return []
     const availableLocations: [number, number][] = []
     const cells = sudoku.getCells()
