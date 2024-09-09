@@ -39,6 +39,11 @@ class Effect {
 
 export enum EffectName {
   Fire = 'Fire',
+  ExtinguishingSpraySmall = 'ExtinguishingSpraySmall',
+  ExtinguishingSprayMedium = 'ExtinguishingSprayMedium',
+  ExtinguishingSprayLarge = 'ExtinguishingSprayLarge',
+  ExtinguishingSpray = 'ExtinguishingSpray',
+  Coal = 'Coal',
   Turtle = 'Turtle',
   Volcano = 'Volcano',
   Darkness = 'Darkness',
@@ -51,6 +56,11 @@ export enum EffectName {
 
 export enum EffectEmoji {
   Fire = '🔥',
+  ExtinguishingSpraySmall = '▫️',
+  ExtinguishingSprayMedium = '◻️',
+  ExtinguishingSprayLarge = '⬜',
+  ExtinguishingSpray = '💨',
+  Coal = '🪨',
   Turtle = '🐢',
   Volcano = '🌋',
   Darkness = '🌑',

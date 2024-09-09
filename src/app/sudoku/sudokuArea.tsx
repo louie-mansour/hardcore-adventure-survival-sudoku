@@ -5,6 +5,7 @@ import { EffectEmoji } from "@/models/effect";
 import { ItemEmoji } from "@/models/item";
 import { CellValue, Sudoku } from "@/models/sudoku";
 import { useEffect, useState } from "react";
+import internal from "stream";
 import { GameMode } from "../playarea/playArea";
 import HintPanel from "../sudoku/hintPanel";
 import Sudoku9x9Grid from "../sudoku/sudoku-grid/sudokuGrid";
@@ -113,6 +114,15 @@ export default function SudokuArea(props: SudokuAreaProps) {
   function placeEffect(emoji: EffectEmoji, row: number, col: number) {
     setPlacedEffectLocations(e => {
       return [[emoji, row, col], ...e]
+    })
+  }
+
+  function removeEffect(row: number, col: number) {
+    setPlacedEffectLocations(e => {
+      const idx = e.findIndex(i => i[1] == row && i[2] == col)
+      console.log(e)
+      e.splice(idx, 1)
+      return e
     })
   }
 
@@ -277,6 +287,19 @@ export default function SudokuArea(props: SudokuAreaProps) {
           }, 5000)
         }, 5000)
         return
+      case '🧯':
+        enableExtinguisher(EffectEmoji.ExtinguishingSpraySmall, row, col)
+        setTimeout(() => { // TODO: Promises with await/then would be nicer
+          enableExtinguisher(EffectEmoji.ExtinguishingSprayMedium, row, col)
+          setTimeout(() => {
+            enableExtinguisher(EffectEmoji.ExtinguishingSprayLarge, row, col)
+            setTimeout(() => {
+              enableExtinguisher(EffectEmoji.ExtinguishingSpray, row, col)
+              setTimeout(() => removeEffect(row, col), 200)
+            }, 100)
+          }, 100)
+        }, 100)
+        return
       default:
         return alert('Not implemented yet')
     }
@@ -317,26 +340,43 @@ export default function SudokuArea(props: SudokuAreaProps) {
   async function enableEffect(value: EffectEmoji) {
     switch (value) {
       case '🔥':
-        const queue: [number, number][] = [[selectedCell[0], selectedCell[1]]]
-        const visited = new Set<string>([])
-        while (queue.length > 0) {
-          shuffle(queue)
-          const el = queue.shift()
-          if (!el) return
-          const [r, c] = el
-          if (r < 0 || r > 8 || c < 0 || c > 8) continue
-          if (visited.has(`${r}${c}`)) continue
-          await new Promise(resolve => setTimeout(() => {
-            resolve(placeEffect(EffectEmoji.Fire, r, c))
-          }, 1000))
-
-          visited.add(`${r}${c}`)
-          queue.push([r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1])
-        }
+        await enableFire()
         break
       default:
         return alert('Not implemented yet')
     }
+  }
+
+  async function enableFire() {
+    const queue: [number, number][] = [[selectedCell[0], selectedCell[1]]]
+    const visited = new Set<string>([])
+    while (queue.length > 0) {
+      shuffle(queue)
+      const el = queue.shift()
+      if (!el) return
+      const [r, c] = el
+      if (r < 0 || r > 8 || c < 0 || c > 8) continue
+      if (visited.has(`${r}${c}`)) continue
+      await new Promise(resolve => setTimeout(() => {
+        resolve(placeEffect(EffectEmoji.Fire, r, c))
+      }, 1000))
+
+      visited.add(`${r}${c}`)
+      queue.push([r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1])
+    }
+  }
+
+  function enableExtinguisher(emoji: EffectEmoji, r: number, c: number) {
+    placeEffect(emoji, r, c)
+    if (r < 8) placeEffect(emoji, r + 1, c)
+    if (r > 0) placeEffect(emoji, r - 1, c)
+    if (c < 8) placeEffect(emoji, r, c + 1)
+    if (c > 0) placeEffect(emoji, r, c - 1)
+
+    if (r < 8 && c < 8) placeEffect(emoji, r + 1, c + 1)
+    if (r < 8 && c > 0) placeEffect(emoji, r + 1, c - 1)
+    if (r > 0 && c < 8) placeEffect(emoji, r - 1, c + 1)
+    if (r > 0 && c > 0) placeEffect(emoji, r - 1, c - 1)
   }
 
   function shuffle(array: unknown[]) {
