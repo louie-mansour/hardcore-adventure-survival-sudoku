@@ -36,6 +36,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [placedEffectLocations, setPlacedEffectLocations] = useState<[EffectEmoji, number, number][]>([])
   const [enabledItem, setEnabledItem] = useState<string>()
   const [numberOfShields, setNumberOfShields] = useState(0)
+  let fireQueue: [number, number][] = []
 
   useEffect(() => {
     if(sudoku.isSolved()) {
@@ -295,7 +296,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
             enableExtinguisher(EffectEmoji.ExtinguishingSprayLarge, row, col)
             setTimeout(() => {
               enableExtinguisher(EffectEmoji.ExtinguishingSpray, row, col)
-              setTimeout(() => removeEffect(row, col), 200)
+              setTimeout(() => endExtinguisher(row, col), 300)
             }, 100)
           }, 100)
         }, 100)
@@ -328,15 +329,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
     return []
   }
 
-  // Fire = '🔥',
-  // Turtle = '🐢',
-  // Volcano = '🌋',
-  // Darkness = '🌑',
-  // Mirror = '🪞',
-  // Rat = '🐀',
-  // Dizzy = '😵‍💫',
-  // Dagger = '🗡️',
-
   async function enableEffect(value: EffectEmoji) {
     switch (value) {
       case '🔥':
@@ -348,11 +340,11 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   async function enableFire() {
-    const queue: [number, number][] = [[selectedCell[0], selectedCell[1]]]
+    fireQueue = [[selectedCell[0], selectedCell[1]]]
     const visited = new Set<string>([])
-    while (queue.length > 0) {
-      shuffle(queue)
-      const el = queue.shift()
+    while (fireQueue.length > 0) {
+      shuffle(fireQueue)
+      const el = fireQueue.shift()
       if (!el) return
       const [r, c] = el
       if (r < 0 || r > 8 || c < 0 || c > 8) continue
@@ -362,7 +354,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
       }, 1000))
 
       visited.add(`${r}${c}`)
-      queue.push([r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1])
+      fireQueue.push([r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1])
     }
   }
 
@@ -377,6 +369,21 @@ export default function SudokuArea(props: SudokuAreaProps) {
     if (r < 8 && c > 0) placeEffect(emoji, r + 1, c - 1)
     if (r > 0 && c < 8) placeEffect(emoji, r - 1, c + 1)
     if (r > 0 && c > 0) placeEffect(emoji, r - 1, c - 1)
+
+    fireQueue.splice(fireQueue.indexOf([r, c]), 1)
+  }
+
+  function endExtinguisher(r: number, c: number) {
+    placeEffect('' as EffectEmoji, r, c)
+    if (r < 8) placeEffect('' as EffectEmoji, r + 1, c)
+    if (r > 0) placeEffect('' as EffectEmoji, r - 1, c)
+    if (c < 8) placeEffect('' as EffectEmoji, r, c + 1)
+    if (c > 0) placeEffect('' as EffectEmoji, r, c - 1)
+
+    if (r < 8 && c < 8) placeEffect('' as EffectEmoji, r + 1, c + 1)
+    if (r < 8 && c > 0) placeEffect('' as EffectEmoji, r + 1, c - 1)
+    if (r > 0 && c < 8) placeEffect('' as EffectEmoji, r - 1, c + 1)
+    if (r > 0 && c > 0) placeEffect('' as EffectEmoji, r - 1, c - 1)
   }
 
   function shuffle(array: unknown[]) {
