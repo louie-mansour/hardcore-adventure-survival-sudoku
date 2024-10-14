@@ -15,7 +15,7 @@ export default function Toolbox(props: ToolboxProps) {
   const { putValueInCell, items, enabledItem, utilizeItem, effects, enableEffect } = props
   return (
     <>
-      <div className="flex flex-row justify-evenly">
+      <div className="flex flex-row justify-evenly gap-3">
         { ['1','2','3','4','5','6','7','8','9'].map(el =>
           <div
             className="cursor-pointer"
@@ -28,34 +28,29 @@ export default function Toolbox(props: ToolboxProps) {
           </div>
         )}
       </div>
-      <div className='h-32'>
-        <div className="flex flex-row justify-evenly">
-          <p className="text-3xl">
-            Items:
-          </p>
-        { items.map(el => {
-          let className: string
-          if (el === enabledItem) {
-            className = "cursor-pointer border border-blue-500 border-2"
-          } else {
-            className="cursor-pointer"
-          }
-          return <div
-            className={`${className}`}
-            key={el.name}
-            onClick={ () => {
-              utilizeItem(el)
-            }
-          }
+      <p className="text-3xl self-start">
+        Items:
+      </p>
+      <div className='flex flex-col self-start'>
+      { items.map(el => {
+        let className: string
+        if (el === enabledItem) {
+          className = "cursor-pointer border border-blue-500 border-2"
+        } else {
+          className="cursor-pointer"
+        }
+        return el.numberOfUses > 0 || el.numberOfUses === 'Infinite' ? <div className='flex flex-row items-center'>
+          <p
+            className={`text-5xl ${className}`}
+            onClick={() => utilizeItem(el)}
           >
-            <div>
-              <p className="text-5xl text-center">
-                {el.emoji}
-              </p>
-            </div>
-          </div>
-        })}
-        </div>
+            {el.emoji}
+          </p>
+          <p className="text-xl">
+            Qty: {el.numberOfUses}
+          </p>
+        </div> : null
+      })}
       </div>
       <div className='h-32'>
         <div className="flex flex-row justify-evenly">   

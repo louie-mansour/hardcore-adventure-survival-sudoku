@@ -7,7 +7,6 @@ import { Item, ItemEmoji, ItemName } from "@/models/item";
 import { CellValue, Sudoku } from "@/models/sudoku";
 import { useEffect, useState } from "react";
 import { GameMode } from "../playarea/playArea";
-import HintPanel from "../sudoku/hintPanel";
 import Sudoku9x9Grid from "../sudoku/sudoku-grid/sudokuGrid";
 import Toolbox from "../sudoku/toolbox";
 
@@ -66,8 +65,8 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }, [])
 
   return (
-    <>
-      <div className='flex flex-col justify-center items-center'>
+    <div className='flex flex-col justify-center items-center gap-3'>
+      {/* <div className='flex flex-col justify-center items-center'> */}
         <Sudoku9x9Grid
           selectedCell={selectedCell}
           selectCell={selectCell}
@@ -82,7 +81,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
           placedItemLocations={placedItemLocations}
           placedEffectLocations={placedEffectLocations}
         />
-      </div>
+      {/* </div> */}
       <Toolbox
         putValueInCell={putValueInCell}
         items={items}
@@ -91,12 +90,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         effects={effects}
         enableEffect={enableEffect}
       />
-      <HintPanel
-        isFoundMistakes={gameMode === GameMode.OngoingHints ? false : mistakes.length > 0}
-        isFoundHint={!!hint}
-        gameMode={gameMode}
-      />
-    </>
+    </div>
   )
 
   function placeItem(emoji: ItemEmoji, row: number, col: number) {
@@ -111,24 +105,12 @@ export default function SudokuArea(props: SudokuAreaProps) {
     })
   }
 
-  function removeEffect(row: number, col: number) {
-    setPlacedEffectLocations(e => {
-      const idx = e.findIndex(i => i[1] == row && i[2] == col)
-      console.log(e)
-      e.splice(idx, 1)
-      return e
-    })
-  }
-
   function updateSudoku(value: CellValue, row: number, col: number) {
-    console.log('55555555555')
     setSudoku(s => {
-      console.log('444444444444')
       const newSudoku = s.updateCell(value, row, col)
       const mistakes = newSudoku.findMistakes()
 
       if (mistakes.length > 0) {
-        console.log('666666666')
         setMistakes(mistakes)
         setIsRevealMistakes(true)
         // TODO: This is fine but not ideal
@@ -138,8 +120,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
       }
 
       const itemLocation = itemLocations.find(el => el[1] === row && el[2] === col)
-      console.log('THERE')
-      console.log(itemLocations)
       if (value && itemLocation) {
         setItems(i => [...new Set([...i, itemLocation[0]])])
       }
@@ -158,20 +138,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
     }
   }
 
-  function revealHint() {
-    const revealedHint = sudoku.revealHint()
-    const newSudoku = sudoku.updateCell(revealedHint[2], revealedHint[0], revealedHint[1])
-    setSudoku(newSudoku)
-
-    if (gameMode === GameMode.OngoingHints) {
-      setMistakes(newSudoku.findMistakes())
-      setHint(newSudoku.getHint({ allowMistakes: true }))
-      return
-    }
-
-    setHint(null)
-  }
-
   function selectCell(cell: [number, number]) {
     setSelectedCell(cell)
   }
@@ -180,7 +146,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
     if (enabledItem?.name === ItemName.Note) {
       toggleNoteValue(selectedCell[0], selectedCell[1], value)
     } else {
-      console.log('000000000000')
       updateSudoku(value, selectedCell[0], selectedCell[1])
     }
   }
@@ -214,6 +179,9 @@ export default function SudokuArea(props: SudokuAreaProps) {
   function utilizeItem(item: Item) {
     const row = selectedCell[0]
     const col = selectedCell[1]
+    if (!item.use()) {
+      return
+    }
     switch (item.name) {
       case ItemName.Note: return chooseEnabledItem(item)
       case ItemName.CrystalBall:

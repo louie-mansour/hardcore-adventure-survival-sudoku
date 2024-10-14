@@ -43,8 +43,6 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const maskStRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
-    console.log('9999999999')
-    console.log(numberOfLives)
     if (numberOfLives === 0) gameover()
   }, [numberOfLives, gameover])
 
@@ -92,8 +90,6 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 
   function decreaseLife(mistakes: object[]) {
     setNumberOfLives(l => {
-      console.log('888888888888')
-      console.log(l)
       if (l === null) {
         return null
       }
@@ -137,8 +133,6 @@ function SudokuCell(props: SudokuCellProps) {
 
     setIsError(true)
     errorStRef.current = setTimeout(() => { setIsError(false) }, 3000)
-    console.log('77777777777777')
-    console.log(mistakes)
     decreaseLife(mistakes) // TODO: Maybe this should be done at a higher level, take a way a life if there's a mistake
   }, [mistakes, row, col, decreaseLife])
 
@@ -192,7 +186,6 @@ function SudokuCell(props: SudokuCellProps) {
   function onKeyDownEvent(event: any) {
     event.preventDefault();
     const key = event.key
-    console.log('KEYDOWN')
 
     let value: CellValue | null
     if (['Backspace', 'Delete'].includes(key)) {
@@ -202,7 +195,6 @@ function SudokuCell(props: SudokuCellProps) {
     } else {
       return
     }
-    console.log('111111111111111111')
     putValueInCell(value)
   }
 
