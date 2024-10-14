@@ -1,52 +1,65 @@
-class Item {
+export class Item {
   type: 'Item'
   name: ItemName
   emoji: ItemEmoji
   description: string
-  numberOfUses: number | null
+  numberOfUses: number | 'Infinite'
 
-  static factory(itemName: ItemName) {
+  static factory(itemName: ItemName): Item {
     switch (itemName) {
       case ItemName.Delete:
-        return new Item(ItemName.Delete, ItemEmoji.Delete, 'Remove a number from a square', null)
+        return new Item(ItemName.Delete, ItemEmoji.Delete, 'Remove a number from a square', 'Infinite')
       case ItemName.Note:
-        return new Item(ItemName.Note, ItemEmoji.Note, 'Jot down possible values in a square', null)
+        return new Item(ItemName.Note, ItemEmoji.Note, 'Jot down possible values in a square', 'Infinite')
       case ItemName.MagnifyingGlass:
-        return new Item(ItemName.MagnifyingGlass, ItemEmoji.MagnifyingGlass, 'Get a hint. Or reveal the value of a hint', null)
+        return new Item(ItemName.MagnifyingGlass, ItemEmoji.MagnifyingGlass, 'Get a hint. Or reveal the value of a hint', 'Infinite')
       case ItemName.BabyBottle:
-        return new Item(ItemName.BabyBottle, ItemEmoji.BabyBottle, 'Get a hint. Or reveal the value of a hint', null)
+        return new Item(ItemName.BabyBottle, ItemEmoji.BabyBottle, 'Get a hint. Or reveal the value of a hint', 'Infinite')
       case ItemName.Surrender:
-        return new Item(ItemName.Surrender, ItemEmoji.Surrender, 'Give up. Reveal the solution', null)
+        return new Item(ItemName.Surrender, ItemEmoji.Surrender, 'Give up. Reveal the solution', 1)
       case ItemName.FireExtinguisher:
-        return new Item(ItemName.FireExtinguisher, ItemEmoji.FireExtinguisher, 'Put ouf fires', null)
+        return new Item(ItemName.FireExtinguisher, ItemEmoji.FireExtinguisher, 'Put ouf fires', 'Infinite')
       case ItemName.Shield:
         return new Item(ItemName.Shield, ItemEmoji.Shield, 'Protect against mistakes', 1)
       case ItemName.MagicWand:
-        return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any square with the correct value', 1)
+        return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any square with the correct value', 3)
       case ItemName.CrystalBall:
         return new Item(ItemName.CrystalBall, ItemEmoji.CrystalBall, 'Get hints for the next few moves', 5)
       case ItemName.Flashlight:
-        return new Item(ItemName.Flashlight, ItemEmoji.Flashlight, 'Brightens up darkness', null)
+        return new Item(ItemName.Flashlight, ItemEmoji.Flashlight, 'Brightens up darkness', 'Infinite')
       case ItemName.Sun:
         return new Item(ItemName.Sun, ItemEmoji.Sun, 'Temporarily remove all negative effects', 1)
       case ItemName.Plant:
-        return new Item(ItemName.Plant, ItemEmoji.Plant, 'Plant it in a square and it will grow into the correct value', 1)
+        return new Item(ItemName.Plant, ItemEmoji.Plant, 'Plant it in a square and it will grow into the correct value', 3)
       case ItemName.Snowflake:
-        return new Item(ItemName.Snowflake, ItemEmoji.Snowflake, 'Reduces frequency of fires', null)
+        return new Item(ItemName.Snowflake, ItemEmoji.Snowflake, 'Reduces frequency of fires', 1)
       case ItemName.FireEngine:
-        return new Item(ItemName.FireEngine, ItemEmoji.FireEngine, 'Fires are automatically put out', null)
+        return new Item(ItemName.FireEngine, ItemEmoji.FireEngine, 'Fires are automatically put out', 1)
       case ItemName.Cheese:
-        return new Item(ItemName.Cheese, ItemEmoji.Cheese, 'Distract rats from blocking your view', null)
+        return new Item(ItemName.Cheese, ItemEmoji.Cheese, 'Stop rats from blocking your view', 'Infinite')
       case ItemName.Hand:
-        return new Item(ItemName.Hand, ItemEmoji.Hand, 'Rotate the board back in place', null)
+        return new Item(ItemName.Hand, ItemEmoji.Hand, 'Rotate the board back in place', 'Infinite')
+      case ItemName.GameDie:
+        return new Item(ItemName.GameDie, ItemEmoji.GameDie, 'Reveal the value of between 1-6 random squares', 1)
     }
+  }
+
+  use(): boolean {
+    if (this.numberOfUses == 'Infinite') {
+      return true
+    }
+    if (this.numberOfUses > 0) {
+      this.numberOfUses--
+      return true
+    }
+    return false
   }
 
   private constructor(
     name: ItemName,
     emoji: ItemEmoji,
     description: string,
-    numberOfUses: number | null,
+    numberOfUses: number | 'Infinite',
   ) {
     this.type = 'Item'
     this.name = name
@@ -73,25 +86,29 @@ export enum ItemName {
   FireEngine = 'FireEngine',
   Cheese = 'Cheese',
   Hand = 'Hand',
+  GameDie = 'GameDie'
 }
 
 export enum ItemEmoji {
-  Delete = '🗑️',
   Note = '✏️',
-  MagnifyingGlass = '🔍',
-  BabyBottle = '🍼',
-  Surrender = '🏳️',
-  FireExtinguisher = '🧯',
   Shield = '🛡️',
   MagicWand = '🪄',
   CrystalBall = '🔮',
-  Flashlight = '🔦',
-  Sun = '☀️',
   Plant = '🌱',
   PlantMedium = '🪴',
   PlantLarge = '🌴',
-  Snowflake = '❄️',
+  GameDie = '🎲',
+  FireExtinguisher = '🧯',
   FireEngine = '🚒',
+
+  // likely not used
+  Delete = '🗑️',
+  MagnifyingGlass = '🔍',
+  BabyBottle = '🍼',
+  Surrender = '🏳️',
+  Flashlight = '🔦',
+  Sun = '☀️',
+  Snowflake = '❄️',
   Cheese = '🧀',
   Hand = '🖐️',
 }

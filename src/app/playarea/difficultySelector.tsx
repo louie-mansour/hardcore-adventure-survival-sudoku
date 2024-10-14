@@ -13,7 +13,7 @@ export default function DifficultySelector({
 
   return (
     <div className="flex flex-row justify-start gap-x-9">
-      <p>Difficulty:</p>
+      {/* <p>Difficulty:</p> */}
       {
         Object.values(GameDifficulty).map((difficultyValue: GameDifficulty) => {
           return (
@@ -33,9 +33,9 @@ export default function DifficultySelector({
 
   function displayDifficulty(difficulty: GameDifficulty) {
     switch(difficulty) {
-      case GameDifficulty.Easy: return 'Easy'
-      case GameDifficulty.Medium: return 'Medium'
-      case GameDifficulty.Hard: return 'Hard'
+      case GameDifficulty.Easy: return 'New Game'
+      // case GameDifficulty.Medium: return 'Medium'
+      // case GameDifficulty.Hard: return 'Hard'
     }
   }
 }

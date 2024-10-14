@@ -1,17 +1,18 @@
-import { EffectEmoji } from "@/models/effect"
+import { NegativeEffectEmoji } from "@/models/effect"
+import { Item } from "@/models/item"
 import { CellValue } from "@/models/sudoku"
 
 interface ToolboxProps {
   putValueInCell: (value: CellValue) => void
-  items: string[]
-  enabledItem: string | undefined,
-  useItem: (value: string) => void,
-  effects: EffectEmoji[],
-  enableEffect: (value: EffectEmoji) => void,
+  items: Item[]
+  enabledItem: Item | undefined,
+  utilizeItem: (value: Item) => void,
+  effects: NegativeEffectEmoji[],
+  enableEffect: (value: NegativeEffectEmoji) => void,
 }
 
 export default function Toolbox(props: ToolboxProps) {
-  const { putValueInCell, items, enabledItem, useItem, effects, enableEffect } = props
+  const { putValueInCell, items, enabledItem, utilizeItem, effects, enableEffect } = props
   return (
     <>
       <div className="flex flex-row justify-evenly">
@@ -28,7 +29,10 @@ export default function Toolbox(props: ToolboxProps) {
         )}
       </div>
       <div className='h-32'>
-        <div className="flex flex-row justify-evenly">   
+        <div className="flex flex-row justify-evenly">
+          <p className="text-3xl">
+            Items:
+          </p>
         { items.map(el => {
           let className: string
           if (el === enabledItem) {
@@ -38,14 +42,15 @@ export default function Toolbox(props: ToolboxProps) {
           }
           return <div
             className={`${className}`}
-            key={el}
+            key={el.name}
             onClick={ () => {
-              useItem(el)
-            } }
+              utilizeItem(el)
+            }
+          }
           >
             <div>
               <p className="text-5xl text-center">
-                {el}
+                {el.emoji}
               </p>
             </div>
           </div>
@@ -54,6 +59,9 @@ export default function Toolbox(props: ToolboxProps) {
       </div>
       <div className='h-32'>
         <div className="flex flex-row justify-evenly">   
+          <p className="text-3xl">
+            Negative Effects:
+          </p>
         { effects.map(el => {
           return <div
             className='cursor-pointer'

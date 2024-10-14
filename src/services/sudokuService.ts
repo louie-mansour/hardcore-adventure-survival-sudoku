@@ -45,7 +45,7 @@ export function getSudoku({ difficulty, index }: Args): Sudoku {
 function chooseSudokuList(difficulty: GameDifficulty): string[] {
   switch (difficulty) {
     case GameDifficulty.Easy: return easySudokuList
-    case GameDifficulty.Medium: return mediumSudokuList
-    case GameDifficulty.Hard: return hardSudokuList
+    // case GameDifficulty.Medium: return mediumSudokuList
+    // case GameDifficulty.Hard: return hardSudokuList
   }
 }

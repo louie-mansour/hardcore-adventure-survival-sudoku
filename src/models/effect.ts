@@ -1,49 +1,59 @@
-class Effect {
+export class NegativeEffect {
   type: 'Effect'
-  name: EffectName
-  emoji: EffectEmoji
+  name: NegativeEffectName
+  emoji: NegativeEffectEmoji
   description: string
+  isActive: boolean
 
-  static factory(effectName: EffectName) {
+  static factory(effectName: NegativeEffectName): NegativeEffect {
     switch (effectName) {
-      case EffectName.Fire:
-        return new Effect(EffectName.Fire, EffectEmoji.Fire, 'Burns your numbers to ashes')
-      case EffectName.Turtle:
-        return new Effect(EffectName.Turtle, EffectEmoji.Turtle, 'Can only move one square at a time')
-      case EffectName.Volcano:
-        return new Effect(EffectName.Volcano, EffectEmoji.Volcano, 'Shakes the board')
-      case EffectName.Darkness:
-        return new Effect(EffectName.Darkness, EffectEmoji.Darkness, 'Makes it hard to see')
-      case EffectName.Mirror:
-        return new Effect(EffectName.Mirror, EffectEmoji.Mirror, 'Flips the numbers')
-      case EffectName.Rat:
-        return new Effect(EffectName.Rat, EffectEmoji.Rat, 'Get in the way of the numbers')
-      case EffectName.Dizzy:
-        return new Effect(EffectName.Dizzy, EffectEmoji.Dizzy, 'Slowly rotates the board')
-      case EffectName.Dagger:
-        return new Effect(EffectName.Dagger, EffectEmoji.Dagger, 'Fill any square with the correct value')
+      case NegativeEffectName.Fire:
+        return new NegativeEffect(NegativeEffectName.Fire, NegativeEffectEmoji.Fire, 'Burns your numbers to ashes')
+      case NegativeEffectName.Turtle:
+        return new NegativeEffect(NegativeEffectName.Turtle, NegativeEffectEmoji.Turtle, 'Can only move one square at a time')
+      case NegativeEffectName.Volcano:
+        return new NegativeEffect(NegativeEffectName.Volcano, NegativeEffectEmoji.Volcano, 'Shakes the board')
+      case NegativeEffectName.Darkness:
+        return new NegativeEffect(NegativeEffectName.Darkness, NegativeEffectEmoji.Darkness, 'Makes it hard to see')
+      case NegativeEffectName.Mirror:
+        return new NegativeEffect(NegativeEffectName.Mirror, NegativeEffectEmoji.Mirror, 'Flips the numbers')
+      case NegativeEffectName.Rat:
+        return new NegativeEffect(NegativeEffectName.Rat, NegativeEffectEmoji.Rat, 'Get in the way of the numbers')
+      case NegativeEffectName.Dizzy:
+        return new NegativeEffect(NegativeEffectName.Dizzy, NegativeEffectEmoji.Dizzy, 'Slowly rotates the board')
+      case NegativeEffectName.Dagger:
+        return new NegativeEffect(NegativeEffectName.Dagger, NegativeEffectEmoji.Dagger, 'Takes away a heart')
     }
   }
 
+  activate() {
+    this.isActive = true
+  }
+
+  deactiveate() {
+    this.isActive = false
+  }
+
   private constructor(
-    name: EffectName,
-    emoji: EffectEmoji,
+    name: NegativeEffectName,
+    emoji: NegativeEffectEmoji,
     description: string,
   ) {
     this.type = 'Effect'
     this.name = name
     this.emoji = emoji
     this.description = description
+    this.isActive = false
   }
 }
 
-export enum EffectName {
+export enum NegativeEffectName {
   Fire = 'Fire',
-  ExtinguishingSpraySmall = 'ExtinguishingSpraySmall',
-  ExtinguishingSprayMedium = 'ExtinguishingSprayMedium',
-  ExtinguishingSprayLarge = 'ExtinguishingSprayLarge',
-  ExtinguishingSpray = 'ExtinguishingSpray',
-  Coal = 'Coal',
+  // ExtinguishingSpraySmall = 'ExtinguishingSpraySmall',
+  // ExtinguishingSprayMedium = 'ExtinguishingSprayMedium',
+  // ExtinguishingSprayLarge = 'ExtinguishingSprayLarge',
+  // ExtinguishingSpray = 'ExtinguishingSpray',
+  // Coal = 'Coal',
   Turtle = 'Turtle',
   Volcano = 'Volcano',
   Darkness = 'Darkness',
@@ -54,7 +64,7 @@ export enum EffectName {
 }
 
 
-export enum EffectEmoji {
+export enum NegativeEffectEmoji {
   Fire = '🔥',
   ExtinguishingSpraySmall = '▫️',
   ExtinguishingSprayMedium = '◻️',
