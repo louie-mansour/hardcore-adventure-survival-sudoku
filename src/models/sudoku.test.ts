@@ -89,40 +89,40 @@ describe('sudoku', () => {
     })
   })
 
-  describe('findErrors', () => {
-    it('Unchanged sudokus have no errors', () => {
-      const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
-      expect(sudoku.findMistakes().length).toEqual(0)
-    })
+  // describe('findErrors', () => {
+  //   it('Unchanged sudokus have no errors', () => {
+  //     const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
+  //     expect(sudoku.findMistakes().length).toEqual(0)
+  //   })
 
-    it('returns an empty array if no errors are found', () => {
-      const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
-      sudoku.updateCell('2', 0, 0)
-      sudoku.updateCell('6', 0, 1)
-      expect(sudoku.findMistakes().length).toEqual(0)
-    })
+  //   it('returns an empty array if no errors are found', () => {
+  //     const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
+  //     sudoku.updateCell('2', 0, 0)
+  //     sudoku.updateCell('6', 0, 1)
+  //     expect(sudoku.findMistakes().length).toEqual(0)
+  //   })
 
-    it('returns an item if one error is found', () => {
-      const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
-      sudoku.updateCell('3', 0, 0)
-      sudoku.updateCell('6', 0, 1)
-      const errors = sudoku.findMistakes()
-      expect(errors.length).toEqual(1)
-      expect(errors[0]).toEqual([0, 0, '2'])
+  //   it('returns an item if one error is found', () => {
+  //     const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
+  //     sudoku.updateCell('3', 0, 0)
+  //     sudoku.updateCell('6', 0, 1)
+  //     const errors = sudoku.findMistakes()
+  //     expect(errors.length).toEqual(1)
+  //     expect(errors[0]).toEqual([0, 0, '2'])
 
-    })
+  //   })
 
-    it('returns two items if two errors are found', () => {
-      const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
-      sudoku.updateCell('3', 0, 0)
-      sudoku.updateCell('4', 0, 1)
+  //   it('returns two items if two errors are found', () => {
+  //     const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
+  //     sudoku.updateCell('3', 0, 0)
+  //     sudoku.updateCell('4', 0, 1)
 
-      const errors = sudoku.findMistakes()
-      expect(errors.length).toEqual(2)
-      expect(errors[0]).toEqual([0, 0, '2'])
-      expect(errors[1]).toEqual([0, 1, '6'])
-    })
-  })
+  //     const errors = sudoku.findMistakes()
+  //     expect(errors.length).toEqual(2)
+  //     expect(errors[0]).toEqual([0, 0, '2'])
+  //     expect(errors[1]).toEqual([0, 1, '6'])
+  //   })
+  // })
 
   describe('getHint', () => {
     it('Returns a hint', () => {

@@ -55,6 +55,23 @@ export class Item {
     return false
   }
 
+  addUses(n: number | 'Infinite'): boolean {
+    if (this.numberOfUses === 'Infinite') {
+      return true
+    }
+    if (n === 'Infinite') {
+      this.numberOfUses = 'Infinite'
+      return true
+    }
+
+    // Hack until I get state working correctly, this limits the emojis' occurrences to two
+    if (this.numberOfUses > n) {
+      return true
+    }
+    this.numberOfUses += n
+    return true
+  }
+
   private constructor(
     name: ItemName,
     emoji: ItemEmoji,

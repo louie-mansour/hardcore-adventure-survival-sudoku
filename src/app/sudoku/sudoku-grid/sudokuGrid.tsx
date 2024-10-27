@@ -10,7 +10,7 @@ interface Sudoku9x9GridProps {
   sudoku: Sudoku
   hint: [number, number, CellValue] | null
   mistakes: [number, number, CellValue][]
-  emojiLocations: [Item | NegativeEffect, number, number][]
+  emojiLocations: [Item | NegativeEffect, number, number, boolean][]
   gameover: () => void
   notes: Set<CellValue>[][]
   putValueInCell: ((cellValue: CellValue) =>  void)
@@ -34,7 +34,7 @@ const STARTNG_LIVES = 2
 // TODO: Bit of a hack with the typing here
 // setNumberOfLives might be best passed in as a prop
 // isMaskItems might also be best passed in as a prop and determined via the Game model's state
-const SudokuContext = createContext<Sudoku9x9GridProps & { decreaseLife: () => void, isMaskItems: boolean } | undefined>(undefined);
+const SudokuContext = createContext<Sudoku9x9GridProps & { decreaseLife: (mistakes: object[]) => void, isMaskItems: boolean } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const [isMaskItems, setIsMaskItems] = useState(false)

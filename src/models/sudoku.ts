@@ -1,5 +1,5 @@
 import { MistakeError } from '../errors/mistake';
-import { createSudokuAlgorithm, findErrorsAlgorithm as findMistakesAlgorithm, getHintAlgorithmDeprecated, solveAlgorithm } from './sudokuAlgorithms';
+import { createSudokuAlgorithm, getHintAlgorithmDeprecated, solveAlgorithm } from './sudokuAlgorithms';
 
 export type CellValue = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | null
 
@@ -31,6 +31,14 @@ export class Sudoku {
   }
 
   updateCell(value: CellValue, row: number, col: number): Sudoku {
+    if (this.solved[row][col].value !== value) {
+      throw new Error('Incorrect value')
+    }
+
+    if (this.cells[row][col].value) {
+      throw new Error('Already updated')
+    }
+
     const cell = this.cells[row][col]
     this.cells[row][col] = cell.updateValue(value)
     
@@ -41,20 +49,7 @@ export class Sudoku {
     return new Sudoku([ ...this.solved ], [ ...this.solved ])
   }
 
-  findMistakes(): [number, number, CellValue][] {
-    const mistakes = findMistakesAlgorithm(this.cells, this.solved)
-    return [ ...mistakes ]
-  }
-
-  getHint({ allowMistakes }: { allowMistakes: boolean } = { allowMistakes: false }): [number, number, null] {
-    if (!allowMistakes) {
-      const mistakes = this.findMistakes()
-      if (mistakes.length > 0) {
-        this.currentHint = null
-        throw new MistakeError(mistakes, 'There is a mistake in the sudoku')
-      }
-    }
-
+  getHint(): [number, number, null] {
     const [r, c, value] = getHintAlgorithmDeprecated(this.cells, this.solved)
     this.currentHint = [r, c, value]
     return [r, c, null]

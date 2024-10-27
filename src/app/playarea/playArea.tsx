@@ -18,18 +18,16 @@ export enum GameMode {
 export default function PlayArea() {
   const [game, setGame] = useState<Game>(() => new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
-  const [isHardcoreModeEnabled, setIsHardcoreModeEnabled] = useState(true)
-  const [isOngoingHintsModeEnabled, setIsOngoingHintsModeEnabled] = useState(false)
   // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
   const [initialSudoku, setInitialSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
-  const [itemLocations, setItemLocations] = useState<[Item, number, number][]>([])
+  const [itemLocations, setItemLocations] = useState<[Item, number, number, boolean][]>([])
 
   useEffect(() => {
     if (initialSudoku && itemLocations.length === 0) {
       setItemLocations(determineItemLocations(initialSudoku))
     }
 
-    function determineItemLocations(sudoku: Sudoku): [Item, number, number][] {
+    function determineItemLocations(sudoku: Sudoku): [Item, number, number, boolean][] {
       if (!sudoku) return []
       const availableLocations: [number, number][] = []
       const cells = sudoku.getCells()
@@ -54,11 +52,11 @@ export default function PlayArea() {
         Item.factory(ItemName.GameDie),
       ]
   
-      const itemLocations: [Item, number, number][] = []
+      const itemLocations: [Item, number, number, boolean][] = []
       for (let i = 0; i < itemsToDistribute.length; i++) {
         const locationIndex = Math.floor(Math.random() * availableLocations.length)
         const location = availableLocations[locationIndex]
-        itemLocations.push([itemsToDistribute[i], location[0], location[1]])
+        itemLocations.push([itemsToDistribute[i], location[0], location[1], true])
         availableLocations.splice(locationIndex, 1)
       }
       return itemLocations
@@ -94,17 +92,11 @@ export default function PlayArea() {
         <div className='h-screen flex flex-col justify-evenly my-0 mx-5 h-svh gap-2 pt-8'>
           <Title />
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />
-          {/* <OptionsSelector
-            enableOngoingHintsMode={enableOngoingHintsMode}
-            enableHardcoreMode={enableHardcoreMode}
-            isHardcoreModeEnabled={isHardcoreModeEnabled}
-            isOngoingHintsModeEnabled={isOngoingHintsModeEnabled}
-          /> */}
           <div className='flex flex-col justify-center items-center'>
             <SudokuArea
               initialSudoku={initialSudoku}
-              gameMode={getMode(isHardcoreModeEnabled, isOngoingHintsModeEnabled)}
               itemLocations={itemLocations}
+              removeItemLocation={removeItemLocation}
               negativeEffectLocations={[]}
               solveSudoku={solveSudoku}
               gameStart={gameStart}
@@ -116,6 +108,20 @@ export default function PlayArea() {
       </div>
     </div>
   )
+
+  function removeItemLocation(r: number, c: number): boolean {
+    let isRemove = false
+    setItemLocations(il => {
+      const idx = il.findIndex(e => e[1] === r && e[2] === c && e[3])
+      if (idx === -1) {
+        return [ ...il ]
+      }
+      isRemove = true
+      il[idx] = [il[idx][0], il[idx][1], il[idx][2], false]
+      return [ ...il ]
+    })
+    return isRemove
+  }
 
   function requestNewGame(difficulty: GameDifficulty) {
     setNewGame(new Game(difficulty))
@@ -131,24 +137,6 @@ export default function PlayArea() {
 
   function gameComplete() {
     setGame(g => g.complete())
-  }
-
-  // function enableOngoingHintsMode(isEnable: boolean) {
-  //   setIsOngoingHintsModeEnabled(isEnable)
-  // }
-
-  // function enableHardcoreMode(isEnable: boolean) {
-  //   setIsHardcoreModeEnabled(isEnable)
-  // }
-
-  function getMode(isHardcoreModeEnabled: boolean, isOngoingHintsModeEnabled: boolean): GameMode {
-    if (isHardcoreModeEnabled) {
-      return GameMode.Hardcore
-    }
-    if (isOngoingHintsModeEnabled) {
-      return GameMode.OngoingHints
-    }
-    return GameMode.Normal
   }
 
   function solveSudoku() {

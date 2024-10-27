@@ -6,14 +6,13 @@ import { NegativeEffect, NegativeEffectEmoji } from "@/models/effect";
 import { Item, ItemEmoji, ItemName } from "@/models/item";
 import { CellValue, Sudoku } from "@/models/sudoku";
 import { useEffect, useState } from "react";
-import { GameMode } from "../playarea/playArea";
 import Sudoku9x9Grid from "../sudoku/sudoku-grid/sudokuGrid";
 import Toolbox from "../sudoku/toolbox";
 
 interface SudokuAreaProps {
   initialSudoku: Sudoku
-  gameMode: GameMode
-  itemLocations: [Item, number, number][],
+  itemLocations: [Item, number, number, boolean][],
+  removeItemLocation: (r: number, c: number) => boolean
   negativeEffectLocations: [NegativeEffect, number, number][],
   solveSudoku: () => void
   gameStart: () => void
@@ -22,13 +21,12 @@ interface SudokuAreaProps {
 }
 
 export default function SudokuArea(props: SudokuAreaProps) {
-  const { initialSudoku, gameMode, itemLocations, negativeEffectLocations, solveSudoku, gameStart, gameOver, gameComplete } = props
+  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete } = props
 
   const [sudoku, setSudoku] = useState<Sudoku>(() => initialSudoku)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
   const [notes, setNotes] = useState(() => initNotes())
   const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
-  const [isRevealMistakes, setIsRevealMistakes] = useState(false)
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [items, setItems] = useState(initItems())
   const [placedItemLocations, setPlacedItemLocations] = useState<[ItemEmoji, number, number][]>([])
@@ -53,7 +51,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
       setSudoku(initialSudoku)
       setNotes(initNotes())
       setMistakes([])
-      setIsRevealMistakes(false)
       setHint(null)
       setItems(initItems())
       setEnabledItem(undefined)
@@ -66,13 +63,12 @@ export default function SudokuArea(props: SudokuAreaProps) {
 
   return (
     <div className='flex flex-col justify-center items-center gap-3'>
-      {/* <div className='flex flex-col justify-center items-center'> */}
         <Sudoku9x9Grid
           selectedCell={selectedCell}
           selectCell={selectCell}
           sudoku={sudoku}
           hint={hint}
-          mistakes={isRevealMistakes ? mistakes : []}
+          mistakes={mistakes}
           emojiLocations={itemLocations}
           gameover={gameOver}
           notes={notes}
@@ -81,7 +77,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
           placedItemLocations={placedItemLocations}
           placedEffectLocations={placedEffectLocations}
         />
-      {/* </div> */}
       <Toolbox
         putValueInCell={putValueInCell}
         items={items}
@@ -106,26 +101,35 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   function updateSudoku(value: CellValue, row: number, col: number) {
+    let didUpdate = false
     setSudoku(s => {
-      const newSudoku = s.updateCell(value, row, col)
-      const mistakes = newSudoku.findMistakes()
-
-      if (mistakes.length > 0) {
-        setMistakes(mistakes)
-        setIsRevealMistakes(true)
-        // TODO: This is fine but not ideal
-        // Ideally the model methods are immutable and we can just return s
-        // Until then, this workaround will work without issues
-        return s.updateCell(null, row, col)
+      try {
+        const updatedSudoku = s.updateCell(value, row, col)
+        didUpdate = true
+        return updatedSudoku
+      } catch (error: unknown) {
+        setMistakes([[row, col, value]])
+        return s
       }
-
-      const itemLocation = itemLocations.find(el => el[1] === row && el[2] === col)
-      if (value && itemLocation) {
-        setItems(i => [...new Set([...i, itemLocation[0]])])
-      }
-      return newSudoku
-
     })
+
+    if (!didUpdate) {
+      return
+    }
+    console.log('updated')
+
+    const itemLocation = itemLocations.find(el => el[1] === row && el[2] === col && el[3])
+    if (value && itemLocation) {
+      removeItemLocation(itemLocation[1], itemLocation[2])
+      setItems(i => {
+        const idx = i.findIndex(e => e.name === itemLocation[0].name)
+        if (idx === -1) {
+          return [...new Set([...i, itemLocation[0]])]
+        }
+        i[idx].addUses(itemLocation[0].numberOfUses)
+        return [ ...i ]
+      })
+    }
   }
 
   function getHint() {
