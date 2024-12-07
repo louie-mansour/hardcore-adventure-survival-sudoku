@@ -26,7 +26,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [sudoku, setSudoku] = useState<Sudoku>(() => initialSudoku)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
   const [notes, setNotes] = useState(() => initNotes())
-  const [mistakes, setMistakes] = useState<[number, number, CellValue][]>([])
+  const [mistakes, setMistakes] = useState<Map<number, [number, number, CellValue]>>(() => new Map())
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [items, setItems] = useState(initItems())
   const [placedItemLocations, setPlacedItemLocations] = useState<[ItemEmoji, number, number][]>([])
@@ -50,7 +50,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
     function reset() {
       setSudoku(initialSudoku)
       setNotes(initNotes())
-      setMistakes([])
+      setMistakes(new Map())
       setHint(null)
       setItems(initItems())
       setEnabledItem(undefined)
@@ -61,22 +61,24 @@ export default function SudokuArea(props: SudokuAreaProps) {
     setItems(initItems())
   }, [])
 
+  console.log(`mistakes length: ${mistakes.size}`)
+
   return (
     <div className='flex flex-col justify-center items-center gap-3'>
-        <Sudoku9x9Grid
-          selectedCell={selectedCell}
-          selectCell={selectCell}
-          sudoku={sudoku}
-          hint={hint}
-          mistakes={mistakes}
-          emojiLocations={itemLocations}
-          gameover={gameOver}
-          notes={notes}
-          putValueInCell={putValueInCell}
-          numberOfShields={numberOfShields}
-          placedItemLocations={placedItemLocations}
-          placedEffectLocations={placedEffectLocations}
-        />
+      <Sudoku9x9Grid
+        selectedCell={selectedCell}
+        selectCell={selectCell}
+        sudoku={sudoku}
+        hint={hint}
+        mistakes={mistakes}
+        emojiLocations={itemLocations}
+        gameover={gameOver}
+        notes={notes}
+        putValueInCell={putValueInCell}
+        numberOfShields={numberOfShields}
+        placedItemLocations={placedItemLocations}
+        placedEffectLocations={placedEffectLocations}
+      />
       <Toolbox
         putValueInCell={putValueInCell}
         items={items}
@@ -102,16 +104,28 @@ export default function SudokuArea(props: SudokuAreaProps) {
 
   function updateSudoku(value: CellValue, row: number, col: number) {
     let didUpdate = false
+    const now = Date.now()
     setSudoku(s => {
       try {
         const updatedSudoku = s.updateCell(value, row, col)
         didUpdate = true
         return updatedSudoku
       } catch (error: unknown) {
-        setMistakes([[row, col, value]])
+        console.log('####')
+        console.log(mistakes)
+        setMistakes(m => m.set(now, [row, col, value]))
+        console.log('in catch')
         return s
       }
     })
+
+    // console.log('out catch')
+
+
+    // if (isMistake) {
+    //   console.log('isMistake')
+    //   setMistakes(m => m.set(now, [row, col, value]))
+    // }
 
     if (!didUpdate) {
       return
@@ -133,13 +147,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   function getHint() {
-    try {
-      setHint(sudoku.getHint())
-    } catch (err: unknown) {
-      if (err instanceof MistakeError) {
-        setMistakes(err.mistakes)
-      }
-    }
+    setHint(sudoku.getHint())
   }
 
   function selectCell(cell: [number, number]) {

@@ -1,7 +1,7 @@
 import { NegativeEffect, NegativeEffectEmoji } from "@/models/effect";
 import { Item, ItemEmoji } from "@/models/item";
 import { CellType, CellValue, Sudoku } from "@/models/sudoku"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, Dispatch } from "react"
 import { createContext, useContext } from 'react';
 
 interface Sudoku9x9GridProps {
@@ -9,7 +9,7 @@ interface Sudoku9x9GridProps {
   selectedCell: [number, number] | null
   sudoku: Sudoku
   hint: [number, number, CellValue] | null
-  mistakes: [number, number, CellValue][]
+  mistakes: Map<number, [number, number, CellValue]>
   emojiLocations: [Item | NegativeEffect, number, number, boolean][]
   gameover: () => void
   notes: Set<CellValue>[][]
@@ -22,29 +22,39 @@ interface Sudoku9x9GridProps {
 interface Sudoku3x3GridProps {
   rows: [number, number, number]
   cols: [number, number, number]
+  mistakes: Map<number, [number, number, CellValue]>
 }
 
 interface SudokuCellProps {
   row: number
   col: number
+  mistakes: Map<number, [number, number, CellValue]>
 }
 
-const STARTNG_LIVES = 2
+const STARTNG_LIVES = 5
 
 // TODO: Bit of a hack with the typing here
 // setNumberOfLives might be best passed in as a prop
 // isMaskItems might also be best passed in as a prop and determined via the Game model's state
-const SudokuContext = createContext<Sudoku9x9GridProps & { decreaseLife: (mistakes: object[]) => void, isMaskItems: boolean } | undefined>(undefined);
+const SudokuContext = createContext<
+Sudoku9x9GridProps & {
+  decreaseLife: (mistakes: Map<number, [number, number, CellValue]>) => void,
+  isMaskItems: boolean,
+  displayedErrors: Map<number, [number, number, CellValue]>,
+  setDisplayedErrors: any
+} | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
+  console.log('Sudoku9x9Grid')
   const [isMaskItems, setIsMaskItems] = useState(false)
+  const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
   const [numberOfLives, setNumberOfLives] = useState<number | null>(STARTNG_LIVES)
-  const { emojiLocations, gameover, numberOfShields } = props
+  const { emojiLocations, gameover, numberOfShields, mistakes } = props
   const maskStRef = useRef<NodeJS.Timeout>()
 
-  useEffect(() => {
+  // useEffect(() => {
     if (numberOfLives === 0) gameover()
-  }, [numberOfLives, gameover])
+  // }, [numberOfLives, gameover])
 
   useEffect(() => {
     if (maskStRef.current) {
@@ -73,68 +83,78 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
           gridTemplateColumns: '7.1rem 7.1rem 7.1rem',
         }}
       >
-        <SudokuContext.Provider value={{ ...props, decreaseLife, isMaskItems }} >
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} />
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} />
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} />
+        <SudokuContext.Provider value={{ ...props, decreaseLife, isMaskItems, displayedErrors, setDisplayedErrors }} >
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} mistakes={mistakes} />
         </SudokuContext.Provider>
       </div>
     </div>
   )
 
-  function decreaseLife(mistakes: object[]) {
+  function decreaseLife(mistakes: Map<number, [number, number, CellValue]>) {
     setNumberOfLives(l => {
-      if (l === null) {
-        return null
-      }
+      // if (l === null) {
+      //   return null
+      // }
       if (l === 0) {
         return 0
       }
-      return STARTNG_LIVES - mistakes.length
+      return STARTNG_LIVES - mistakes.size
     })
   }
 }
 
 function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
-  const { rows, cols } = props
+  console.log('Sudoku3x3Grid')
+  const { rows, cols, mistakes } = props
   return (
     <div className='grid border border-black grid-cols-3'>
-      <SudokuCell row={rows[0]} col={cols[0]} />
-      <SudokuCell row={rows[0]} col={cols[1]} />
-      <SudokuCell row={rows[0]} col={cols[2]} />
-      <SudokuCell row={rows[1]} col={cols[0]} />
-      <SudokuCell row={rows[1]} col={cols[1]} />
-      <SudokuCell row={rows[1]} col={cols[2]} />
-      <SudokuCell row={rows[2]} col={cols[0]} />
-      <SudokuCell row={rows[2]} col={cols[1]} />
-      <SudokuCell row={rows[2]} col={cols[2]} />
+      <SudokuCell row={rows[0]} col={cols[0]} mistakes={mistakes} />
+      <SudokuCell row={rows[0]} col={cols[1]} mistakes={mistakes} />
+      <SudokuCell row={rows[0]} col={cols[2]} mistakes={mistakes} />
+      <SudokuCell row={rows[1]} col={cols[0]} mistakes={mistakes} />
+      <SudokuCell row={rows[1]} col={cols[1]} mistakes={mistakes} />
+      <SudokuCell row={rows[1]} col={cols[2]} mistakes={mistakes} />
+      <SudokuCell row={rows[2]} col={cols[0]} mistakes={mistakes} />
+      <SudokuCell row={rows[2]} col={cols[1]} mistakes={mistakes} />
+      <SudokuCell row={rows[2]} col={cols[2]} mistakes={mistakes} />
     </div>
   )
 }
 
 function SudokuCell(props: SudokuCellProps) {
+  console.log('SudokuCell')
   const context = useContext(SudokuContext)!
-  const { sudoku, hint, mistakes, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations } = context
-  const { row, col } = props
+  const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations, displayedErrors, setDisplayedErrors } = context
+  const { row, col, mistakes } = props
   const [isError, setIsError] = useState(false)
   const cell = sudoku.getCells()[row][col]
   const errorStRef = useRef<NodeJS.Timeout>()
 
-  useEffect(() => {
-    if (!mistakes.map(([r, c, _v]) => `${r}${c}`).includes(`${row}${col}`)) {
-      return
-    }
+  if (row === 8 && col === 8) {
+    console.log('HERE')
+    console.log(mistakes)
+    console.log('HEREEND')
+  }
 
-    setIsError(true)
-    errorStRef.current = setTimeout(() => { setIsError(false) }, 3000)
-    decreaseLife(mistakes) // TODO: Maybe this should be done at a higher level, take a way a life if there's a mistake
-  }, [mistakes, row, col, decreaseLife])
+  useEffect(() => {
+    const nonDisplayedMistakes = [...mistakes].filter(m => !displayedErrors.get(m[0]))
+    const rcMistake = [ ...nonDisplayedMistakes ].find(([_now, [r, c, _cellValue]]) => `${r}${c}` === `${row}${col}`)
+    if (rcMistake) {
+      setIsError(true)
+      errorStRef.current = setTimeout(() => { setIsError(false) }, 3000)
+      setDisplayedErrors((e: Map<number, [number, number, CellValue]>) => { return e.set(rcMistake[0], rcMistake[1]) })
+      console.log('DISPLAY')
+      decreaseLife(mistakes) // TODO: Maybe this should be done at a higher level, take away a life if there's a mistake
+    }
+  }, undefined)
 
   const backgroundColor = determineBackgroundColor()
 
@@ -196,6 +216,9 @@ function SudokuCell(props: SudokuCellProps) {
       return
     }
     putValueInCell(value)
+    // This is a hack. I don't know why this works but selecting the cell causes a re-render.
+    // Without selecting the cell, the re-render doesn't happen and the mistakes are shown after the next click
+    selectCell([row, col]) 
   }
 
   function determineBackgroundColor(): string {
