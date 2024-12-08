@@ -45,7 +45,6 @@ Sudoku9x9GridProps & {
 } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
-  console.log('Sudoku9x9Grid')
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
   const [numberOfLives, setNumberOfLives] = useState<number | null>(STARTNG_LIVES)
@@ -112,7 +111,6 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 }
 
 function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
-  console.log('Sudoku3x3Grid')
   const { rows, cols, mistakes } = props
   return (
     <div className='grid border border-black grid-cols-3'>
@@ -130,19 +128,12 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 }
 
 function SudokuCell(props: SudokuCellProps) {
-  console.log('SudokuCell')
   const context = useContext(SudokuContext)!
   const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations, displayedErrors, setDisplayedErrors } = context
   const { row, col, mistakes } = props
   const [isError, setIsError] = useState(false)
   const cell = sudoku.getCells()[row][col]
   const errorStRef = useRef<NodeJS.Timeout>()
-
-  if (row === 8 && col === 8) {
-    console.log('HERE')
-    console.log(mistakes)
-    console.log('HEREEND')
-  }
 
   useEffect(() => {
     const nonDisplayedMistakes = [...mistakes].filter(m => !displayedErrors.get(m[0]))
@@ -151,7 +142,6 @@ function SudokuCell(props: SudokuCellProps) {
       setIsError(true)
       errorStRef.current = setTimeout(() => { setIsError(false) }, 3000)
       setDisplayedErrors((e: Map<number, [number, number, CellValue]>) => { return e.set(rcMistake[0], rcMistake[1]) })
-      console.log('DISPLAY')
       decreaseLife(mistakes) // TODO: Maybe this should be done at a higher level, take away a life if there's a mistake
     }
   }, undefined)

@@ -32,7 +32,7 @@ export class Sudoku {
 
   updateCell(value: CellValue, row: number, col: number): Sudoku {
     if (this.solved[row][col].value !== value) {
-      throw new Error('Incorrect value')
+      throw new MistakeError([row, col, value], 'Incorrect value')
     }
 
     if (this.cells[row][col].value) {

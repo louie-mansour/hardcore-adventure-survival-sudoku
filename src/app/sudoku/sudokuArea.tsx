@@ -61,8 +61,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
     setItems(initItems())
   }, [])
 
-  console.log(`mistakes length: ${mistakes.size}`)
-
   return (
     <div className='flex flex-col justify-center items-center gap-3'>
       <Sudoku9x9Grid
@@ -111,26 +109,17 @@ export default function SudokuArea(props: SudokuAreaProps) {
         didUpdate = true
         return updatedSudoku
       } catch (error: unknown) {
-        console.log('####')
-        console.log(mistakes)
-        setMistakes(m => m.set(now, [row, col, value]))
-        console.log('in catch')
+        if (error instanceof MistakeError) {
+          setMistakes(m => m.set(now, [row, col, value]))
+        }
+        console.log(error)
         return s
       }
     })
 
-    // console.log('out catch')
-
-
-    // if (isMistake) {
-    //   console.log('isMistake')
-    //   setMistakes(m => m.set(now, [row, col, value]))
-    // }
-
     if (!didUpdate) {
       return
     }
-    console.log('updated')
 
     const itemLocation = itemLocations.find(el => el[1] === row && el[2] === col && el[3])
     if (value && itemLocation) {
