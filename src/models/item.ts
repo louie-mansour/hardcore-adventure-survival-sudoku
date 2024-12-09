@@ -41,6 +41,8 @@ export class Item {
         return new Item(ItemName.Hand, ItemEmoji.Hand, 'Rotate the board back in place', 'Infinite')
       case ItemName.GameDie:
         return new Item(ItemName.GameDie, ItemEmoji.GameDie, 'Reveal the value of between 1-6 random squares', 1)
+      case ItemName.Placeholder:
+        return new Item(ItemName.Placeholder, ItemEmoji.Placeholder, 'Not a real item. This is a placeholder', 1)
     }
   }
 
@@ -103,7 +105,8 @@ export enum ItemName {
   FireEngine = 'FireEngine',
   Cheese = 'Cheese',
   Hand = 'Hand',
-  GameDie = 'GameDie'
+  GameDie = 'GameDie',
+  Placeholder = 'Placeholder'
 }
 
 export enum ItemEmoji {
@@ -128,4 +131,5 @@ export enum ItemEmoji {
   Snowflake = '❄️',
   Cheese = '🧀',
   Hand = '🖐️',
+  Placeholder = '⬜',
 }

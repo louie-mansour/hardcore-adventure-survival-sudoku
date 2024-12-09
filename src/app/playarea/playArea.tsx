@@ -5,7 +5,6 @@ import { getSudoku } from "@/services/sudokuService";
 import { useEffect, useState } from "react";
 import SudokuArea from "../sudoku/sudokuArea";
 import DifficultySelector from "./difficultySelector";
-// import OptionsSelector from "./optionsSelector";
 import Title from "./title";
 import { Item, ItemName } from '../../models/item'
 
@@ -97,7 +96,7 @@ export default function PlayArea() {
               initialSudoku={initialSudoku}
               itemLocations={itemLocations}
               removeItemLocation={removeItemLocation}
-              negativeEffectLocations={[]}
+              // negativeEffectLocations={[]}
               solveSudoku={solveSudoku}
               gameStart={gameStart}
               gameOver={gameOver}

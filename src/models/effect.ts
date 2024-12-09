@@ -23,6 +23,8 @@ export class NegativeEffect {
         return new NegativeEffect(NegativeEffectName.Dizzy, NegativeEffectEmoji.Dizzy, 'Slowly rotates the board')
       case NegativeEffectName.Dagger:
         return new NegativeEffect(NegativeEffectName.Dagger, NegativeEffectEmoji.Dagger, 'Takes away a heart')
+      case NegativeEffectName.PlaceHolder:
+        return new NegativeEffect(NegativeEffectName.PlaceHolder, NegativeEffectEmoji.Placeholder, 'Not a real effect, this is a placeholder')
     }
   }
 
@@ -61,6 +63,7 @@ export enum NegativeEffectName {
   Rat = 'Rat',
   Dizzy = 'Dizzy',
   Dagger = 'Dagger',
+  PlaceHolder = 'PlaceHolder',
 }
 
 
@@ -78,4 +81,5 @@ export enum NegativeEffectEmoji {
   Rat = '🐀',
   Dizzy = '😵‍💫',
   Dagger = '🗡️',
+  Placeholder = '⬜',
 }

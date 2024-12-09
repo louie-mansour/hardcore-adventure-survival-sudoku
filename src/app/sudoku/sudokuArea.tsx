@@ -2,7 +2,7 @@
 
 import { MODE } from "@/consts";
 import { MistakeError } from "@/errors/mistake";
-import { NegativeEffect, NegativeEffectEmoji } from "@/models/effect";
+import { NegativeEffect, NegativeEffectEmoji, NegativeEffectName } from "@/models/effect";
 import { Item, ItemEmoji, ItemName } from "@/models/item";
 import { CellValue, Sudoku } from "@/models/sudoku";
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ interface SudokuAreaProps {
   initialSudoku: Sudoku
   itemLocations: [Item, number, number, boolean][],
   removeItemLocation: (r: number, c: number) => boolean
-  negativeEffectLocations: [NegativeEffect, number, number][],
+  // negativeEffectLocations: [NegativeEffect, number, number][],
   solveSudoku: () => void
   gameStart: () => void
   gameOver: () => void
@@ -30,9 +30,10 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [items, setItems] = useState(initItems())
   const [placedItemLocations, setPlacedItemLocations] = useState<[ItemEmoji, number, number][]>([])
-  const [effects, setEffects] = useState<NegativeEffectEmoji[]>(initEffects())
+  const [effects, setEffects] = useState<NegativeEffect[]>(initEffects())
   const [placedEffectLocations, setPlacedEffectLocations] = useState<[NegativeEffectEmoji, number, number][]>([])
-  const [enabledItem, setEnabledItem] = useState<Item | undefined>()
+  // const [enabledItem, setEnabledItem] = useState<Item | undefined>()
+  const [isNote, setIsNote] = useState<boolean>(false)
   const [numberOfShields, setNumberOfShields] = useState(0)
   let fireQueue: [number, number][] = []
 
@@ -53,7 +54,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
       setMistakes(new Map())
       setHint(null)
       setItems(initItems())
-      setEnabledItem(undefined)
+      // setEnabledItem(undefined)
     }
   }, [initialSudoku])
 
@@ -81,7 +82,9 @@ export default function SudokuArea(props: SudokuAreaProps) {
         putValueInCell={putValueInCell}
         items={items}
         utilizeItem={utilizeItem}
-        enabledItem={enabledItem}
+        setIsNote={setIsNote}
+        isNote={isNote}
+        // enabledItem={enabledItem}
         effects={effects}
         enableEffect={enableEffect}
       />
@@ -144,7 +147,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   function putValueInCell(value: CellValue) {
-    if (enabledItem?.name === ItemName.Note) {
+    if (isNote) {
       toggleNoteValue(selectedCell[0], selectedCell[1], value)
     } else {
       updateSudoku(value, selectedCell[0], selectedCell[1])
@@ -168,14 +171,14 @@ export default function SudokuArea(props: SudokuAreaProps) {
     setNotes([...notes])
   }
 
-  function chooseEnabledItem(item: Item) {
-    setEnabledItem(i => {
-      if (item.name === i?.name) {
-        return undefined
-      }
-      return item
-    })
-  }
+  // function chooseEnabledItem(item: Item) {
+  //   setEnabledItem(i => {
+  //     if (item.name === i?.name) {
+  //       return undefined
+  //     }
+  //     return item
+  //   })
+  // }
 
   function utilizeItem(item: Item) {
     const row = selectedCell[0]
@@ -184,7 +187,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
       return
     }
     switch (item.name) {
-      case ItemName.Note: return chooseEnabledItem(item)
+      // case ItemName.Note: return chooseEnabledItem(item)
       case ItemName.CrystalBall:
         return getHint()
       case ItemName.MagicWand:
@@ -222,14 +225,24 @@ export default function SudokuArea(props: SudokuAreaProps) {
   function initItems(): Item[] {
     if (MODE === 'DEVELOPER') {
       return [
+        // Appear in item bar in game
         Item.factory(ItemName.FireExtinguisher),
-        Item.factory(ItemName.Shield),
         Item.factory(ItemName.MagicWand),
         Item.factory(ItemName.CrystalBall),
         Item.factory(ItemName.GameDie),
+        Item.factory(ItemName.Plant),
+
+        // Don't appear in item bar
+        Item.factory(ItemName.Shield),
       ]
     }
-    return [Item.factory(ItemName.Note)]
+    return [
+      Item.factory(ItemName.Placeholder),
+      Item.factory(ItemName.Placeholder),
+      Item.factory(ItemName.Placeholder),
+      Item.factory(ItemName.Placeholder),
+      Item.factory(ItemName.Placeholder),
+    ]
   }
 
   function increaseNumberOfShields() {
@@ -238,11 +251,24 @@ export default function SudokuArea(props: SudokuAreaProps) {
     })
   }
 
-  function initEffects(): NegativeEffectEmoji[] {
+  function initEffects(): NegativeEffect[] {
     if (MODE === 'DEVELOPER') {
+      return [
+        NegativeEffect.factory(NegativeEffectName.Fire),
+        NegativeEffect.factory(NegativeEffectName.Turtle),
+        NegativeEffect.factory(NegativeEffectName.Volcano),
+        NegativeEffect.factory(NegativeEffectName.Darkness),
+        NegativeEffect.factory(NegativeEffectName.Mirror),
+        NegativeEffect.factory(NegativeEffectName.Rat),
+        NegativeEffect.factory(NegativeEffectName.Dizzy),
+        NegativeEffect.factory(NegativeEffectName.Dagger),
+      ]
       return ['🔥', '🐢', '🌋', '🌑', '🪞', '🐀', '😵‍💫', '🗡️'] as NegativeEffectEmoji[]
     }
-    return []
+    return [
+      NegativeEffect.factory(NegativeEffectName.PlaceHolder),
+      NegativeEffect.factory(NegativeEffectName.PlaceHolder),
+    ]
   }
 
   async function enableEffect(value: NegativeEffectEmoji) {
