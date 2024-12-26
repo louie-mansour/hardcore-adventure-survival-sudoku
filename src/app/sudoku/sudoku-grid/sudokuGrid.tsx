@@ -10,6 +10,7 @@ interface Sudoku9x9GridProps {
   sudoku: Sudoku
   hint: [number, number, CellValue] | null
   mistakes: Map<number, [number, number, CellValue]>
+  inputs: Map<number, [number, number, CellValue]>
   emojiLocations: [Item | NegativeEffect, number, number, boolean][]
   gameover: () => void
   notes: Set<CellValue>[][]
@@ -23,12 +24,14 @@ interface Sudoku3x3GridProps {
   rows: [number, number, number]
   cols: [number, number, number]
   mistakes: Map<number, [number, number, CellValue]>
+  inputs: Map<number, [number, number, CellValue]>
 }
 
 interface SudokuCellProps {
   row: number
   col: number
   mistakes: Map<number, [number, number, CellValue]>
+  inputs: Map<number, [number, number, CellValue]>
 }
 
 const STARTNG_LIVES = 5
@@ -48,7 +51,7 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
   const [numberOfLives, setNumberOfLives] = useState<number | null>(STARTNG_LIVES)
-  const { emojiLocations, gameover, numberOfShields, mistakes } = props
+  const { emojiLocations, gameover, numberOfShields, mistakes, inputs } = props
   const maskStRef = useRef<NodeJS.Timeout>()
 
   // useEffect(() => {
@@ -83,15 +86,15 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
         }}
       >
         <SudokuContext.Provider value={{ ...props, decreaseLife, isMaskItems, displayedErrors, setDisplayedErrors }} >
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} mistakes={mistakes} />
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} mistakes={mistakes} />
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} mistakes={mistakes} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} mistakes={mistakes} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} mistakes={mistakes} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} mistakes={mistakes} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} mistakes={mistakes} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} mistakes={mistakes} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} mistakes={mistakes} />
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
+          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
+          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
+          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
         </SudokuContext.Provider>
       </div>
     </div>
@@ -111,18 +114,18 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 }
 
 function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
-  const { rows, cols, mistakes } = props
+  const { rows, cols, mistakes, inputs } = props
   return (
     <div className='grid border border-black grid-cols-3'>
-      <SudokuCell row={rows[0]} col={cols[0]} mistakes={mistakes} />
-      <SudokuCell row={rows[0]} col={cols[1]} mistakes={mistakes} />
-      <SudokuCell row={rows[0]} col={cols[2]} mistakes={mistakes} />
-      <SudokuCell row={rows[1]} col={cols[0]} mistakes={mistakes} />
-      <SudokuCell row={rows[1]} col={cols[1]} mistakes={mistakes} />
-      <SudokuCell row={rows[1]} col={cols[2]} mistakes={mistakes} />
-      <SudokuCell row={rows[2]} col={cols[0]} mistakes={mistakes} />
-      <SudokuCell row={rows[2]} col={cols[1]} mistakes={mistakes} />
-      <SudokuCell row={rows[2]} col={cols[2]} mistakes={mistakes} />
+      <SudokuCell row={rows[0]} col={cols[0]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[0]} col={cols[1]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[0]} col={cols[2]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[1]} col={cols[0]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[1]} col={cols[1]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[1]} col={cols[2]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[2]} col={cols[0]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[2]} col={cols[1]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[2]} col={cols[2]} mistakes={mistakes} inputs={inputs} />
     </div>
   )
 }
@@ -130,7 +133,7 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 function SudokuCell(props: SudokuCellProps) {
   const context = useContext(SudokuContext)!
   const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations, displayedErrors, setDisplayedErrors } = context
-  const { row, col, mistakes } = props
+  const { row, col, mistakes, inputs } = props
   const [isError, setIsError] = useState(false)
   const cell = sudoku.getCells()[row][col]
   const errorStRef = useRef<NodeJS.Timeout>()
