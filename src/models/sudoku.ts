@@ -35,9 +35,11 @@ export class Sudoku {
       throw new MistakeError([row, col, value], 'Incorrect value')
     }
 
-    if (this.cells[row][col].value) {
-      throw new Error('Already updated')
-    }
+    // if (this.cells[row][col].value) {
+    //   console.log(value)
+    //   console.log(this.cells[row][col].value)
+    //   throw new Error('Already updated')
+    // }
 
     const cell = this.cells[row][col]
     this.cells[row][col] = cell.updateValue(value)
