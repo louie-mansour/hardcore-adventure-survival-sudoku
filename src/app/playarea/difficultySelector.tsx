@@ -33,7 +33,7 @@ export default function DifficultySelector({
 
   function displayDifficulty(difficulty: GameDifficulty) {
     switch(difficulty) {
-      case GameDifficulty.Easy: return 'New Game'
+      case GameDifficulty.Easy: return 'Start New Game'
       // case GameDifficulty.Medium: return 'Medium'
       // case GameDifficulty.Hard: return 'Hard'
     }
