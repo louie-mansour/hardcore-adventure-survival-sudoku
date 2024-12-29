@@ -32,17 +32,11 @@ export class Sudoku {
 
   updateCell(value: CellValue, row: number, col: number): Sudoku {
     if (this.cells[row][col].value) {
-      return this
+      return new Sudoku([...this.cells], [...this.solved])
     }
     if (this.solved[row][col].value !== value) {
       throw new MistakeError([row, col, value], 'Incorrect value')
     }
-
-    // if (this.cells[row][col].value) {
-    //   console.log(value)
-    //   console.log(this.cells[row][col].value)
-    //   throw new Error('Already updated')
-    // }
 
     const cell = this.cells[row][col]
     this.cells[row][col] = cell.updateValue(value)

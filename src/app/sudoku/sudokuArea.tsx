@@ -108,20 +108,19 @@ export default function SudokuArea(props: SudokuAreaProps) {
     const now = Date.now()
     setSudoku(s => {
       try {
-        console.log('update cell')
         const updatedSudoku = s.updateCell(value, row, col)
         didUpdate = true
-        console.log('updated')
         if (hint && hint[0] === row && hint[1] === col) {
           setHint(null)
         }
         setInputs(i => i.set(now, [row, col, value]))
+        console.log('success')
         return updatedSudoku
       } catch (error: unknown) {
         if (error instanceof MistakeError) {
           setMistakes(m => m.set(now, [row, col, value]))
         }
-        console.log(error)
+        console.log('error')
         return s
       }
     })
