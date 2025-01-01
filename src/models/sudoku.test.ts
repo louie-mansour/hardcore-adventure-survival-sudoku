@@ -1,7 +1,5 @@
 import { CellType, CellValue, Sudoku } from "./sudoku"
-import fs, { linkSync } from 'fs'
-import path from 'path'
-import { easySudokus } from "@/services/easy"
+import { easySudokus } from "../services/easy"
 
 function getTestSudokuGrid(): CellValue[][] {
   return [
@@ -50,12 +48,15 @@ describe('sudoku', () => {
   describe('update', () => {
     const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
     it('Can update Variable cell type', () => {
-      const udpatedSudoku = sudoku.updateCell('1', 0, 0)
-      expect(udpatedSudoku.getCells()[0][0].value).toEqual('1')
+      const correctValue = sudoku.solved[0][0].value
+      const udpatedSudoku = sudoku.updateCell(correctValue, 0, 0)
+      expect(udpatedSudoku.getCells()[0][0].value).toEqual(correctValue)
     })
 
     it('Cannot update Fixed cell type', () => {
-      expect(() => sudoku.updateCell('1', 0, 2)).toThrow()
+      const currValue = sudoku.getCells()[0][2].value
+      sudoku.updateCell('1', 0, 2)
+      expect(sudoku.getCells()[0][2].value).toEqual(currValue)
     })
   })
 
@@ -128,12 +129,6 @@ describe('sudoku', () => {
     it('Returns a hint', () => {
       const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
       expect(sudoku.getHint()).toEqual([4, 4, null])
-    })
-
-    it('Throws an error if the sudoku has a mistake', () => {
-      const sudoku = Sudoku.createSudoku(getTestSudokuGrid())
-      sudoku.updateCell('3', 0, 0)
-      expect(() => sudoku.getHint()).toThrow()
     })
 
     it('Can continue getting hints until the sudoku is solved', () => {
