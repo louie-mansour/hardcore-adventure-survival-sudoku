@@ -86,8 +86,8 @@ export default function PlayArea() {
   }, [newGame, setGame, game])
 
   return (
-    <div className="w-full h-full	flex flex-row justify-center bg-yellow-50 h-svh">
-      <div className="bg-white w-full max-w-2xl">
+    <div className="w-full h-full	flex flex-row justify-center bg-page-outside-light h-svh">
+      <div className="bg-page-inside-light w-full max-w-2xl">
         <div className='h-screen flex flex-col justify-evenly my-0 mx-5 h-svh gap-2 pt-8'>
           <Title />
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />

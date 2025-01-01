@@ -54,9 +54,7 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const { emojiLocations, gameover, numberOfShields, mistakes, inputs } = props
   const maskStRef = useRef<NodeJS.Timeout>()
 
-  // useEffect(() => {
-    if (numberOfLives === 0) gameover()
-  // }, [numberOfLives, gameover])
+  if (numberOfLives === 0) gameover()
 
   useEffect(() => {
     if (maskStRef.current) {
@@ -102,9 +100,6 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 
   function decreaseLife(mistakes: Map<number, [number, number, CellValue]>) {
     setNumberOfLives(l => {
-      // if (l === null) {
-      //   return null
-      // }
       if (l === 0) {
         return 0
       }
@@ -116,7 +111,7 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
   const { rows, cols, mistakes, inputs } = props
   return (
-    <div className='grid border border-black grid-cols-3'>
+    <div className='grid border border-sudoku-lines-light grid-cols-3'>
       <SudokuCell row={rows[0]} col={cols[0]} mistakes={mistakes} inputs={inputs} />
       <SudokuCell row={rows[0]} col={cols[1]} mistakes={mistakes} inputs={inputs} />
       <SudokuCell row={rows[0]} col={cols[2]} mistakes={mistakes} inputs={inputs} />
@@ -133,17 +128,17 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 function SudokuCell(props: SudokuCellProps) {
   const context = useContext(SudokuContext)!
   const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations, displayedErrors, setDisplayedErrors } = context
-  const { row, col, mistakes, inputs } = props
-  const [isError, setIsError] = useState(false)
+  const { row, col, mistakes } = props
+  const [isMistake, setIsMistake] = useState(false)
   const cell = sudoku.getCells()[row][col]
-  const errorStRef = useRef<NodeJS.Timeout>()
+  const mistakeSetTimeoutRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
     const nonDisplayedMistakes = [...mistakes].filter(m => !displayedErrors.get(m[0]))
     const rcMistake = [ ...nonDisplayedMistakes ].find(([_now, [r, c, _cellValue]]) => `${r}${c}` === `${row}${col}`)
     if (rcMistake) {
-      setIsError(true)
-      errorStRef.current = setTimeout(() => { setIsError(false) }, 3000)
+      setIsMistake(true)
+      mistakeSetTimeoutRef.current = setTimeout(() => { setIsMistake(false) }, 3000)
       setDisplayedErrors((e: Map<number, [number, number, CellValue]>) => { return e.set(rcMistake[0], rcMistake[1]) })
       decreaseLife(mistakes) // TODO: Maybe this should be done at a higher level, take away a life if there's a mistake
     }
@@ -154,7 +149,7 @@ function SudokuCell(props: SudokuCellProps) {
   const emoji = emojiLocations.find(el => el[1] === row && el[2] === col)?.[0]
   const placedItem = placedItemLocations.find(el => el[1] === row && el[2] === col)?.[0]
   const placedEffect = placedEffectLocations.find(el => el[1] === row && el[2] === col)?.[0]
-  const textTransparency = isTransparentText(cell.value, emoji, isMaskItems, placedItem) ? 'text-transparent' : 'text-black'
+  const textTransparency = isTransparentText(cell.value, emoji, isMaskItems, placedItem) ? 'text-transparent' : 'text-sudoku-text-light'
 
   const notesInCell = notes[row][col]
 
@@ -162,7 +157,7 @@ function SudokuCell(props: SudokuCellProps) {
     <div
       className="m-0 p-0 w-9 h-9">
       { (cell.value || (emoji && !isMaskItems)) || placedItem || placedEffect?
-        <div className={`absolute box-border border border-black flex items-center justify-center ${backgroundColor} ${textTransparency}`}>
+        <div className={`absolute box-border border border-sudoku-lines-light flex items-center justify-center ${backgroundColor} ${textTransparency}`}>
           <input
             className={`w-9 h-9 border-0 outline-none text-center text-lg cursor-pointer caret-transparent ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
             maxLength={1}
@@ -177,7 +172,7 @@ function SudokuCell(props: SudokuCellProps) {
           </input>
         </div>
       :
-      <div className='grid grid-cols-3 absolute box-border border border-black cursor-pointer items-center justify-center'
+      <div className='grid grid-cols-3 absolute box-border border border-sudoku-lines-light cursor-pointer items-center justify-center'
         tabIndex={-1}
         onClick={() => selectCell([row, col])}
         onKeyDown={onKeyDownEvent}
@@ -215,19 +210,19 @@ function SudokuCell(props: SudokuCellProps) {
   }
 
   function determineBackgroundColor(): string {
-    if (isError) {
-      return 'bg-red-500'
+    if (isMistake) {
+      return 'bg-sudoku-mistake-light'
     }
     if (hint && hint[0] === row && hint[1] === col) {
-      return 'bg-green-500'
+      return 'bg-sudoku-hint-light'
     }
     if (selectedCell && selectedCell[0] === row && selectedCell[1] === col) {
-      return 'bg-blue-500'
+      return 'bg-sudoku-selected-light'
     }
     if (selectedCell && (selectedCell[0] === row || selectedCell[1] === col || (get3x3Range(selectedCell[0]).includes(row) && get3x3Range(selectedCell[1]).includes(col))))  {
-      return 'bg-blue-100'
+      return 'bg-sudoku-highlight-light'
     }
-    return 'bg-transparent'
+    return 'bg-sudoku-cell-light'
   }
 }
 
@@ -259,7 +254,7 @@ interface NoteCellProps {
 function NoteCell(props: NoteCellProps) {
   const { note, backgroundColor } = props
   return (
-    <div className={`w-3 h-3 items-center text-center align-middle text-xs pointer-events-none ${backgroundColor}`} > 
+    <div className={`w-3 h-3 items-center text-center align-middle text-xs text-sudoku-draft-light pointer-events-none ${backgroundColor}`} > 
       { note }
     </div>
   )

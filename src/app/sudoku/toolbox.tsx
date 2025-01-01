@@ -14,6 +14,8 @@ interface ToolboxProps {
 
 export default function Toolbox(props: ToolboxProps) {
   const { putValueInCell, items, utilizeItem, isNote, setIsNote, effects, enableEffect } = props
+  const writeBackgroundColor = isNote ? 'bg-draft-unselected-light' : 'bg-draft-selected-light'
+  const draftBackgroundColor = isNote ? 'bg-draft-selected-light' : 'bg-draft-unselected-light'
   return (
     <>
       <div className="flex flex-row justify-evenly gap-3">
@@ -23,24 +25,24 @@ export default function Toolbox(props: ToolboxProps) {
             key={el}
             onClick={ () => putValueInCell(el as CellValue) }
           >
-            <p className="text-5xl">
+            <p className="text-5xl text-numbers-text-light">
               {el}
             </p>
           </div>
         )}
       </div>
       <div>
-        <button className="text-black inline-flex">
-          <input checked={!isNote} onClick={() => setIsNote(false)} className="hidden" type="radio" id="Login21" name="row1" />
-          <label className="bg-white px-5 py-2.5 border border-blue-300 rounded-l-lg" htmlFor="Login21">Write ✒️</label>
+        <button className="text-draft-text-light inline-flex">
+          <input checked={!isNote} onClick={() => setIsNote(false)} className="hidden" type="radio" id="write" />
+          <label className={`${writeBackgroundColor} px-5 py-2.5 border border-draft-selected-light text-draft-text-light rounded-l-lg`} htmlFor="write">Write ✒️</label>
         </button>
-        <button className="text-black inline-flex">
-          <input checked={isNote} onClick={() => setIsNote(true)} className="hidden" type="radio" id="Login22" name="row1" />
-          <label className="bg-white px-5 py-2.5 px-5 py-2.5 border border-blue-300 rounded-r-lg" htmlFor="Login22">Draft ✏️</label>
+        <button className="text-draft-text-light inline-flex">
+          <input checked={isNote} onClick={() => setIsNote(true)} className="hidden" type="radio" id="draft" />
+          <label className={`${draftBackgroundColor} px-5 py-2.5 border border-draft-selected-light text-draft-text-light rounded-r-lg`} htmlFor="draft">Draft ✏️</label>
         </button>
       </div>
       <div className='flex flex-col self-start'>
-        <p className="text-xl self-start">
+        <p className="text-xl self-start text-toolbox-text-light">
           Items:
         </p>
         <div className='grid grid-cols-5 gap-4'>
@@ -54,7 +56,7 @@ export default function Toolbox(props: ToolboxProps) {
               >
                 {el.emoji}
               </p>
-              <p className="text-lg">
+              <p className="text-lg text-toolbox-text-light">
                 ×{el.numberOfUses === 'Infinite' ? '∞' : el.numberOfUses}
               </p>
             </div>
@@ -62,7 +64,7 @@ export default function Toolbox(props: ToolboxProps) {
         })}
         </div>
       </div>
-        <p className="text-xl self-start">
+        <p className="text-xl self-start text-toolbox-text-light">
             Negative Effects:
         </p>
         <div className="flex flex-row self-start">   

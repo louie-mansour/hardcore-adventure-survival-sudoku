@@ -13,7 +13,6 @@ export default function DifficultySelector({
 
   return (
     <div className="flex flex-row justify-center gap-x-9">
-      {/* <p>Difficulty:</p> */}
       {
         Object.values(GameDifficulty).map((difficultyValue: GameDifficulty) => {
           return (
@@ -22,7 +21,7 @@ export default function DifficultySelector({
               onClick={() => requestNewGame(difficultyValue) }
             >
               <a
-                className={`font-medium cursor-pointer ${difficultyValue === difficulty ? 'text-black' : 'text-gray-500'}`}
+                className="font-medium cursor-pointer text-page-text-light"
               >{displayDifficulty(difficultyValue)}</a>
             </p>
           )
