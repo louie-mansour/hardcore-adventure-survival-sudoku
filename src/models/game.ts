@@ -32,14 +32,20 @@ export class Game {
   }
 
   fail(): Game {
-    if (this.state != GameState.InProgress) {
+    if (this.state === GameState.Fail) {
+      return this
+    }
+    if (this.state !== GameState.InProgress) {
       throw new Error('Cannot fail a game unless it is in the in progress state. ' + this.state)
     }
     return new Game(this.difficulty, GameState.Fail)
   }
 
   complete(): Game {
-    if (this.state != GameState.InProgress) {
+    if (this.state === GameState.Success) {
+      return this
+    }
+    if (this.state !== GameState.InProgress) {
       throw new Error('Cannot complete a game unless it is in the in progress state. ' + this.state)
     }
     return new Game(this.difficulty, GameState.Success)

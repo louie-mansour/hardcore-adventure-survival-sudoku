@@ -51,10 +51,15 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config } = props
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
-  const [numberOfLives, setNumberOfLives] = useState<number | null>(config.startingNumberOfLives)
+  const [numberOfLives, setNumberOfLives] = useState<number>(config.startingNumberOfLives)
   const maskStRef = useRef<NodeJS.Timeout>()
 
-  if (numberOfLives === 0) gameover()
+  useEffect(() => {
+    if (numberOfLives <= 0) {
+      gameover()
+    }
+  }, [numberOfLives])
+
 
   useEffect(() => {
     if (maskStRef.current) {
@@ -67,7 +72,6 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 
   return (
     <div className='w-fit'>
-    { numberOfLives !== null &&
       <div>
         {
           numberOfLives === 0 ? '☠️' : '❤️'.repeat(numberOfLives)
@@ -76,26 +80,25 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
           '🛡️'.repeat(numberOfShields || 0)
         }
       </div>
-    }
-      <div className='grid'
-        style={{
-          gridTemplateRows: '7.1rem 7.1rem 7.1rem', // TODO: The sizes aren't correct - need to revisit this to make it better
-          gridTemplateColumns: '7.1rem 7.1rem 7.1rem',
-        }}
-      >
-        <SudokuContext.Provider value={{ ...props, decreaseLife, isMaskItems, displayedErrors, setDisplayedErrors }} >
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
-          <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
-          <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
-          <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
-        </SudokuContext.Provider>
-      </div>
+    <div className='grid'
+      style={{
+        gridTemplateRows: '7.1rem 7.1rem 7.1rem', // TODO: The sizes aren't correct - need to revisit this to make it better
+        gridTemplateColumns: '7.1rem 7.1rem 7.1rem',
+      }}
+    >
+      <SudokuContext.Provider value={{ ...props, decreaseLife, isMaskItems, displayedErrors, setDisplayedErrors }} >
+        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
+      </SudokuContext.Provider>
     </div>
+  </div>
   )
 
   function decreaseLife(mistakes: Map<number, [number, number, CellValue]>) {

@@ -43,7 +43,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
       // gameComplete()
       return
     }
-    // gameStart() // TODO: This constantly puts the game into inProgress mode. There's probably a better way of doing thiss
+    gameStart() // TODO: This constantly puts the game into inProgress mode. There's probably a better way of doing thiss
   }, [sudoku, gameStart, gameComplete])
 
   useEffect(() => {

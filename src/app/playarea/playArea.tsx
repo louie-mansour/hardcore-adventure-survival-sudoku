@@ -1,7 +1,7 @@
 import { EndGameError } from "@/models/errors/endGame";
-import { Game, GameDifficulty } from "@/models/game";
+import { Game, GameDifficulty, GameState } from "@/models/game";
 import { Sudoku } from "@/models/sudoku";
-import { getSudoku } from "@/services/sudokuService";
+import { findSudoku } from "@/services/sudokuService";
 import { useEffect, useState } from "react";
 import SudokuArea from "../sudoku/sudokuArea";
 import DifficultySelector from "./difficultySelector";
@@ -24,7 +24,7 @@ export default function PlayArea(props: PlayAreaProps) {
   const [game, setGame] = useState<Game>(() => new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
   // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
-  const [sudoku, setSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
+  const [sudoku, setSudoku] = useState<Sudoku>(() => findSudoku({ difficulty: game.difficulty, index: 4 }))
   const [itemLocations, setItemLocations] = useState<[Item, number, number, boolean][]>([])
 
   // TODO: Not sure why useEffect is needed here
@@ -39,7 +39,7 @@ export default function PlayArea(props: PlayAreaProps) {
     setGame(g => {
       try {
         const nGame = g.newGame(newGame.difficulty)
-        const newlySelectedSudoku = getSudoku({ difficulty: nGame.difficulty })
+        const newlySelectedSudoku = findSudoku({ difficulty: nGame.difficulty })
         setSudoku(newlySelectedSudoku)
         return nGame
       } catch (e: unknown) {
@@ -49,12 +49,16 @@ export default function PlayArea(props: PlayAreaProps) {
         if (!confirm(e.message)) {
           return g
         }
-        setSudoku(getSudoku({ difficulty: e.game.difficulty }))
+        setSudoku(findSudoku({ difficulty: e.game.difficulty }))
         return e.game
       } finally {
         setNewGame(null)
       }
     })
+  }
+
+  if (game.state === GameState.Fail) {
+    return <div>Game Over</div>
   }
 
   return (

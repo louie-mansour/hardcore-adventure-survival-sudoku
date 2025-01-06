@@ -24,7 +24,7 @@ interface Args {
   difficulty: GameDifficulty
 }
 
-export function getSudoku({ difficulty, index }: Args): Sudoku {
+export function findSudoku({ difficulty, index }: Args): Sudoku {
   const sudokuList = chooseSudokuList(difficulty)
   const sudokuIndex = index ?? Math.round(Math.random() * sudokuList.length - 2)
   const encodedSudoku = easySudokuList[sudokuIndex]
