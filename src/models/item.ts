@@ -1,3 +1,5 @@
+import { CellType, Sudoku } from "./sudoku"
+
 export class Item {
   type: 'Item'
   name: ItemName
@@ -132,4 +134,39 @@ export enum ItemEmoji {
   Cheese = '🧀',
   Hand = '🖐️',
   Placeholder = '⬜',
+}
+
+export function determineItemLocations(sudoku: Sudoku): [Item, number, number, boolean][] {
+  if (!sudoku) return []
+  const availableLocations: [number, number][] = []
+  const cells = sudoku.getCells()
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (cells[r][c].cellType === CellType.Variable) {
+        availableLocations.push([r, c])
+      }
+    }
+  }
+
+  const itemsToDistribute = [
+    Item.factory(ItemName.Shield),
+    Item.factory(ItemName.Shield),
+    Item.factory(ItemName.MagicWand),
+    Item.factory(ItemName.MagicWand),
+    Item.factory(ItemName.CrystalBall),
+    Item.factory(ItemName.CrystalBall),
+    Item.factory(ItemName.Plant),
+    Item.factory(ItemName.Plant),
+    Item.factory(ItemName.GameDie),
+    Item.factory(ItemName.GameDie),
+  ]
+
+  const itemLocations: [Item, number, number, boolean][] = [] // Not sure what the boolean at the end is for
+  for (let i = 0; i < itemsToDistribute.length; i++) {
+    const locationIndex = Math.floor(Math.random() * availableLocations.length)
+    const location = availableLocations[locationIndex]
+    itemLocations.push([itemsToDistribute[i], location[0], location[1], true])
+    availableLocations.splice(locationIndex, 1)
+  }
+  return itemLocations
 }

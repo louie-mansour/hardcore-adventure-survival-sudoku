@@ -1,4 +1,5 @@
 import { GameDifficulty } from "@/models/game"
+import { easyText } from "@/text"
 
 interface Props {
   requestNewGame: (_: GameDifficulty) => void
@@ -32,7 +33,7 @@ export default function DifficultySelector({
 
   function displayDifficulty(difficulty: GameDifficulty) {
     switch(difficulty) {
-      case GameDifficulty.Easy: return 'Start New Game'
+      case GameDifficulty.Easy: return easyText
       // case GameDifficulty.Medium: return 'Medium'
       // case GameDifficulty.Hard: return 'Hard'
     }

@@ -1,12 +1,13 @@
-import { EndGameError } from "@/errors/endGame";
+import { EndGameError } from "@/models/errors/endGame";
 import { Game, GameDifficulty } from "@/models/game";
-import { CellType, Sudoku } from "@/models/sudoku";
+import { Sudoku } from "@/models/sudoku";
 import { getSudoku } from "@/services/sudokuService";
 import { useEffect, useState } from "react";
 import SudokuArea from "../sudoku/sudokuArea";
 import DifficultySelector from "./difficultySelector";
 import Title from "./title";
-import { Item, ItemName } from '../../models/item'
+import { determineItemLocations, Item } from '../../models/item'
+import { SudokuConfig } from "@/config";
 
 export enum GameMode {
   Hardcore = 'Hardcore',
@@ -14,63 +15,32 @@ export enum GameMode {
   OngoingHints = 'OngoingHints',
 }
 
-export default function PlayArea() {
+interface PlayAreaProps {
+  config: SudokuConfig
+}
+
+export default function PlayArea(props: PlayAreaProps) {
+  const { config } = props
   const [game, setGame] = useState<Game>(() => new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
   // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
-  const [initialSudoku, setInitialSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
+  const [sudoku, setSudoku] = useState<Sudoku>(() => getSudoku({ difficulty: game.difficulty, index: 4 }))
   const [itemLocations, setItemLocations] = useState<[Item, number, number, boolean][]>([])
 
+  // TODO: Not sure why useEffect is needed here
+  // Louie - Need to implement the game going into 'In Progress' so we can ask the user if they want to confirm starting a new game
   useEffect(() => {
-    if (initialSudoku && itemLocations.length === 0) {
-      setItemLocations(determineItemLocations(initialSudoku))
+    if (sudoku && itemLocations.length === 0) {
+      setItemLocations(determineItemLocations(sudoku))
     }
+  }, [sudoku, itemLocations, setItemLocations])
 
-    function determineItemLocations(sudoku: Sudoku): [Item, number, number, boolean][] {
-      if (!sudoku) return []
-      const availableLocations: [number, number][] = []
-      const cells = sudoku.getCells()
-      for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
-          if (cells[r][c].cellType === CellType.Variable) {
-            availableLocations.push([r, c])
-          }
-        }
-      }
-  
-      const itemsToDistribute = [
-        Item.factory(ItemName.Shield),
-        Item.factory(ItemName.Shield),
-        Item.factory(ItemName.MagicWand),
-        Item.factory(ItemName.MagicWand),
-        Item.factory(ItemName.CrystalBall),
-        Item.factory(ItemName.CrystalBall),
-        Item.factory(ItemName.Plant),
-        Item.factory(ItemName.Plant),
-        Item.factory(ItemName.GameDie),
-        Item.factory(ItemName.GameDie),
-      ]
-  
-      const itemLocations: [Item, number, number, boolean][] = []
-      for (let i = 0; i < itemsToDistribute.length; i++) {
-        const locationIndex = Math.floor(Math.random() * availableLocations.length)
-        const location = availableLocations[locationIndex]
-        itemLocations.push([itemsToDistribute[i], location[0], location[1], true])
-        availableLocations.splice(locationIndex, 1)
-      }
-      return itemLocations
-    }
-  }, [initialSudoku, itemLocations, setItemLocations])
-
-  useEffect(() => {
-    if (!newGame) {
-      return
-    }
-
+  if (newGame) {
     setGame(g => {
       try {
         const nGame = g.newGame(newGame.difficulty)
-        setInitialSudoku(getSudoku({ difficulty: nGame.difficulty }))
+        const newlySelectedSudoku = getSudoku({ difficulty: nGame.difficulty })
+        setSudoku(newlySelectedSudoku)
         return nGame
       } catch (e: unknown) {
         if (!(e instanceof EndGameError)) {
@@ -79,11 +49,13 @@ export default function PlayArea() {
         if (!confirm(e.message)) {
           return g
         }
-        setInitialSudoku(getSudoku({ difficulty: e.game.difficulty }))
+        setSudoku(getSudoku({ difficulty: e.game.difficulty }))
         return e.game
+      } finally {
+        setNewGame(null)
       }
     })
-  }, [newGame, setGame, game])
+  }
 
   return (
     <div className="w-full h-full	flex flex-row justify-center bg-page-outside-light h-svh">
@@ -93,14 +65,14 @@ export default function PlayArea() {
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />
           <div className='flex flex-col justify-center items-center'>
             <SudokuArea
-              initialSudoku={initialSudoku}
+              initialSudoku={sudoku}
               itemLocations={itemLocations}
               removeItemLocation={removeItemLocation}
-              // negativeEffectLocations={[]}
               solveSudoku={solveSudoku}
               gameStart={gameStart}
               gameOver={gameOver}
               gameComplete={gameComplete}
+              config={config}
             />
           </div>
         </div>
@@ -139,7 +111,7 @@ export default function PlayArea() {
   }
 
   function solveSudoku() {
-    setInitialSudoku(s => s.getSolution())
+    setSudoku(s => s.getSolution())
     setGame(g => g.complete())
   }
 }

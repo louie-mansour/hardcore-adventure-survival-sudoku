@@ -1,12 +1,12 @@
 'use client'
 
-import { MODE } from "@/consts";
-import { MistakeError } from "@/errors/mistake";
+import { SudokuConfig } from "@/config";
+import { MistakeError } from "@/models/errors/mistake";
 import { NegativeEffect, NegativeEffectEmoji, NegativeEffectName } from "@/models/effect";
 import { Item, ItemEmoji, ItemName } from "@/models/item";
 import { CellType, CellValue, Sudoku } from "@/models/sudoku";
 import { useEffect, useState } from "react";
-import Sudoku9x9Grid from "../sudoku/sudoku-grid/sudokuGrid";
+import Sudoku9x9Grid from "./sudokuGrid";
 import Toolbox from "../sudoku/toolbox";
 
 interface SudokuAreaProps {
@@ -17,10 +17,11 @@ interface SudokuAreaProps {
   gameStart: () => void
   gameOver: () => void
   gameComplete: () => void
+  config: SudokuConfig
 }
 
 export default function SudokuArea(props: SudokuAreaProps) {
-  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete } = props
+  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, config } = props
 
   const [sudoku, setSudoku] = useState<Sudoku>(() => initialSudoku)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
@@ -54,7 +55,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
       setMistakes(new Map())
       setHint(null)
       setItems(initItems())
-      // setEnabledItem(undefined)
     }
   }, [initialSudoku])
 
@@ -78,6 +78,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         numberOfShields={numberOfShields}
         placedItemLocations={placedItemLocations}
         placedEffectLocations={placedEffectLocations}
+        config={config}
       />
       <Toolbox
         putValueInCell={putValueInCell}
@@ -114,13 +115,11 @@ export default function SudokuArea(props: SudokuAreaProps) {
           setHint(null)
         }
         setInputs(i => i.set(now, [row, col, value]))
-        console.log('success')
         return updatedSudoku
       } catch (error: unknown) {
         if (error instanceof MistakeError) {
           setMistakes(m => m.set(now, [row, col, value]))
         }
-        console.log('error')
         return s
       }
     })
@@ -234,7 +233,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   function initItems(): Item[] {
-    if (MODE === 'DEVELOPER') {
+    if (config.mode === 'DEVELOPER') {
       return [
         // Appear in item bar in game
         Item.factory(ItemName.FireExtinguisher),
@@ -263,7 +262,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   function initEffects(): NegativeEffect[] {
-    if (MODE === 'DEVELOPER') {
+    if (config.mode === 'DEVELOPER') {
       return [
         NegativeEffect.factory(NegativeEffectName.Fire),
         NegativeEffect.factory(NegativeEffectName.Turtle),

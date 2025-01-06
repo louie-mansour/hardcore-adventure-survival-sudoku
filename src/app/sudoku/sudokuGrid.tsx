@@ -1,7 +1,8 @@
+import { SudokuConfig } from "@/config";
 import { NegativeEffect, NegativeEffectEmoji } from "@/models/effect";
 import { Item, ItemEmoji } from "@/models/item";
 import { CellType, CellValue, Sudoku } from "@/models/sudoku"
-import { useEffect, useRef, useState, Dispatch } from "react"
+import { useEffect, useRef, useState } from "react"
 import { createContext, useContext } from 'react';
 
 interface Sudoku9x9GridProps {
@@ -18,6 +19,7 @@ interface Sudoku9x9GridProps {
   numberOfShields: number
   placedItemLocations: [ItemEmoji, number, number][]
   placedEffectLocations: [NegativeEffectEmoji, number, number][]
+  config: SudokuConfig
 }
 
 interface Sudoku3x3GridProps {
@@ -34,8 +36,6 @@ interface SudokuCellProps {
   inputs: Map<number, [number, number, CellValue]>
 }
 
-const STARTNG_LIVES = 5
-
 // TODO: Bit of a hack with the typing here
 // setNumberOfLives might be best passed in as a prop
 // isMaskItems might also be best passed in as a prop and determined via the Game model's state
@@ -48,10 +48,10 @@ Sudoku9x9GridProps & {
 } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
+  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config } = props
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
-  const [numberOfLives, setNumberOfLives] = useState<number | null>(STARTNG_LIVES)
-  const { emojiLocations, gameover, numberOfShields, mistakes, inputs } = props
+  const [numberOfLives, setNumberOfLives] = useState<number | null>(config.startingNumberOfLives)
   const maskStRef = useRef<NodeJS.Timeout>()
 
   if (numberOfLives === 0) gameover()
@@ -62,7 +62,7 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
     }
 
     setIsMaskItems(false)
-    maskStRef.current = setTimeout(() => { setIsMaskItems(true) }, 3000)
+    maskStRef.current = setTimeout(() => { setIsMaskItems(true) }, config.itemDisplayTimeoutMilliseconds)
   }, [emojiLocations])
 
   return (
@@ -103,7 +103,7 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
       if (l === 0) {
         return 0
       }
-      return STARTNG_LIVES - mistakes.size
+      return config.startingNumberOfLives - mistakes.size
     })
   }
 }
@@ -127,7 +127,7 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 
 function SudokuCell(props: SudokuCellProps) {
   const context = useContext(SudokuContext)!
-  const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations, displayedErrors, setDisplayedErrors } = context
+  const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations, displayedErrors, setDisplayedErrors, config } = context
   const { row, col, mistakes } = props
   const [isMistake, setIsMistake] = useState(false)
   const cell = sudoku.getCells()[row][col]
@@ -138,7 +138,7 @@ function SudokuCell(props: SudokuCellProps) {
     const rcMistake = [ ...nonDisplayedMistakes ].find(([_now, [r, c, _cellValue]]) => `${r}${c}` === `${row}${col}`)
     if (rcMistake) {
       setIsMistake(true)
-      mistakeSetTimeoutRef.current = setTimeout(() => { setIsMistake(false) }, 3000)
+      mistakeSetTimeoutRef.current = setTimeout(() => { setIsMistake(false) }, config.mistakeTimeoutMilliseconds)
       setDisplayedErrors((e: Map<number, [number, number, CellValue]>) => { return e.set(rcMistake[0], rcMistake[1]) })
       decreaseLife(mistakes) // TODO: Maybe this should be done at a higher level, take away a life if there's a mistake
     }
@@ -156,9 +156,10 @@ function SudokuCell(props: SudokuCellProps) {
   return (
     <div
       className="m-0 p-0 w-9 h-9">
-      { (cell.value || (emoji && !isMaskItems)) || placedItem || placedEffect?
+      { (cell.value || (emoji && !isMaskItems)) || placedItem || placedEffect ?
         <div className={`absolute box-border border border-sudoku-lines-light flex items-center justify-center ${backgroundColor} ${textTransparency}`}>
           <input
+            data-testid={`cell-${row}${col}`}
             className={`w-9 h-9 border-0 outline-none text-center text-lg cursor-pointer caret-transparent ${cell.cellType === CellType.Fixed ? 'font-bold' : ''} ${backgroundColor}`}
             maxLength={1}
             type='text'
@@ -172,20 +173,21 @@ function SudokuCell(props: SudokuCellProps) {
           </input>
         </div>
       :
-      <div className='grid grid-cols-3 absolute box-border border border-sudoku-lines-light cursor-pointer items-center justify-center'
+      <div className={`grid grid-cols-3 absolute box-border border border-sudoku-lines-light cursor-pointer items-center justify-center ${backgroundColor}`}
+        data-testid={`cell-${row}${col}`}
         tabIndex={-1}
         onClick={() => selectCell([row, col])}
         onKeyDown={onKeyDownEvent}
       >
-        <NoteCell note={notesInCell.has('1') ? '1' : null} backgroundColor={backgroundColor} />
-        <NoteCell note={notesInCell.has('2') ? '2' : null} backgroundColor={backgroundColor} />
-        <NoteCell note={notesInCell.has('3') ? '3' : null} backgroundColor={backgroundColor} />
-        <NoteCell note={notesInCell.has('4') ? '4' : null} backgroundColor={backgroundColor} />
-        <NoteCell note={notesInCell.has('5') ? '5' : null} backgroundColor={backgroundColor} />
-        <NoteCell note={notesInCell.has('6') ? '6' : null} backgroundColor={backgroundColor} />
-        <NoteCell note={notesInCell.has('7') ? '7' : null} backgroundColor={backgroundColor} />
-        <NoteCell note={notesInCell.has('8') ? '8' : null} backgroundColor={backgroundColor} />
-        <NoteCell note={notesInCell.has('9') ? '9' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={1} note={notesInCell.has('1') ? '1' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={2} note={notesInCell.has('2') ? '2' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={3} note={notesInCell.has('3') ? '3' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={4} note={notesInCell.has('4') ? '4' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={5} note={notesInCell.has('5') ? '5' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={6} note={notesInCell.has('6') ? '6' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={7} note={notesInCell.has('7') ? '7' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={8} note={notesInCell.has('8') ? '8' : null} backgroundColor={backgroundColor} />
+        <NoteCell row={row} col={col} noteNumber={9} note={notesInCell.has('9') ? '9' : null} backgroundColor={backgroundColor} />
       </div>
       }
     </div>
@@ -249,12 +251,15 @@ function get3x3Range(rowOrCol: number): [number, number, number] {
 interface NoteCellProps {
   note: CellValue
   backgroundColor: string
+  noteNumber: number
+  row: number
+  col: number
 }
 
 function NoteCell(props: NoteCellProps) {
-  const { note, backgroundColor } = props
+  const { note, backgroundColor, noteNumber, row, col } = props
   return (
-    <div className={`w-3 h-3 items-center text-center align-middle text-xs text-sudoku-draft-light pointer-events-none ${backgroundColor}`} > 
+    <div data-testid={`data-draft-${row}${col}${noteNumber}`} className={`w-3 h-3 items-center text-center align-middle text-xs text-sudoku-draft-light pointer-events-none`} > 
       { note }
     </div>
   )

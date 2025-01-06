@@ -1,4 +1,5 @@
-import { EndGameError } from "@/errors/endGame"
+import { EndGameError } from "@/models/errors/endGame"
+import { thisWillEndCurrentGameText } from "@/text"
 
 export enum GameDifficulty {
   Easy = 'easy',
@@ -7,7 +8,7 @@ export enum GameDifficulty {
 }
 
 export enum GameState {
-  // Intial = 'initial',
+  Intial = 'initial',
   InProgress = 'inProgress',
   // Paused = 'paused',
   Success = 'success',
@@ -20,7 +21,7 @@ export class Game {
 
   constructor(
     difficulty: GameDifficulty = GameDifficulty.Easy,
-    state: GameState = GameState.InProgress,
+    state: GameState = GameState.Intial,
   ) {
     this.difficulty = difficulty
     this.state = state
@@ -29,13 +30,6 @@ export class Game {
   start(): Game {
     return new Game(this.difficulty, GameState.InProgress)
   }
-
-  // resume(): Game {
-  //   if (this.state != GameState.Paused) {
-  //     throw new Error('Cannot resume a game unless it is in the paused state')
-  //   }
-  //   return new Game(this.difficulty, GameState.InProgress)
-  // }
 
   fail(): Game {
     if (this.state != GameState.InProgress) {
@@ -52,9 +46,9 @@ export class Game {
   }
 
   newGame(difficulty: GameDifficulty): Game {
-    const newGame = new Game(difficulty, GameState.InProgress)
+    const newGame = new Game(difficulty, GameState.Intial)
     if ([GameState.InProgress].includes(this.state)) {
-      throw new EndGameError(newGame, 'This will end the current game. Are you sure?')
+      throw new EndGameError(newGame, thisWillEndCurrentGameText)
     }
     return newGame
   }

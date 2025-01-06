@@ -1,6 +1,7 @@
-import { NegativeEffect, NegativeEffectEmoji, NegativeEffectName } from "@/models/effect"
+import { NegativeEffect, NegativeEffectName } from "@/models/effect"
 import { Item, ItemName } from "@/models/item"
 import { CellValue } from "@/models/sudoku"
+import { draftText, itemsText, negativeEffectsText, writeText } from "@/text"
 
 interface ToolboxProps {
   putValueInCell: (value: CellValue) => void
@@ -34,16 +35,16 @@ export default function Toolbox(props: ToolboxProps) {
       <div>
         <button className="text-draft-text-light inline-flex">
           <input checked={!isNote} onClick={() => setIsNote(false)} className="hidden" type="radio" id="write" />
-          <label className={`${writeBackgroundColor} px-5 py-2.5 border border-draft-selected-light text-draft-text-light rounded-l-lg`} htmlFor="write">Write ✒️</label>
+          <label className={`${writeBackgroundColor} px-5 py-2.5 border border-draft-selected-light text-draft-text-light rounded-l-lg`} htmlFor="write">{writeText}</label>
         </button>
         <button className="text-draft-text-light inline-flex">
           <input checked={isNote} onClick={() => setIsNote(true)} className="hidden" type="radio" id="draft" />
-          <label className={`${draftBackgroundColor} px-5 py-2.5 border border-draft-selected-light text-draft-text-light rounded-r-lg`} htmlFor="draft">Draft ✏️</label>
+          <label className={`${draftBackgroundColor} px-5 py-2.5 border border-draft-selected-light text-draft-text-light rounded-r-lg`} htmlFor="draft">{draftText}</label>
         </button>
       </div>
       <div className='flex flex-col self-start'>
         <p className="text-xl self-start text-toolbox-text-light">
-          Items:
+          {itemsText}
         </p>
         <div className='grid grid-cols-5 gap-4'>
         { items.map((el, i) => {
@@ -65,7 +66,7 @@ export default function Toolbox(props: ToolboxProps) {
         </div>
       </div>
         <p className="text-xl self-start text-toolbox-text-light">
-            Negative Effects:
+            {negativeEffectsText}
         </p>
         <div className="flex flex-row self-start">   
         { effects.map((el, i) => {
