@@ -215,6 +215,12 @@ export default function SudokuArea(props: SudokuAreaProps) {
         if (!item.use()) {
           return
         }
+        // TODO: Need a new data structure for negative effects. Here is why:
+        // If a fire is present, or as it is being extinguinguished
+        // The number or item underneath should continue as normal
+        // THis means that negative effects need to be a layer on top of the items and numbers
+        // We also need to remove all of the nagative effects from a cell (e.g. fire extinguisher is complete)
+        // So we should not be allowed to have more than one negative effect on a cell. Currently we allow multiple
         enableExtinguisher(NegativeEffectEmoji.ExtinguishingSpraySmall, row, col)
         setTimeout(() => { // TODO: Promises with await/then would be nicer
           enableExtinguisher(NegativeEffectEmoji.ExtinguishingSprayMedium, row, col)
