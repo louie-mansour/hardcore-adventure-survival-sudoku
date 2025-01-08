@@ -8,6 +8,7 @@ import DifficultySelector from "./difficultySelector";
 import Title from "./title";
 import { determineItemLocations, Item } from '../../models/item'
 import { SudokuConfig } from "@/config";
+import HowToPlay from "./howToPlay";
 
 export enum GameMode {
   Hardcore = 'Hardcore',
@@ -66,19 +67,18 @@ export default function PlayArea(props: PlayAreaProps) {
       <div className="bg-page-inside-light w-full max-w-2xl">
         <div className='h-screen flex flex-col justify-evenly my-0 mx-5 h-svh gap-2 pt-8'>
           <Title />
+          <HowToPlay />
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />
-          <div className='flex flex-col justify-center items-center'>
-            <SudokuArea
-              initialSudoku={sudoku}
-              itemLocations={itemLocations}
-              removeItemLocation={removeItemLocation}
-              solveSudoku={solveSudoku}
-              gameStart={gameStart}
-              gameOver={gameOver}
-              gameComplete={gameComplete}
-              config={config}
-            />
-          </div>
+          <SudokuArea
+            initialSudoku={sudoku}
+            itemLocations={itemLocations}
+            removeItemLocation={removeItemLocation}
+            solveSudoku={solveSudoku}
+            gameStart={gameStart}
+            gameOver={gameOver}
+            gameComplete={gameComplete}
+            config={config}
+          />
         </div>
       </div>
     </div>
