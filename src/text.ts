@@ -1,4 +1,5 @@
-export const titleText = 'Survival Sudoku 💪'
+export const titleText = 'Survival Sudoku'
+export const howToPlayText = 'How to Play'
 export const easyText = 'Start New Game'
 export const writeText = 'Write ✒️'
 export const draftText = 'Draft ✏️'

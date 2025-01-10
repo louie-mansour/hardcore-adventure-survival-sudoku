@@ -83,3 +83,15 @@ export enum NegativeEffectEmoji {
   Dagger = '🗡️',
   Placeholder = '⬜',
 }
+
+export const EFFECT_LIST = [
+  NegativeEffect.factory(NegativeEffectName.Fire),
+  // NegativeEffect.factory(NegativeEffectName.Turtle),
+  // NegativeEffect.factory(NegativeEffectName.Volcano),
+  // NegativeEffect.factory(NegativeEffectName.Darkness),
+  // NegativeEffect.factory(NegativeEffectName.Mirror),
+  // NegativeEffect.factory(NegativeEffectName.Rat),
+  // NegativeEffect.factory(NegativeEffectName.Dizzy),
+  // NegativeEffect.factory(NegativeEffectName.Dagger),
+  
+]

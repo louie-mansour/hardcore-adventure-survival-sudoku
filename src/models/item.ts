@@ -11,17 +11,17 @@ export class Item {
   static factory(itemName: ItemName): Item {
     switch (itemName) {
       case ItemName.CrystalBall:
-        return new Item(ItemName.CrystalBall, ItemEmoji.CrystalBall, 'Get hints for the next few moves', 5)
+        return new Item(ItemName.CrystalBall, ItemEmoji.CrystalBall, 'Reveal a hint', 3)
       case ItemName.FireExtinguisher:
-        return new Item(ItemName.FireExtinguisher, ItemEmoji.FireExtinguisher, 'Put ouf fires', 'Infinite')
+        return new Item(ItemName.FireExtinguisher, ItemEmoji.FireExtinguisher, 'Put out fires', 'Infinite')
       case ItemName.GameDie:
-        return new Item(ItemName.GameDie, ItemEmoji.GameDie, 'Reveal the value of between 1-6 random squares', 1)
+        return new Item(ItemName.GameDie, ItemEmoji.GameDie, 'Reveal a random value between 1-6', 1)
       case ItemName.MagicWand:
-        return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any square with the correct value', 3)
+        return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any cell with the correct value', 2)
       case ItemName.Placeholder:
         return new Item(ItemName.Placeholder, ItemEmoji.Placeholder, 'Not a real item. This is a placeholder', 1, false)
       case ItemName.Plant:
-        return new Item(ItemName.Plant, ItemEmoji.Plant, 'Plant it in a square and it will grow into the correct value', 3)
+        return new Item(ItemName.Plant, ItemEmoji.Plant, 'Plant in a cell and it will grow into the correct value', 2)
       case ItemName.Shield:
         return new Item(ItemName.Shield, ItemEmoji.Shield, 'Protect against mistakes', 1)
       // case ItemName.Flashlight:
@@ -158,3 +158,21 @@ export function determineItemLocations(sudoku: Sudoku): [Item, number, number, b
   }
   return itemLocations
 }
+
+export const ITEM_LIST = [
+  Item.factory(ItemName.FireExtinguisher),
+  Item.factory(ItemName.CrystalBall),
+  Item.factory(ItemName.MagicWand),
+  Item.factory(ItemName.Plant),
+  Item.factory(ItemName.GameDie),
+  Item.factory(ItemName.Shield),
+  // Item.factory(ItemName.Flashlight),
+  // Item.factory(ItemName.Sun),
+  // Item.factory(ItemName.Snowflake),
+  // Item.factory(ItemName.FireEngine),
+  // Item.factory(ItemName.Cheese),
+  // Item.factory(ItemName.Hand),
+  // Item.factory(ItemName.MagnifyingGlass),
+  // Item.factory(ItemName.BabyBottle),
+  // Item.factory(ItemName.Surrender),
+]
