@@ -145,6 +145,7 @@ function SudokuCell(props: SudokuCellProps) {
       setIsMistake(true)
       mistakeSetTimeoutRef.current = setTimeout(() => { setIsMistake(false) }, config.mistakeTimeoutMilliseconds)
       setDisplayedErrors((e: Map<number, [number, number, CellValue]>) => { return e.set(rcMistake[0], rcMistake[1]) })
+      // TODO: Showing errors appears to be a little broken unless using the keyboard to enter the value
       decreaseLife(mistakes) // TODO: Maybe this should be done at a higher level, take away a life if there's a mistake
     }
   }, undefined)

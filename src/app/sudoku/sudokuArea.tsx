@@ -36,7 +36,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [isNote, setIsNote] = useState<boolean>(false)
   const [numberOfShields, setNumberOfShields] = useState(0)
   const [plantLocations, setPlantLocations] = useState<Set<string>>(new Set())
-  let fireQueue: [number, number][] = []
 
   // TODO: This is broken. Come back to it when other things are fixed
   // useEffect(() => {
@@ -101,7 +100,14 @@ export default function SudokuArea(props: SudokuAreaProps) {
 
   function placeEffect(emoji: NegativeEffectEmoji, row: number, col: number) {
     setPlacedEffectLocations(e => {
-      return new Map(e.set(JSON.stringify([row, col]), emoji))
+      return new Map(e.set(JSON.stringify([row, col]), emoji)) // TODO: It appears we need a new map for this to render. I suspect it's related to the reference
+    })
+  }
+
+  function deleteEffect(row: number, col: number) {
+    setPlacedEffectLocations(e => {
+      e.delete(JSON.stringify([row, col]))
+      return new Map(e)
     })
   }
 
@@ -298,21 +304,39 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   async function enableFire() {
-    fireQueue = [[selectedCell[0], selectedCell[1]]]
-    const visited = new Set<string>([])
-    while (fireQueue.length > 0) {
-      shuffle(fireQueue)
-      const el = fireQueue.shift()
-      if (!el) return
-      const [r, c] = el
-      if (r < 0 || r > 8 || c < 0 || c > 8) continue
-      if (visited.has(`${r}${c}`)) continue
-      await new Promise(resolve => setTimeout(() => {
-        resolve(placeEffect(NegativeEffectEmoji.Fire, r, c))
-      }, 1000))
+    const [currentR, currentC] = selectedCell
+    setPlacedEffectLocations(e => new Map(e.set(JSON.stringify([currentR, currentC]), NegativeEffectEmoji.Fire)))
+    let isFire = true
+    while (isFire) {
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      setPlacedEffectLocations(e => {
+        let fireLocations = []
+        for (let r = 0; r < 9; r++) {
+          for (let c = 0; c < 9; c++) {
+            if (e.has(JSON.stringify([r, c]))) {
+              fireLocations.push([r, c])
+            }
+          }
+        }
+        if (fireLocations.length === 0) {
+          isFire = false
+          return new Map(e)
+        }
+        const fireOptions: Set<string> = new Set()
+        fireLocations.forEach(([r, c]) => {
+          if (r < 8 && !fireLocations.find(el => el[0] === r + 1 && el[1] === c)) fireOptions.add(JSON.stringify([r + 1, c]))
+          if (r > 0 && !fireLocations.find(el => el[0] === r - 1 && el[1] === c)) fireOptions.add(JSON.stringify([r - 1, c]))
+          if (c < 8 && !fireLocations.find(el => el[0] === r && el[1] === c + 1)) fireOptions.add(JSON.stringify([r, c + 1]))
+          if (c > 0 && !fireLocations.find(el => el[0] === r && el[1] === c - 1)) fireOptions.add(JSON.stringify([r, c - 1]))
+        })
 
-      visited.add(`${r}${c}`)
-      fireQueue.push([r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1])
+        const fireOptionsList = [ ...fireOptions ]
+        shuffle(fireOptionsList)
+        const newFireLocation = fireOptionsList.shift()
+        if (!newFireLocation) return new Map(e)
+        return new Map(e.set(newFireLocation, NegativeEffectEmoji.Fire))
+      })
+
     }
   }
 
@@ -327,21 +351,19 @@ export default function SudokuArea(props: SudokuAreaProps) {
     if (r < 8 && c > 0) placeEffect(emoji, r + 1, c - 1)
     if (r > 0 && c < 8) placeEffect(emoji, r - 1, c + 1)
     if (r > 0 && c > 0) placeEffect(emoji, r - 1, c - 1)
-
-    fireQueue.splice(fireQueue.indexOf([r, c]), 1)
   }
 
   function endExtinguisher(r: number, c: number) {
-    placeEffect('' as NegativeEffectEmoji, r, c)
-    if (r < 8) placeEffect('' as NegativeEffectEmoji, r + 1, c)
-    if (r > 0) placeEffect('' as NegativeEffectEmoji, r - 1, c)
-    if (c < 8) placeEffect('' as NegativeEffectEmoji, r, c + 1)
-    if (c > 0) placeEffect('' as NegativeEffectEmoji, r, c - 1)
+    deleteEffect(r, c)
+    if (r < 8) deleteEffect(r + 1, c)
+    if (r > 0) deleteEffect(r - 1, c)
+    if (c < 8) deleteEffect(r, c + 1)
+    if (c > 0) deleteEffect(r, c - 1)
 
-    if (r < 8 && c < 8) placeEffect('' as NegativeEffectEmoji, r + 1, c + 1)
-    if (r < 8 && c > 0) placeEffect('' as NegativeEffectEmoji, r + 1, c - 1)
-    if (r > 0 && c < 8) placeEffect('' as NegativeEffectEmoji, r - 1, c + 1)
-    if (r > 0 && c > 0) placeEffect('' as NegativeEffectEmoji, r - 1, c - 1)
+    if (r < 8 && c < 8) deleteEffect(r + 1, c + 1)
+    if (r < 8 && c > 0) deleteEffect(r + 1, c - 1)
+    if (r > 0 && c < 8) deleteEffect(r - 1, c + 1)
+    if (r > 0 && c > 0) deleteEffect(r - 1, c - 1)
   }
 
   function shuffle(array: unknown[]) {
