@@ -69,22 +69,19 @@ export default function Toolbox(props: ToolboxProps) {
             {negativeEffectsText}
         </p>
         <div className="flex flex-row self-start">   
-        { effects.map((el, i) => {
-          const invisible = el.name === NegativeEffectName.PlaceHolder ? 'invisible' : ''
-          return <div
-            className='cursor-pointer'
-            key={el.emoji + i}
-            onClick={ () => {
-              enableEffect(el)
-            } }
-          >
-            <div>
-              <p className={`text-4xl text-center ${invisible}`}>
-                {el.emoji}
-              </p>
-            </div>
-          </div>
-        })}
+          { effects.map((el, i) => {
+            const invisible = el.name === NegativeEffectName.PlaceHolder ? 'invisible' : ''
+            return (
+              <div key={el.emoji + i} className={`flex flex-row justify-center items-center ${invisible}`}>
+                <p
+                  className={`text-4xl text-center cursor-pointer`}
+                  onClick={() => enableEffect(el)}
+                >
+                  {el.emoji}
+                </p>
+              </div>
+            )
+          })}
         </div>
     </>
   )

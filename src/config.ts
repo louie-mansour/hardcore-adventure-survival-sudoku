@@ -7,7 +7,7 @@ export interface SudokuConfig {
 }
 
 export const config: SudokuConfig = {
-  mode: process.env.MODE === 'DEVELOPER' ? 'DEVELOPER' : 'NORMAL',
+  mode: process.env.NEXT_PUBLIC_MODE === 'DEVELOPER' ? 'DEVELOPER' : 'NORMAL',
 
   startingNumberOfLives: Number(process.env.STARTING_NUMBER_OF_LIVES) || 3,
   preselectedSudoku: Number(process.env.PRESELECTED_SUDOKU) || null,

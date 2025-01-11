@@ -18,7 +18,7 @@ interface Sudoku9x9GridProps {
   putValueInCell: ((cellValue: CellValue) =>  void)
   numberOfShields: number
   placedItemLocations: [ItemEmoji, number, number][]
-  placedEffectLocations: [NegativeEffectEmoji, number, number][]
+  placedEffectLocations: Map<string, NegativeEffectEmoji>
   config: SudokuConfig
 }
 
@@ -27,6 +27,7 @@ interface Sudoku3x3GridProps {
   cols: [number, number, number]
   mistakes: Map<number, [number, number, CellValue]>
   inputs: Map<number, [number, number, CellValue]>
+  placedEffectLocations: Map<string, NegativeEffectEmoji>
 }
 
 interface SudokuCellProps {
@@ -34,6 +35,7 @@ interface SudokuCellProps {
   col: number
   mistakes: Map<number, [number, number, CellValue]>
   inputs: Map<number, [number, number, CellValue]>
+  placedEffectLocations: Map<string, NegativeEffectEmoji>
 }
 
 // TODO: Bit of a hack with the typing here
@@ -48,7 +50,7 @@ Sudoku9x9GridProps & {
 } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
-  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config } = props
+  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations } = props
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
   const [numberOfLives, setNumberOfLives] = useState<number>(config.startingNumberOfLives)
@@ -87,15 +89,15 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
       }}
     >
       <SudokuContext.Provider value={{ ...props, decreaseLife, isMaskItems, displayedErrors, setDisplayedErrors }} >
-        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
-        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
-        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
-        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
-        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
-        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
-        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} />
-        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} />
-        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} />
+        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+        <Sudoku3x3Grid rows={[0, 1, 2]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+        <Sudoku3x3Grid rows={[3, 4, 5]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[0, 1, 2]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[3, 4, 5]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+        <Sudoku3x3Grid rows={[6, 7, 8]} cols={[6, 7, 8]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
       </SudokuContext.Provider>
     </div>
   </div>
@@ -112,26 +114,26 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 }
 
 function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
-  const { rows, cols, mistakes, inputs } = props
+  const { rows, cols, mistakes, inputs, placedEffectLocations } = props
   return (
     <div className='grid border border-sudoku-lines-light grid-cols-3'>
-      <SudokuCell row={rows[0]} col={cols[0]} mistakes={mistakes} inputs={inputs} />
-      <SudokuCell row={rows[0]} col={cols[1]} mistakes={mistakes} inputs={inputs} />
-      <SudokuCell row={rows[0]} col={cols[2]} mistakes={mistakes} inputs={inputs} />
-      <SudokuCell row={rows[1]} col={cols[0]} mistakes={mistakes} inputs={inputs} />
-      <SudokuCell row={rows[1]} col={cols[1]} mistakes={mistakes} inputs={inputs} />
-      <SudokuCell row={rows[1]} col={cols[2]} mistakes={mistakes} inputs={inputs} />
-      <SudokuCell row={rows[2]} col={cols[0]} mistakes={mistakes} inputs={inputs} />
-      <SudokuCell row={rows[2]} col={cols[1]} mistakes={mistakes} inputs={inputs} />
-      <SudokuCell row={rows[2]} col={cols[2]} mistakes={mistakes} inputs={inputs} />
+      <SudokuCell row={rows[0]} col={cols[0]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+      <SudokuCell row={rows[0]} col={cols[1]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+      <SudokuCell row={rows[0]} col={cols[2]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+      <SudokuCell row={rows[1]} col={cols[0]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+      <SudokuCell row={rows[1]} col={cols[1]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+      <SudokuCell row={rows[1]} col={cols[2]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+      <SudokuCell row={rows[2]} col={cols[0]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+      <SudokuCell row={rows[2]} col={cols[1]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
+      <SudokuCell row={rows[2]} col={cols[2]} mistakes={mistakes} inputs={inputs} placedEffectLocations={placedEffectLocations}/>
     </div>
   )
 }
 
 function SudokuCell(props: SudokuCellProps) {
   const context = useContext(SudokuContext)!
-  const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, placedEffectLocations, displayedErrors, setDisplayedErrors, config } = context
-  const { row, col, mistakes } = props
+  const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, displayedErrors, setDisplayedErrors, config } = context
+  const { row, col, mistakes, placedEffectLocations } = props
   const [isMistake, setIsMistake] = useState(false)
   const cell = sudoku.getCells()[row][col]
   const mistakeSetTimeoutRef = useRef<NodeJS.Timeout>()
@@ -151,7 +153,7 @@ function SudokuCell(props: SudokuCellProps) {
 
   const emoji = emojiLocations.find(el => el[1] === row && el[2] === col)?.[0]
   const placedItem = placedItemLocations.find(el => el[1] === row && el[2] === col)?.[0]
-  const placedEffect = placedEffectLocations.find(el => el[1] === row && el[2] === col)?.[0]
+  const placedEffect = placedEffectLocations.get(JSON.stringify([row, col]))
   const textTransparency = isTransparentText(cell.value, emoji, isMaskItems, placedItem) ? 'text-transparent' : 'text-sudoku-text-light'
 
   const notesInCell = notes[row][col]
@@ -168,10 +170,10 @@ function SudokuCell(props: SudokuCellProps) {
             type='text'
             onClick={() => selectCell([row, col])}
             tabIndex={-1}
-            onKeyDown={onKeyDownEvent} // TODO: A problem with this keyDownEvent or the one below. It doesn't register until after a few clicks
+            onKeyDown={onKeyDownEvent}
             onFocus={(e) => e.target.readOnly = true}
             readOnly={true}
-            value={ placedEffect ?? cell.value ?? placedItem ?? emoji?.emoji ?? ''}
+            value={placedEffect ?? cell.value ?? placedItem ?? emoji?.emoji ?? ''}
           >
           </input>
         </div>

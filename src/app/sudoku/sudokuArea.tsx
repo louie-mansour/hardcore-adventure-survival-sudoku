@@ -32,7 +32,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [items, setItems] = useState(initItems())
   const [placedItemLocations, setPlacedItemLocations] = useState<[ItemEmoji, number, number][]>([])
   const [effects, setEffects] = useState<NegativeEffect[]>(initEffects())
-  const [placedEffectLocations, setPlacedEffectLocations] = useState<[NegativeEffectEmoji, number, number][]>([])
+  const [placedEffectLocations, setPlacedEffectLocations] = useState<Map<string, NegativeEffectEmoji>>(new Map())
   const [isNote, setIsNote] = useState<boolean>(false)
   const [numberOfShields, setNumberOfShields] = useState(0)
   const [plantLocations, setPlantLocations] = useState<Set<string>>(new Set())
@@ -78,7 +78,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         putValueInCell={putValueInCell}
         numberOfShields={numberOfShields}
         placedItemLocations={placedItemLocations}
-        placedEffectLocations={placedEffectLocations}
+        placedEffectLocations={new Map([ ...placedEffectLocations])}
         config={config}
       />
       <Toolbox
@@ -101,7 +101,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
 
   function placeEffect(emoji: NegativeEffectEmoji, row: number, col: number) {
     setPlacedEffectLocations(e => {
-      return [[emoji, row, col], ...e]
+      return new Map(e.set(JSON.stringify([row, col]), emoji))
     })
   }
 
