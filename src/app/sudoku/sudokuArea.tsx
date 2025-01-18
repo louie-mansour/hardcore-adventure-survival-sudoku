@@ -36,6 +36,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [isNote, setIsNote] = useState<boolean>(false)
   const [numberOfShields, setNumberOfShields] = useState(0)
   const [plantLocations, setPlantLocations] = useState<Set<string>>(new Set())
+  const [fireTimeouts, setFireTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map())
 
   // TODO: This is broken. Come back to it when other things are fixed
   // useEffect(() => {
@@ -305,7 +306,22 @@ export default function SudokuArea(props: SudokuAreaProps) {
 
   async function enableFire() {
     const [currentR, currentC] = selectedCell
-    setPlacedEffectLocations(e => new Map(e.set(JSON.stringify([currentR, currentC]), NegativeEffectEmoji.Fire)))
+    const currentString = JSON.stringify([currentR, currentC])
+    setPlacedEffectLocations(e => new Map(e.set(currentString, NegativeEffectEmoji.Fire)))
+    setFireTimeouts(f => {
+      console.log('setFireTimeout', currentString)
+      if (f.get(currentString)) return f
+      
+      const newTimeout = setTimeout(() => {
+        console.log('deleteFireTimeout', currentString)
+        setSudoku(s => {
+          console.log('deleteCell', currentString)
+          return s.deleteCell(JSON.parse(currentString)[0], JSON.parse(currentString)[1])
+        })
+        
+      }, 6000)
+      return new Map(f.set(currentString, newTimeout))
+    })
     let isFire = true
     while (isFire) {
       await new Promise(resolve => setTimeout(resolve, 3000))
@@ -334,6 +350,14 @@ export default function SudokuArea(props: SudokuAreaProps) {
         shuffle(fireOptionsList)
         const newFireLocation = fireOptionsList.shift()
         if (!newFireLocation) return new Map(e)
+        setFireTimeouts(f => {
+          if (f.get(newFireLocation)) return f
+          
+          const newTimeout = setTimeout(() => {
+            setSudoku(s => s.deleteCell(JSON.parse(newFireLocation)[0], JSON.parse(newFireLocation)[1]))
+          }, 6000)
+          return new Map(f.set(newFireLocation, newTimeout))
+        })
         return new Map(e.set(newFireLocation, NegativeEffectEmoji.Fire))
       })
 
@@ -351,6 +375,19 @@ export default function SudokuArea(props: SudokuAreaProps) {
     if (r < 8 && c > 0) placeEffect(emoji, r + 1, c - 1)
     if (r > 0 && c < 8) placeEffect(emoji, r - 1, c + 1)
     if (r > 0 && c > 0) placeEffect(emoji, r - 1, c - 1)
+
+    setFireTimeouts(f => {
+      for (let i = r - 1; i <= r + 1; i++) {
+        for (let j = c - 1; j <= c + 1; j++) {
+          const fireTimeout = f.get(JSON.stringify([i, j]))
+          if (fireTimeout) {
+            clearTimeout(fireTimeout)
+            f.delete(JSON.stringify([i, j]))
+          }
+        }
+      }
+      return f
+    })
   }
 
   function endExtinguisher(r: number, c: number) {

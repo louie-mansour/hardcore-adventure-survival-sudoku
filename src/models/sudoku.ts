@@ -30,6 +30,17 @@ export class Sudoku {
     return this.cells
   }
 
+  deleteCell(row: number, col: number): Sudoku {
+    if (this.cells[row][col].cellType === CellType.Fixed) {
+      return new Sudoku([...this.cells], [...this.solved])
+    }
+
+    this.cells[row][col] = this.cells[row][col].updateValue(null)
+    return new Sudoku(
+      [...this.cells], [...this.solved]
+    )
+  }
+
   updateCell(value: CellValue, row: number, col: number): Sudoku {
     if (this.cells[row][col].value) {
       return new Sudoku([...this.cells], [...this.solved])
