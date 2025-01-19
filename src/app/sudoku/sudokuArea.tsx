@@ -17,11 +17,12 @@ interface SudokuAreaProps {
   gameStart: () => void
   gameOver: () => void
   gameComplete: () => void
+  gameTimer: number
   config: SudokuConfig
 }
 
 export default function SudokuArea(props: SudokuAreaProps) {
-  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, config } = props
+  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, gameTimer, config } = props
 
   const [sudoku, setSudoku] = useState<Sudoku>(() => initialSudoku)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
@@ -46,6 +47,10 @@ export default function SudokuArea(props: SudokuAreaProps) {
   //   }
   //   gameStart() // TODO: This constantly puts the game into inProgress mode. There's probably a better way of doing this
   // }, [sudoku, gameStart, gameComplete])
+
+  useEffect(() => {
+    gameStart()
+  }, [])
 
   useEffect(() => {
     reset()
@@ -79,6 +84,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         numberOfShields={numberOfShields}
         placedItemLocations={placedItemLocations}
         placedEffectLocations={new Map([ ...placedEffectLocations])}
+        gameTimer={gameTimer}
         config={config}
       />
       <Toolbox
@@ -309,13 +315,10 @@ export default function SudokuArea(props: SudokuAreaProps) {
     const currentString = JSON.stringify([currentR, currentC])
     setPlacedEffectLocations(e => new Map(e.set(currentString, NegativeEffectEmoji.Fire)))
     setFireTimeouts(f => {
-      console.log('setFireTimeout', currentString)
       if (f.get(currentString)) return f
       
       const newTimeout = setTimeout(() => {
-        console.log('deleteFireTimeout', currentString)
         setSudoku(s => {
-          console.log('deleteCell', currentString)
           return s.deleteCell(JSON.parse(currentString)[0], JSON.parse(currentString)[1])
         })
         

@@ -27,6 +27,17 @@ export default function PlayArea(props: PlayAreaProps) {
   // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
   const [sudoku, setSudoku] = useState<Sudoku>(() => findSudoku({ difficulty: game.difficulty, index: 4 }))
   const [itemLocations, setItemLocations] = useState<[Item, number, number, boolean][]>([])
+  const [gameTimer, setGameTimer] = useState<number>(0)
+  
+  useEffect(() => {
+    setInterval(() => {
+      if (game.state !== GameState.InProgress) {
+        return
+      }
+      setGameTimer(t => t + 1)
+    }, 1000)
+  }, [])
+
 
   // TODO: Not sure why useEffect is needed here
   // Louie - Need to implement the game going into 'In Progress' so we can ask the user if they want to confirm starting a new game
@@ -67,7 +78,7 @@ export default function PlayArea(props: PlayAreaProps) {
       <div className="bg-page-inside-light w-full max-w-2xl">
         <div className='h-screen flex flex-col justify-evenly my-0 mx-5 h-svh gap-2 pt-8'>
           <Title />
-          <HowToPlay />
+          <HowToPlay gamePause={gamePause} gameStart={gameStart} />
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />
           <SudokuArea
             initialSudoku={sudoku}
@@ -77,6 +88,7 @@ export default function PlayArea(props: PlayAreaProps) {
             gameStart={gameStart}
             gameOver={gameOver}
             gameComplete={gameComplete}
+            gameTimer={gameTimer}
             config={config}
           />
         </div>
@@ -103,19 +115,38 @@ export default function PlayArea(props: PlayAreaProps) {
   }
 
   function gameStart() {
-    setGame(g => g.start())
+    setGame(g => {
+      g.start()
+      return g
+    })
+  }
+
+  function gamePause() {
+    setGame(g => {
+      g.pause()
+      return g
+    })
   }
 
   function gameOver() {
-    setGame(g => g.fail())
+    setGame(g => {
+      g.fail()
+      return g
+    })
   }
 
   function gameComplete() {
-    setGame(g => g.complete())
+    setGame(g => {
+      g.complete()
+      return g
+    })
   }
 
   function solveSudoku() {
     setSudoku(s => s.getSolution())
-    setGame(g => g.complete())
+    setGame(g => {
+      g.complete()
+      return g
+    })
   }
 }

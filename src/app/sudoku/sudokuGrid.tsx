@@ -1,9 +1,11 @@
 import { SudokuConfig } from "@/config";
 import { NegativeEffect, NegativeEffectEmoji } from "@/models/effect";
+import { Game } from "@/models/game";
 import { Item, ItemEmoji } from "@/models/item";
 import { CellType, CellValue, Sudoku } from "@/models/sudoku"
 import { useEffect, useRef, useState } from "react"
 import { createContext, useContext } from 'react';
+import GameTimer from "../gametimer/GameTimer";
 
 interface Sudoku9x9GridProps {
   selectCell: (cell: [number, number]) => void
@@ -19,6 +21,7 @@ interface Sudoku9x9GridProps {
   numberOfShields: number
   placedItemLocations: [ItemEmoji, number, number][]
   placedEffectLocations: Map<string, NegativeEffectEmoji>
+  gameTimer: number
   config: SudokuConfig
 }
 
@@ -50,7 +53,7 @@ Sudoku9x9GridProps & {
 } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
-  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations } = props
+  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations, gameTimer } = props
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
   const [numberOfLives, setNumberOfLives] = useState<number>(config.startingNumberOfLives)
@@ -74,13 +77,18 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
 
   return (
     <div className='w-fit'>
-      <div>
-        {
-          numberOfLives === 0 ? '☠️' : '❤️'.repeat(numberOfLives)
-        }
-        {
-          '🛡️'.repeat(numberOfShields || 0)
-        }
+      <div className='flex flex-row justify-between'>
+        <div>
+          {
+            numberOfLives === 0 ? '☠️' : '❤️'.repeat(numberOfLives)
+          }
+          {
+            '🛡️'.repeat(numberOfShields || 0)
+          }
+        </div>
+        <div>
+          <GameTimer gameTimer={gameTimer} />
+        </div>
       </div>
     <div className='grid'
       style={{

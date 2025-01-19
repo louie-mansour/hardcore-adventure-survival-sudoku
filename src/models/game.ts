@@ -10,45 +10,51 @@ export enum GameDifficulty {
 export enum GameState {
   Intial = 'initial',
   InProgress = 'inProgress',
-  // Paused = 'paused',
+  Paused = 'paused',
   Success = 'success',
   Fail = 'fail',
 }
 
 export class Game {
-  readonly difficulty: GameDifficulty
-  readonly state: GameState
+  difficulty: GameDifficulty
+  state: GameState
 
   constructor(
     difficulty: GameDifficulty = GameDifficulty.Easy,
     state: GameState = GameState.Intial,
+    // counterCallback: ({ seconds }: { seconds: number}) => void,
   ) {
     this.difficulty = difficulty
     this.state = state
   }
 
-  start(): Game {
-    return new Game(this.difficulty, GameState.InProgress)
+  start(): boolean {
+    this.state = GameState.InProgress
+    return true
   }
 
-  fail(): Game {
-    if (this.state === GameState.Fail) {
-      return this
-    }
+  pause(): boolean {
     if (this.state !== GameState.InProgress) {
-      throw new Error('Cannot fail a game unless it is in the in progress state. ' + this.state)
+      return false
     }
-    return new Game(this.difficulty, GameState.Fail)
+    this.state = GameState.Paused
+    return true
   }
 
-  complete(): Game {
-    if (this.state === GameState.Success) {
-      return this
-    }
+  fail(): boolean {
     if (this.state !== GameState.InProgress) {
-      throw new Error('Cannot complete a game unless it is in the in progress state. ' + this.state)
+      return false
     }
-    return new Game(this.difficulty, GameState.Success)
+    this.state = GameState.Fail
+    return true
+  }
+
+  complete(): boolean {
+    if (this.state !== GameState.InProgress) {
+      return false
+    }
+    this.state = GameState.Success
+    return true
   }
 
   newGame(difficulty: GameDifficulty): Game {

@@ -4,19 +4,31 @@ import { howToPlayText } from "@/text";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
-export default function HowToPlay() {
+interface HowToPlayProps {
+  gamePause: () => void
+  gameStart: () => void
+}
+
+export default function HowToPlay(props: HowToPlayProps) {
+  const { gamePause, gameStart } = props
   const [showModal, setShowModal] = useState(false);
 
   return (
     <div className="flex flex-row justify-center gap-x-9">
       <p 
-        onClick={() => setShowModal(true)} 
+        onClick={() => {
+          gamePause()
+          setShowModal(true)}
+        } 
         className="cursor-pointer"
       >
         {howToPlayText}
       </p>
       {showModal && createPortal(
-        <ModalContent onClose={() => setShowModal(false)} />,
+        <ModalContent onClose={() => {
+          setShowModal(false)
+          gameStart()
+        }} />,
         document.body
       )}
     </div>
