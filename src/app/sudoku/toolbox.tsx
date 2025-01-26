@@ -9,7 +9,7 @@ interface ToolboxProps {
   setIsNote: (value: boolean) => void,
   isNote: boolean,
   utilizeItem: (value: Item) => void,
-  effects: NegativeEffect[],
+  effects: Set<NegativeEffect>,
   enableEffect: (value: NegativeEffect) => void,
 }
 
@@ -69,7 +69,7 @@ export default function Toolbox(props: ToolboxProps) {
             {negativeEffectsText}
         </p>
         <div className="flex flex-row self-start">   
-          { effects.map((el, i) => {
+          { [...effects].map((el, i) => {
             const invisible = el.name === NegativeEffectName.PlaceHolder ? 'invisible' : ''
             return (
               <div key={el.emoji + i} className={`flex flex-row justify-center items-center ${invisible}`}>

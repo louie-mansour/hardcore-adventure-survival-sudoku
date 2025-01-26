@@ -4,6 +4,8 @@ export interface SudokuConfig {
   preselectedSudoku: number | null,
   itemDisplayTimeoutMilliseconds: number,
   mistakeTimeoutMilliseconds: number,
+  maxSudokuTimeHours: number,
+  meanSecondsBetweenFires: number,
 }
 
 export const config: SudokuConfig = {
@@ -14,4 +16,7 @@ export const config: SudokuConfig = {
 
   itemDisplayTimeoutMilliseconds: Number(process.env.ITEM_DISPLAY_TIMEOUT_MILLISECONDS) || 3000,
   mistakeTimeoutMilliseconds: Number(process.env.MISTAKE_TIMEOUT_MILLISECONDS) || 3000,
+
+  maxSudokuTimeHours: Number(process.env.MAX_SUDOKU_TIME_HOURS) || 10,
+  meanSecondsBetweenFires: Number(process.env.MEAN_SECONDS_BETWEEN_FIRES) || 20,
 }

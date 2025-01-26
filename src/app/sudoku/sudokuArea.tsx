@@ -19,10 +19,11 @@ interface SudokuAreaProps {
   gameComplete: () => void
   gameTimer: number
   config: SudokuConfig
+  negativeEffectTimers: Map<number, NegativeEffect[]>
 }
 
 export default function SudokuArea(props: SudokuAreaProps) {
-  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, gameTimer, config } = props
+  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, gameTimer, config, negativeEffectTimers } = props
 
   const [sudoku, setSudoku] = useState<Sudoku>(() => initialSudoku)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
@@ -32,7 +33,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [hint, setHint] = useState<[number, number, CellValue] | null>(null)
   const [items, setItems] = useState(initItems())
   const [placedItemLocations, setPlacedItemLocations] = useState<[ItemEmoji, number, number][]>([])
-  const [effects, setEffects] = useState<NegativeEffect[]>(initEffects())
+  const [effects, setEffects] = useState<Set<NegativeEffect>>(initEffects())
   const [placedEffectLocations, setPlacedEffectLocations] = useState<Map<string, NegativeEffectEmoji>>(new Map())
   const [isNote, setIsNote] = useState<boolean>(false)
   const [numberOfShields, setNumberOfShields] = useState(0)
@@ -47,6 +48,15 @@ export default function SudokuArea(props: SudokuAreaProps) {
   //   }
   //   gameStart() // TODO: This constantly puts the game into inProgress mode. There's probably a better way of doing this
   // }, [sudoku, gameStart, gameComplete])
+
+  useEffect(() => {
+    const negativeEffectTimerLookup = negativeEffectTimers.get(gameTimer)
+    if (negativeEffectTimerLookup) {
+      negativeEffectTimerLookup.forEach(effect => enableEffect(effect))
+    }
+  }, [gameTimer])
+
+
 
   useEffect(() => {
     gameStart()
@@ -269,10 +279,10 @@ export default function SudokuArea(props: SudokuAreaProps) {
     }
     return [
       Item.factory(ItemName.FireExtinguisher),
-      Item.factory(ItemName.MagicWand),
-      Item.factory(ItemName.CrystalBall),
-      Item.factory(ItemName.GameDie),
-      Item.factory(ItemName.Plant),
+      // Item.factory(ItemName.MagicWand),
+      // Item.factory(ItemName.CrystalBall),
+      // Item.factory(ItemName.GameDie),
+      // Item.factory(ItemName.Plant),
     ]
   }
 
@@ -282,9 +292,9 @@ export default function SudokuArea(props: SudokuAreaProps) {
     })
   }
 
-  function initEffects(): NegativeEffect[] {
+  function initEffects(): Set<NegativeEffect> {
     if (config.mode === 'DEVELOPER') {
-      return [
+      return new Set([
         NegativeEffect.factory(NegativeEffectName.Fire),
         NegativeEffect.factory(NegativeEffectName.Turtle),
         NegativeEffect.factory(NegativeEffectName.Volcano),
@@ -293,40 +303,41 @@ export default function SudokuArea(props: SudokuAreaProps) {
         NegativeEffect.factory(NegativeEffectName.Rat),
         NegativeEffect.factory(NegativeEffectName.Dizzy),
         NegativeEffect.factory(NegativeEffectName.Dagger),
-      ]
+      ])
     }
-    return [
+    return new Set([
       NegativeEffect.factory(NegativeEffectName.PlaceHolder),
-      NegativeEffect.factory(NegativeEffectName.PlaceHolder),
-    ]
+    ])
   }
 
   async function enableEffect(value: NegativeEffect) {
+    const r = Math.floor(Math.random() * 8)
+    const c = Math.floor(Math.random() * 8)
     switch (value.name) {
       case NegativeEffectName.Fire:
-        return await enableFire();
+        return await enableFire(r, c);
       default:
         return alert('Not implemented yet')
     }
   }
 
-  async function enableFire() {
-    const [currentR, currentC] = selectedCell
-    const currentString = JSON.stringify([currentR, currentC])
-    setPlacedEffectLocations(e => new Map(e.set(currentString, NegativeEffectEmoji.Fire)))
+  async function enableFire(r: number, c: number) {
+    const fireEffect = NegativeEffect.factory(NegativeEffectName.Fire)
+    const fireStartString = JSON.stringify([r, c])
+    setPlacedEffectLocations(e => new Map(e.set(fireStartString, NegativeEffectEmoji.Fire)))
     setFireTimeouts(f => {
-      if (f.get(currentString)) return f
-      
+      if (f.get(fireStartString)) return f
       const newTimeout = setTimeout(() => {
         setSudoku(s => {
-          return s.deleteCell(JSON.parse(currentString)[0], JSON.parse(currentString)[1])
+          return s.deleteCell(JSON.parse(fireStartString)[0], JSON.parse(fireStartString)[1])
         })
         
       }, 6000)
-      return new Map(f.set(currentString, newTimeout))
+      return new Map(f.set(fireStartString, newTimeout))
     })
     let isFire = true
     while (isFire) {
+      setEffects(e => e.add(fireEffect))
       await new Promise(resolve => setTimeout(resolve, 3000))
       setPlacedEffectLocations(e => {
         let fireLocations = []
@@ -365,6 +376,10 @@ export default function SudokuArea(props: SudokuAreaProps) {
       })
 
     }
+    setEffects(e => {
+      e.delete(fireEffect)
+      return e
+    })
   }
 
   function enableExtinguisher(emoji: NegativeEffectEmoji, r: number, c: number) {

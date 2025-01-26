@@ -1,11 +1,10 @@
 import { SudokuConfig } from "@/config";
 import { NegativeEffect, NegativeEffectEmoji } from "@/models/effect";
-import { Game } from "@/models/game";
 import { Item, ItemEmoji } from "@/models/item";
 import { CellType, CellValue, Sudoku } from "@/models/sudoku"
 import { useEffect, useRef, useState } from "react"
 import { createContext, useContext } from 'react';
-import GameTimer from "../gametimer/GameTimer";
+import GameTimer from "../gametimer/gameTimer";
 
 interface Sudoku9x9GridProps {
   selectCell: (cell: [number, number]) => void

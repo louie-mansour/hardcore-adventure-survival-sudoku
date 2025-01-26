@@ -1,3 +1,5 @@
+import { config } from "@/config";
+
 export class NegativeEffect {
   type: 'Effect'
   name: NegativeEffectName
@@ -93,5 +95,15 @@ export const EFFECT_LIST = [
   // NegativeEffect.factory(NegativeEffectName.Rat),
   // NegativeEffect.factory(NegativeEffectName.Dizzy),
   // NegativeEffect.factory(NegativeEffectName.Dagger),
-  
 ]
+
+export function determineEffectTimings(): Map<number, NegativeEffect[]> {
+    const maxSudokuTimeSeconds = config.maxSudokuTimeHours * 3600
+
+    let effectTimings: Map<number, NegativeEffect[]> = new Map()
+    for (let i = 0; i < maxSudokuTimeSeconds; i += config.meanSecondsBetweenFires) {
+      const fireTime = Math.floor(Math.random() * config.meanSecondsBetweenFires) + i
+      effectTimings.set(fireTime, [...(effectTimings.get(fireTime) ?? []), NegativeEffect.factory(NegativeEffectName.Fire)])
+    }
+    return effectTimings
+}

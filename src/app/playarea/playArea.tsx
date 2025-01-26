@@ -9,6 +9,7 @@ import Title from "./title";
 import { determineItemLocations, Item } from '../../models/item'
 import { SudokuConfig } from "@/config";
 import HowToPlay from "./howToPlay";
+import { determineEffectTimings, NegativeEffect } from "@/models/effect";
 
 export enum GameMode {
   Hardcore = 'Hardcore',
@@ -27,6 +28,7 @@ export default function PlayArea(props: PlayAreaProps) {
   // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
   const [sudoku, setSudoku] = useState<Sudoku>(() => findSudoku({ difficulty: game.difficulty, index: 4 }))
   const [itemLocations, setItemLocations] = useState<[Item, number, number, boolean][]>([])
+  const [negativeEffectTimers, setNegativeEffectTimers] = useState<Map<number, NegativeEffect[]>>(new Map())
   const [gameTimer, setGameTimer] = useState<number>(0)
   
   useEffect(() => {
@@ -44,8 +46,14 @@ export default function PlayArea(props: PlayAreaProps) {
   useEffect(() => {
     if (sudoku && itemLocations.length === 0) {
       setItemLocations(determineItemLocations(sudoku))
+      setNegativeEffectTimers(determineEffectTimings())
+      
     }
   }, [sudoku, itemLocations, setItemLocations])
+
+  useEffect(() => {
+    setNegativeEffectTimers(determineEffectTimings())
+  }, [])
 
   if (newGame) {
     setGame(g => {
@@ -90,6 +98,7 @@ export default function PlayArea(props: PlayAreaProps) {
             gameComplete={gameComplete}
             gameTimer={gameTimer}
             config={config}
+            negativeEffectTimers={negativeEffectTimers}
           />
         </div>
       </div>
