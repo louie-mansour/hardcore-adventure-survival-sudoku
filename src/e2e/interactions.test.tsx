@@ -14,6 +14,12 @@ describe('UI Interactions', () => {
       preselectedSudoku: 4, // We select this sudoku to avoid randomness
       itemDisplayTimeoutMilliseconds: 1000,
       mistakeTimeoutMilliseconds: 1000,
+      maxSudokuTimeHours: 10,
+      meanSecondsBetweenFires: 20,
+      fireSpreadsMilliseconds: 3000,
+      extinguisherSprayMilliseconds: 100,
+      fireBurnsNumberMilliseconds: 6000,
+      plantGrowingMilliseconds: 5000,
     }
   })
   describe('Starting a new game', () => {

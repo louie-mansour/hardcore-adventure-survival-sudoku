@@ -229,9 +229,9 @@ export default function SudokuArea(props: SudokuAreaProps) {
                   l.delete(JSON.stringify([row, col]))
                   return l
                 })
-              }, 5000)
-            }, 5000)
-          }, 5000)
+              }, config.plantGrowingMilliseconds)
+            }, config.plantGrowingMilliseconds)
+          }, config.plantGrowingMilliseconds)
           return
         }
         return
@@ -253,10 +253,10 @@ export default function SudokuArea(props: SudokuAreaProps) {
             enableExtinguisher(NegativeEffectEmoji.ExtinguishingSprayLarge, row, col)
             setTimeout(() => {
               enableExtinguisher(NegativeEffectEmoji.ExtinguishingSpray, row, col)
-              setTimeout(() => endExtinguisher(row, col), 300)
-            }, 100)
-          }, 100)
-        }, 100)
+              setTimeout(() => endExtinguisher(row, col), config.extinguisherSprayMilliseconds)
+            }, config.extinguisherSprayMilliseconds)
+          }, config.extinguisherSprayMilliseconds)
+        }, config.extinguisherSprayMilliseconds)
         return
       default:
         return alert('Not implemented yet')
@@ -332,13 +332,13 @@ export default function SudokuArea(props: SudokuAreaProps) {
           return s.deleteCell(JSON.parse(fireStartString)[0], JSON.parse(fireStartString)[1])
         })
         
-      }, 6000)
+      }, config.fireBurnsNumberMilliseconds)
       return new Map(f.set(fireStartString, newTimeout))
     })
     let isFire = true
     while (isFire) {
       setEffects(e => e.add(fireEffect))
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      await new Promise(resolve => setTimeout(resolve, config.fireSpreadsMilliseconds))
       setPlacedEffectLocations(e => {
         let fireLocations = []
         for (let r = 0; r < 9; r++) {
@@ -369,7 +369,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
           
           const newTimeout = setTimeout(() => {
             setSudoku(s => s.deleteCell(JSON.parse(newFireLocation)[0], JSON.parse(newFireLocation)[1]))
-          }, 6000)
+          }, config.fireBurnsNumberMilliseconds)
           return new Map(f.set(newFireLocation, newTimeout))
         })
         return new Map(e.set(newFireLocation, NegativeEffectEmoji.Fire))
