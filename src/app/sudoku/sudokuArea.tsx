@@ -329,7 +329,9 @@ export default function SudokuArea(props: SudokuAreaProps) {
       if (f.get(fireStartString)) return f
       const newTimeout = setTimeout(() => {
         setSudoku(s => {
-          return s.deleteCell(JSON.parse(fireStartString)[0], JSON.parse(fireStartString)[1])
+          const newSudoku = s.deleteCell(JSON.parse(fireStartString)[0], JSON.parse(fireStartString)[1])
+          setHint(newSudoku.getHint())
+          return newSudoku
         })
         
       }, config.fireBurnsNumberMilliseconds)
@@ -368,7 +370,10 @@ export default function SudokuArea(props: SudokuAreaProps) {
           if (f.get(newFireLocation)) return f
           
           const newTimeout = setTimeout(() => {
-            setSudoku(s => s.deleteCell(JSON.parse(newFireLocation)[0], JSON.parse(newFireLocation)[1]))
+            setSudoku(s => {
+              const newSudoku = s.deleteCell(JSON.parse(newFireLocation)[0], JSON.parse(newFireLocation)[1])
+              setHint(newSudoku.getHint())
+              return newSudoku            })
           }, config.fireBurnsNumberMilliseconds)
           return new Map(f.set(newFireLocation, newTimeout))
         })

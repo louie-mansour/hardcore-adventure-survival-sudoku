@@ -7,7 +7,7 @@ export interface SudokuConfig {
   maxSudokuTimeHours: number,
   meanSecondsBetweenFires: number,
   fireSpreadsMilliseconds: number,
-  extinguisherSprayMilliseconds: number,
+  extinguisherSprayMilliseconds: number,XF
   fireBurnsNumberMilliseconds: number,
   plantGrowingMilliseconds: number,
 }
