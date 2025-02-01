@@ -9,13 +9,7 @@ import Title from "./title";
 import { determineItemLocations, Item } from '../../models/item'
 import { SudokuConfig } from "@/config";
 import HowToPlay from "./howToPlay";
-import { determineEffectTimings, NegativeEffect } from "@/models/effect";
-
-export enum GameMode {
-  Hardcore = 'Hardcore',
-  Normal = 'Normal',
-  OngoingHints = 'OngoingHints',
-}
+import { determineEffectTimings, NegativeEffect, NegativeEffectEmoji } from "@/models/effect";
 
 interface PlayAreaProps {
   config: SudokuConfig
@@ -31,6 +25,8 @@ export default function PlayArea(props: PlayAreaProps) {
   const [negativeEffectTimers, setNegativeEffectTimers] = useState<Map<number, NegativeEffect[]>>(new Map())
   const [gameTimer, setGameTimer] = useState<number>(0)
   const gameTimerTimout = useRef<NodeJS.Timeout | null>(null)
+  const [placedEffectLocations, setPlacedEffectLocations] = useState<Map<string, NegativeEffectEmoji>>(new Map())
+
   
   if (!gameTimerTimout.current) {
     gameTimerTimout.current = setInterval(() => {
@@ -74,7 +70,14 @@ export default function PlayArea(props: PlayAreaProps) {
         if (!confirm(e.message)) {
           return g
         }
-        setSudoku(findSudoku({ difficulty: e.game.difficulty }))
+        setSudoku(s => {
+          const newS = findSudoku({ difficulty: e.game.difficulty })
+          setItemLocations(determineItemLocations(newS))
+          setNegativeEffectTimers(determineEffectTimings())
+          setGameTimer(0)
+          setPlacedEffectLocations(new Map())
+          return newS
+        })
         return e.game
       } finally {
         setNewGame(null)
@@ -104,6 +107,8 @@ export default function PlayArea(props: PlayAreaProps) {
             gameTimer={gameTimer}
             config={config}
             negativeEffectTimers={negativeEffectTimers}
+            placedEffectLocations={placedEffectLocations}
+            setPlacedEffectLocations={setPlacedEffectLocations as any}
           />
         </div>
       </div>

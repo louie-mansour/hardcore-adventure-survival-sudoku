@@ -20,10 +20,12 @@ interface SudokuAreaProps {
   gameTimer: number
   config: SudokuConfig
   negativeEffectTimers: Map<number, NegativeEffect[]>
+  placedEffectLocations: Map<string, NegativeEffectEmoji>
+  setPlacedEffectLocations: (value: any) => Map<string, NegativeEffectEmoji>
 }
 
 export default function SudokuArea(props: SudokuAreaProps) {
-  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, gameTimer, config, negativeEffectTimers } = props
+  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, gameTimer, config, negativeEffectTimers, placedEffectLocations, setPlacedEffectLocations } = props
 
   const [sudoku, setSudoku] = useState<Sudoku>(() => initialSudoku)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
@@ -34,7 +36,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [items, setItems] = useState(initItems())
   const [placedItemLocations, setPlacedItemLocations] = useState<[ItemEmoji, number, number][]>([])
   const [effects, setEffects] = useState<Set<NegativeEffect>>(initEffects())
-  const [placedEffectLocations, setPlacedEffectLocations] = useState<Map<string, NegativeEffectEmoji>>(new Map())
   const [isNote, setIsNote] = useState<boolean>(false)
   const [numberOfShields, setNumberOfShields] = useState(0)
   const [plantLocations, setPlantLocations] = useState<Set<string>>(new Set())
@@ -114,13 +115,13 @@ export default function SudokuArea(props: SudokuAreaProps) {
   }
 
   function placeEffect(emoji: NegativeEffectEmoji, row: number, col: number) {
-    setPlacedEffectLocations(e => {
-      return new Map(e.set(JSON.stringify([row, col]), emoji)) // TODO: It appears we need a new map for this to render. I suspect it's related to the reference
+    setPlacedEffectLocations((e: Map<string, NegativeEffectEmoji>) => {
+      return new Map<string, NegativeEffectEmoji>(e.set(JSON.stringify([row, col]), emoji)) // TODO: It appears we need a new map for this to render. I suspect it's related to the reference
     })
   }
 
   function deleteEffect(row: number, col: number) {
-    setPlacedEffectLocations(e => {
+    setPlacedEffectLocations((e: Map<string, NegativeEffectEmoji>) => {
       e.delete(JSON.stringify([row, col]))
       return new Map(e)
     })
@@ -316,7 +317,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
   async function enableFire(r: number, c: number) {
     const fireEffect = NegativeEffect.factory(NegativeEffectName.Fire)
     const fireStartString = JSON.stringify([r, c])
-    setPlacedEffectLocations(e => new Map(e.set(fireStartString, NegativeEffectEmoji.Fire)))
+    setPlacedEffectLocations((e: Map<string, NegativeEffectEmoji>) => new Map(e.set(fireStartString, NegativeEffectEmoji.Fire)))
     setFireTimeouts(f => {
       if (f.get(fireStartString)) return f
       const newTimeout = setTimeout(() => {
@@ -338,7 +339,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
     while (isFire) {
       setEffects(e => e.add(fireEffect))
       await new Promise(resolve => setTimeout(resolve, config.fireSpreadsMilliseconds))
-      setPlacedEffectLocations(e => {
+      setPlacedEffectLocations((e: Map<string, NegativeEffectEmoji>) => {
         let fireLocations = []
         for (let r = 0; r < 9; r++) {
           for (let c = 0; c < 9; c++) {
