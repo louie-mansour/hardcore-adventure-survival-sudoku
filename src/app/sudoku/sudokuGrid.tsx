@@ -22,6 +22,8 @@ interface Sudoku9x9GridProps {
   placedEffectLocations: Map<string, NegativeEffectEmoji>
   gameTimer: number
   config: SudokuConfig
+  numberOfLives: number
+  setNumberOfLives: (value: any) => number
 }
 
 interface Sudoku3x3GridProps {
@@ -52,10 +54,9 @@ Sudoku9x9GridProps & {
 } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
-  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations, gameTimer } = props
+  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations, gameTimer, numberOfLives, setNumberOfLives } = props
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
-  const [numberOfLives, setNumberOfLives] = useState<number>(config.startingNumberOfLives)
   const maskStRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {
@@ -111,9 +112,9 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
   )
 
   function decreaseLife(mistakes: Map<number, [number, number, CellValue]>) {
-    setNumberOfLives(l => {
+    setNumberOfLives((l: number) => {
       if (l === 0) {
-        return 0
+      return 0
       }
       return config.startingNumberOfLives - mistakes.size
     })

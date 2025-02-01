@@ -27,7 +27,8 @@ export default function PlayArea(props: PlayAreaProps) {
   const [gameTimer, setGameTimer] = useState<number>(0)
   const gameTimerTimout = useRef<NodeJS.Timeout | null>(null)
   const [placedEffectLocations, setPlacedEffectLocations] = useState<Map<string, NegativeEffectEmoji>>(new Map())
-  // const [showGameOver, setShowGameOver] = useState(false);
+  const [numberOfLives, setNumberOfLives] = useState<number>(config.startingNumberOfLives)
+
 
   
   if (!gameTimerTimout.current) {
@@ -78,6 +79,7 @@ export default function PlayArea(props: PlayAreaProps) {
           setNegativeEffectTimers(determineEffectTimings())
           setGameTimer(0)
           setPlacedEffectLocations(new Map())
+          setNumberOfLives(config.startingNumberOfLives)
           return newS
         })
         return e.game
@@ -117,6 +119,8 @@ export default function PlayArea(props: PlayAreaProps) {
             negativeEffectTimers={negativeEffectTimers}
             placedEffectLocations={placedEffectLocations}
             setPlacedEffectLocations={setPlacedEffectLocations as any}
+            numberOfLives={numberOfLives}
+            setNumberOfLives={setNumberOfLives as any}
           />
         </div>
       </div>

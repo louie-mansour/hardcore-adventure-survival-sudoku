@@ -22,10 +22,12 @@ interface SudokuAreaProps {
   negativeEffectTimers: Map<number, NegativeEffect[]>
   placedEffectLocations: Map<string, NegativeEffectEmoji>
   setPlacedEffectLocations: (value: any) => Map<string, NegativeEffectEmoji>
+  numberOfLives: number
+  setNumberOfLives: (value: any) => number
 }
 
 export default function SudokuArea(props: SudokuAreaProps) {
-  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, gameTimer, config, negativeEffectTimers, placedEffectLocations, setPlacedEffectLocations } = props
+  const { initialSudoku, itemLocations, removeItemLocation, gameStart, gameOver, gameComplete, gameTimer, config, negativeEffectTimers, placedEffectLocations, setPlacedEffectLocations, numberOfLives, setNumberOfLives } = props
 
   const [sudoku, setSudoku] = useState<Sudoku>(() => initialSudoku)
   const [selectedCell, setSelectedCell] = useState<[number, number]>([0, 0])
@@ -95,6 +97,8 @@ export default function SudokuArea(props: SudokuAreaProps) {
         placedEffectLocations={new Map([ ...placedEffectLocations])}
         gameTimer={gameTimer}
         config={config}
+        numberOfLives={numberOfLives}
+        setNumberOfLives={setNumberOfLives}
       />
       <Toolbox
         putValueInCell={putValueInCell}
