@@ -142,7 +142,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         return updatedSudoku
       } catch (error: unknown) {
         if (error instanceof MistakeError) {
-          setMistakes(m => m.set(now, [row, col, value]))
+          setMistakes(m => new Map([...m.set(now, [row, col, value])]))
         }
         return s
       }
@@ -239,13 +239,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         if (!item.use()) {
           return
         }
-        // Louie you are here:
-        // TODO: Need a new data structure for negative effects. Here is why:
-        // If a fire is present, or as it is being extinguished
-        // The number or item underneath should continue as normal
-        // This means that effects need to be a layer on top of the items and numbers
-        // We also need to remove all of the nagative effects from a cell (e.g. fire extinguisher is complete)
-        // So we should not be allowed to have more than one negative effect on a cell. With the current data structure, multiple are allowed
+
         enableExtinguisher(NegativeEffectEmoji.ExtinguishingSpraySmall, row, col)
         setTimeout(() => { // TODO: Promises with await/then would be nicer
           enableExtinguisher(NegativeEffectEmoji.ExtinguishingSprayMedium, row, col)
@@ -330,7 +324,12 @@ export default function SudokuArea(props: SudokuAreaProps) {
       const newTimeout = setTimeout(() => {
         setSudoku(s => {
           const newSudoku = s.deleteCell(JSON.parse(fireStartString)[0], JSON.parse(fireStartString)[1])
-          setHint(newSudoku.getHint())
+          setHint(h => {
+            if (h) {
+              return newSudoku.getHint();
+            }
+            return null;
+          })
           return newSudoku
         })
         
@@ -372,8 +371,14 @@ export default function SudokuArea(props: SudokuAreaProps) {
           const newTimeout = setTimeout(() => {
             setSudoku(s => {
               const newSudoku = s.deleteCell(JSON.parse(newFireLocation)[0], JSON.parse(newFireLocation)[1])
-              setHint(newSudoku.getHint())
-              return newSudoku            })
+              setHint(h => {
+                if (h) {
+                  return newSudoku.getHint();
+                }
+                return null;
+              })
+              return newSudoku
+            })
           }, config.fireBurnsNumberMilliseconds)
           return new Map(f.set(newFireLocation, newTimeout))
         })

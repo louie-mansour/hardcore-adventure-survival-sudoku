@@ -24,7 +24,9 @@ export default function Toolbox(props: ToolboxProps) {
           <div
             className="cursor-pointer"
             key={el}
-            onClick={ () => putValueInCell(el as CellValue) }
+            onClick={() => {
+              putValueInCell(el as CellValue)
+            }}
           >
             <p className="text-5xl text-numbers-text-light">
               {el}

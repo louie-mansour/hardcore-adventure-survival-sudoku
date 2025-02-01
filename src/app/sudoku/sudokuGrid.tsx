@@ -219,9 +219,6 @@ function SudokuCell(props: SudokuCellProps) {
       return
     }
     putValueInCell(value)
-    // This is a hack. I don't know why this works but selecting the cell causes a re-render.
-    // Without selecting the cell, the re-render doesn't happen and the mistakes are shown after the next click
-    selectCell([row, col]) 
   }
 
   function determineBackgroundColor(): string {
