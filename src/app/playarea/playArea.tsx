@@ -14,22 +14,21 @@ import { createPortal } from "react-dom";
 
 interface PlayAreaProps {
   config: SudokuConfig
+  sudokuNumber: number
 }
 
-export default function PlayArea(props: PlayAreaProps) {
-  const { config } = props
+export default function PlayArea(props: PlayAreaProps) {  
+  const { config, sudokuNumber } = props
   const [game, setGame] = useState<Game>(new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
-  // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
-  const [sudoku, setSudoku] = useState<Sudoku>(() => findSudoku({ difficulty: game.difficulty, index: 4 }))
+  // This is a hack but it works. We need the same random number generated on the server and on the client
+  const [sudoku, setSudoku] = useState<Sudoku>(() => findSudoku({ difficulty: game.difficulty, index: Number(document.getElementById('sudoku-number')?.getAttribute('data-sn') ?? sudokuNumber) }))
   const [itemLocations, setItemLocations] = useState<[Item, number, number, boolean][]>([])
   const [negativeEffectTimers, setNegativeEffectTimers] = useState<Map<number, NegativeEffect[]>>(new Map())
   const [gameTimer, setGameTimer] = useState<number>(0)
   const gameTimerTimout = useRef<NodeJS.Timeout | null>(null)
   const [placedEffectLocations, setPlacedEffectLocations] = useState<Map<string, NegativeEffectEmoji>>(new Map())
   const [numberOfLives, setNumberOfLives] = useState<number>(config.startingNumberOfLives)
-
-
   
   if (!gameTimerTimout.current) {
     gameTimerTimout.current = setInterval(() => {
@@ -46,7 +45,6 @@ export default function PlayArea(props: PlayAreaProps) {
   }
 
   // TODO: Not sure why useEffect is needed here
-  // Louie - Need to implement the game going into 'In Progress' so we can ask the user if they want to confirm starting a new game
   useEffect(() => {
     if (sudoku && itemLocations.length === 0) {
       setItemLocations(determineItemLocations(sudoku))
