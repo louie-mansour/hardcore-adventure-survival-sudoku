@@ -10,6 +10,7 @@ import { determineItemLocations, Item } from '../../models/item'
 import { SudokuConfig } from "@/config";
 import HowToPlay from "./howToPlay";
 import { determineEffectTimings, NegativeEffect, NegativeEffectEmoji } from "@/models/effect";
+import { createPortal } from "react-dom";
 
 interface PlayAreaProps {
   config: SudokuConfig
@@ -26,6 +27,7 @@ export default function PlayArea(props: PlayAreaProps) {
   const [gameTimer, setGameTimer] = useState<number>(0)
   const gameTimerTimout = useRef<NodeJS.Timeout | null>(null)
   const [placedEffectLocations, setPlacedEffectLocations] = useState<Map<string, NegativeEffectEmoji>>(new Map())
+  // const [showGameOver, setShowGameOver] = useState(false);
 
   
   if (!gameTimerTimout.current) {
@@ -85,14 +87,20 @@ export default function PlayArea(props: PlayAreaProps) {
     })
   }
 
-  if (game.state === GameState.Fail) {
-    return <div>Game Over</div>
-  }
-
   return (
     <div className="w-full h-full	flex flex-row justify-center bg-page-outside-light h-svh">
       <div className="bg-page-inside-light w-full max-w-2xl">
         <div className='h-screen flex flex-col justify-evenly my-0 mx-5 h-svh gap-2 pt-8'>
+          { game.state === GameState.Fail && createPortal(
+            <GameOverModal
+              onNewGame={() => requestNewGame(game.difficulty)}
+            />, document.body
+          )}
+          { game.state === GameState.Success && createPortal(
+            <SuccessModal
+              onNewGame={() => requestNewGame(game.difficulty)}
+            />, document.body
+          )}
           <Title />
           <HowToPlay gamePause={gamePause} gameStart={gameStart} />
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />
@@ -168,4 +176,36 @@ export default function PlayArea(props: PlayAreaProps) {
       return Game.clone(g)
     })
   }
+}
+
+function GameOverModal({ onNewGame } : { onNewGame: () => void }) {
+  return (
+    <div 
+      className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+    >
+      <div 
+        className="modal relative p-4 bg-white rounded shadow-md flex flex-col items-center"
+        style={{ width: 'fit-content', height: 'fit-content' }}
+      >
+        <div>☠️ Game Over ☠️</div>
+        <button onClick={onNewGame} className="mt-4 p-2 bg-red-500 text-white rounded">New Game</button>
+      </div>
+    </div>
+  );
+}
+
+function SuccessModal({ onNewGame } : { onNewGame: () => void }) {
+  return (
+    <div 
+      className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+    >
+      <div 
+        className="modal relative p-4 bg-white rounded shadow-md flex flex-col items-center"
+        style={{ width: 'fit-content', height: 'fit-content' }}
+      >
+        <div>🎉 You win! 🎉</div>
+        <button onClick={onNewGame} className="mt-4 p-2 bg-red-500 text-white rounded">New Game</button>
+      </div>
+    </div>
+  );
 }
