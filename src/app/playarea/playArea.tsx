@@ -2,7 +2,7 @@ import { EndGameError } from "@/models/errors/endGame";
 import { Game, GameDifficulty, GameState } from "@/models/game";
 import { Sudoku } from "@/models/sudoku";
 import { findSudoku } from "@/services/sudokuService";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SudokuArea from "../sudoku/sudokuArea";
 import DifficultySelector from "./difficultySelector";
 import Title from "./title";
@@ -23,23 +23,28 @@ interface PlayAreaProps {
 
 export default function PlayArea(props: PlayAreaProps) {
   const { config } = props
-  const [game, setGame] = useState<Game>(() => new Game())
+  const [game, setGame] = useState<Game>(new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
   // TODO: this renders multiple times. The hack is to set the index explicitly so it's idempotent
   const [sudoku, setSudoku] = useState<Sudoku>(() => findSudoku({ difficulty: game.difficulty, index: 4 }))
   const [itemLocations, setItemLocations] = useState<[Item, number, number, boolean][]>([])
   const [negativeEffectTimers, setNegativeEffectTimers] = useState<Map<number, NegativeEffect[]>>(new Map())
   const [gameTimer, setGameTimer] = useState<number>(0)
+  const gameTimerTimout = useRef<NodeJS.Timeout | null>(null)
   
-  useEffect(() => {
-    setInterval(() => {
-      if (game.state !== GameState.InProgress) {
-        return
-      }
-      setGameTimer(t => t + 1)
+  if (!gameTimerTimout.current) {
+    gameTimerTimout.current = setInterval(() => {
+      let currentGameState
+      setGame(g => { // Work around in order to access current game in the setInterval closures
+        currentGameState = g.state
+        if (currentGameState !== GameState.InProgress) {
+          return g
+        }
+        setGameTimer(t => t + 1)
+        return g
+      })
     }, 1000)
-  }, [])
-
+  }
 
   // TODO: Not sure why useEffect is needed here
   // Louie - Need to implement the game going into 'In Progress' so we can ask the user if they want to confirm starting a new game
@@ -126,28 +131,28 @@ export default function PlayArea(props: PlayAreaProps) {
   function gameStart() {
     setGame(g => {
       g.start()
-      return g
+      return Game.clone(g)
     })
   }
 
   function gamePause() {
     setGame(g => {
       g.pause()
-      return g
+      return Game.clone(g)
     })
   }
 
   function gameOver() {
     setGame(g => {
       g.fail()
-      return g
+      return Game.clone(g)
     })
   }
 
   function gameComplete() {
     setGame(g => {
       g.complete()
-      return g
+      return Game.clone(g)
     })
   }
 
@@ -155,7 +160,7 @@ export default function PlayArea(props: PlayAreaProps) {
     setSudoku(s => s.getSolution())
     setGame(g => {
       g.complete()
-      return g
+      return Game.clone(g)
     })
   }
 }

@@ -22,10 +22,13 @@ export class Game {
   constructor(
     difficulty: GameDifficulty = GameDifficulty.Easy,
     state: GameState = GameState.Intial,
-    // counterCallback: ({ seconds }: { seconds: number}) => void,
   ) {
     this.difficulty = difficulty
     this.state = state
+  }
+
+  static clone(game: Game): Game {
+    return new Game(game.difficulty, game.state)
   }
 
   start(): boolean {

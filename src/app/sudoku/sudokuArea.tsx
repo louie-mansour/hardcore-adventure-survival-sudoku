@@ -40,14 +40,18 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [plantLocations, setPlantLocations] = useState<Set<string>>(new Set())
   const [fireTimeouts, setFireTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map())
 
-  // TODO: This is broken. Come back to it when other things are fixed
-  // useEffect(() => {
-  //   if(sudoku.isSolved()) {
-  //     // gameComplete()
-  //     return
-  //   }
-  //   gameStart() // TODO: This constantly puts the game into inProgress mode. There's probably a better way of doing this
-  // }, [sudoku, gameStart, gameComplete])
+  // TODO: There is likely a way to do this without using useEffect
+  useEffect(() => {
+    if(sudoku.isSolved()) {
+      gameComplete()
+      return
+    }
+    gameStart()
+  }, [sudoku])
+
+  useEffect(() => {
+    gameStart() 
+  }, [])
 
   useEffect(() => {
     const negativeEffectTimerLookup = negativeEffectTimers.get(gameTimer)
@@ -55,12 +59,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
       negativeEffectTimerLookup.forEach(effect => enableEffect(effect))
     }
   }, [gameTimer])
-
-
-
-  useEffect(() => {
-    gameStart()
-  }, [])
 
   useEffect(() => {
     reset()
@@ -264,7 +262,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         Item.factory(ItemName.FireExtinguisher),
         Item.factory(ItemName.MagicWand),
         Item.factory(ItemName.CrystalBall),
-        Item.factory(ItemName.GameDie),
+        // Item.factory(ItemName.GameDie),
         Item.factory(ItemName.Plant),
 
         // Don't appear in item bar
