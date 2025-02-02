@@ -17,7 +17,7 @@ export class Item {
       // case ItemName.GameDie:
       //   return new Item(ItemName.GameDie, ItemEmoji.GameDie, 'Reveal a random value between 1-6', 1)
       case ItemName.MagicWand:
-        return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any cell with the correct value', 200)
+        return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any cell with the correct value', 1)
       case ItemName.Placeholder:
         return new Item(ItemName.Placeholder, ItemEmoji.Placeholder, 'Not a real item. This is a placeholder', 1, false)
       case ItemName.Plant:
@@ -36,12 +36,6 @@ export class Item {
       //   return new Item(ItemName.Cheese, ItemEmoji.Cheese, 'Stop rats from blocking your view', 'Infinite')
       // case ItemName.Hand:
       //   return new Item(ItemName.Hand, ItemEmoji.Hand, 'Rotate the board back in place', 'Infinite')
-      // case ItemName.MagnifyingGlass:
-      //   return new Item(ItemName.MagnifyingGlass, ItemEmoji.MagnifyingGlass, 'Get a hint. Or reveal the value of a hint', 'Infinite')
-      // case ItemName.BabyBottle:
-      //   return new Item(ItemName.BabyBottle, ItemEmoji.BabyBottle, 'Get a hint. Or reveal the value of a hint', 'Infinite')
-      // case ItemName.Surrender:
-      //   return new Item(ItemName.Surrender, ItemEmoji.Surrender, 'Give up. Reveal the solution', 1)
     }
   }
 
