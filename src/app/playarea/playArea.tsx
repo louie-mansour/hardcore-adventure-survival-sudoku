@@ -22,7 +22,7 @@ export default function PlayArea(props: PlayAreaProps) {
   const [game, setGame] = useState<Game>(new Game())
   const [newGame, setNewGame] = useState<Game | null>(null)
   // This is a hack but it works. We need the same random number generated on the server and on the client
-  const [sudoku, setSudoku] = useState<Sudoku>(() => findSudoku({ difficulty: game.difficulty, index: Number(document.getElementById('sudoku-number')?.getAttribute('data-sn') ?? sudokuNumber) }))
+  const [sudoku, setSudoku] = useState<Sudoku>(() => findSudoku({ difficulty: game.difficulty, index: sudokuNumber })) // Number(document?.getElementById('sudoku-number')?.getAttribute('data-sn') ?? sudokuNumber) }))
   const [itemLocations, setItemLocations] = useState<[Item, number, number, boolean][]>([])
   const [negativeEffectTimers, setNegativeEffectTimers] = useState<Map<number, NegativeEffect[]>>(new Map())
   const [gameTimer, setGameTimer] = useState<number>(0)
@@ -56,6 +56,25 @@ export default function PlayArea(props: PlayAreaProps) {
   useEffect(() => {
     setNegativeEffectTimers(determineEffectTimings())
   }, [])
+
+  useEffect(() => {
+    if(game.state === GameState.Fail) {
+      createPortal(
+        <GameOverModal
+          onNewGame={() => requestNewGame(game.difficulty)}
+        />,
+        document.body
+      )
+    }
+    if (game.state === GameState.Success) {
+      createPortal(
+        <SuccessModal
+          onNewGame={() => requestNewGame(game.difficulty)}
+        />,
+        document.body
+      )
+    }
+  }, [game])
 
   if (newGame) {
     setGame(g => {
@@ -91,16 +110,6 @@ export default function PlayArea(props: PlayAreaProps) {
     <div className="w-full h-full	flex flex-row justify-center bg-page-outside-light h-svh">
       <div className="bg-page-inside-light w-full max-w-2xl">
         <div className='h-screen flex flex-col justify-evenly my-0 mx-5 h-svh gap-2 pt-8'>
-          { game.state === GameState.Fail && createPortal(
-            <GameOverModal
-              onNewGame={() => requestNewGame(game.difficulty)}
-            />, document.body
-          )}
-          { game.state === GameState.Success && createPortal(
-            <SuccessModal
-              onNewGame={() => requestNewGame(game.difficulty)}
-            />, document.body
-          )}
           <Title />
           <HowToPlay gamePause={gamePause} gameStart={gameStart} />
           <DifficultySelector requestNewGame={requestNewGame} difficulty={game.difficulty} />

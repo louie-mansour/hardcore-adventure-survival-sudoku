@@ -1,7 +1,7 @@
 import { EFFECT_LIST } from "@/models/effect";
 import { ITEM_LIST } from "@/models/item";
 import { howToPlayText } from "@/text";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface HowToPlayProps {
@@ -12,6 +12,18 @@ interface HowToPlayProps {
 export default function HowToPlay(props: HowToPlayProps) {
   const { gamePause, gameStart } = props
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    if(showModal) {
+      createPortal(
+        <ModalContent onClose={() => {
+          setShowModal(false)
+          gameStart()
+        }} />,
+        document.body
+      )
+    }
+  }, [showModal])
 
   return (
     <div className="flex flex-row justify-center gap-x-9">
@@ -29,7 +41,7 @@ export default function HowToPlay(props: HowToPlayProps) {
           setShowModal(false)
           gameStart()
         }} />,
-        document.body
+        document?.body
       )}
     </div>
   )
@@ -48,7 +60,7 @@ function ModalContent({ onClose } : { onClose: () => void }) {
         <div className="m-4 flex flex-col gap-y-4 align-center justify-center">
           <div>
             <h2><strong>Instructions</strong></h2>
-            <p>Hearts ❤️ are your life, if they run out it's game over ☠️.</p>
+            <p>Hearts ❤️ are your life, if they run out it&apos;s game over ☠️.</p>
             <p>The board will catch fire 🔥, lights will dim 🌑, and daggers 🗡️ will stab.</p>
             <p>Items 🛡️ will help you overcome the challenges.</p>
           </div>
