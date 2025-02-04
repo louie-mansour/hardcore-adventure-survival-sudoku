@@ -24,6 +24,7 @@ interface Sudoku9x9GridProps {
   config: SudokuConfig
   numberOfLives: number
   setNumberOfLives: (value: any) => number
+  isVolcanoErupting: boolean
 }
 
 interface Sudoku3x3GridProps {
@@ -54,7 +55,7 @@ Sudoku9x9GridProps & {
 } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
-  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations, gameTimer, numberOfLives, setNumberOfLives } = props
+  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations, gameTimer, numberOfLives, setNumberOfLives, isVolcanoErupting } = props
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
   const maskStRef = useRef<NodeJS.Timeout>()
@@ -75,6 +76,8 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
     maskStRef.current = setTimeout(() => { setIsMaskItems(true) }, config.itemDisplayTimeoutMilliseconds)
   }, [emojiLocations])
 
+  const shakeAnimation = isVolcanoErupting ? 'shake-animation' : ''
+
   return (
     <div className='w-fit'>
       <div className='flex flex-row justify-between'>
@@ -90,7 +93,7 @@ export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
           <GameTimer gameTimer={gameTimer} />
         </div>
       </div>
-    <div className='grid'
+    <div className={`grid ${shakeAnimation}`}
       style={{
         gridTemplateRows: '7.1rem 7.1rem 7.1rem', // TODO: The sizes aren't correct - need to revisit this to make it better
         gridTemplateColumns: '7.1rem 7.1rem 7.1rem',

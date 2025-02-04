@@ -42,6 +42,8 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [numberOfShields, setNumberOfShields] = useState(0)
   const [plantLocations, setPlantLocations] = useState<Set<string>>(new Set())
   const [fireTimeouts, setFireTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map())
+  const [isVolcanoErupting, setIsVolcanoErupting] = useState(false)
+  const [volcanoTimeout, setVolcanoTimeout] = useState<NodeJS.Timeout>()
 
   // TODO: There is likely a way to do this without using useEffect
   useEffect(() => {
@@ -99,6 +101,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         config={config}
         numberOfLives={numberOfLives}
         setNumberOfLives={setNumberOfLives}
+        isVolcanoErupting={isVolcanoErupting}
       />
       <Toolbox
         putValueInCell={putValueInCell}
@@ -313,9 +316,26 @@ export default function SudokuArea(props: SudokuAreaProps) {
     switch (value.name) {
       case NegativeEffectName.Fire:
         return await enableFire(r, c);
+      case NegativeEffectName.Volcano:
+        return await enableVolcano();
       default:
         return alert('Not implemented yet')
     }
+  }
+
+  async function enableVolcano() {
+    const volcanoEffect =  NegativeEffect.factory(NegativeEffectName.Volcano)
+    clearTimeout(volcanoTimeout)
+    setIsVolcanoErupting(true)
+    setEffects(e => e.add(volcanoEffect))
+    const newVolcanoTimeout = setTimeout(() => {
+      setEffects(e => {
+        e.delete(volcanoEffect)
+        return e
+      })
+      setIsVolcanoErupting(false)
+    }, config.volcanoTimeoutSeconds * 1000)
+    setVolcanoTimeout(newVolcanoTimeout)
   }
 
   async function enableFire(r: number, c: number) {
