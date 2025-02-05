@@ -40,19 +40,28 @@ const config: Config = {
             light: black,
           },
           selected: {
-            light: colors.blue[500],
+            light: {
+              normal: colors.blue[500],
+              darkness: colors.red[950],
+            },
           },
           highlight: {
-            light: colors.blue[100],
+            light: {
+              normal: colors.blue[100],
+              darkness: colors.red[900],
+            },
+          },
+          cell: {
+            light: {
+              normal: colors.white,
+              darkness: colors.gray[900],
+            },
           },
           mistake: {
             light: colors.red[500],
           },
           hint: {
             light: colors.green[500],
-          },
-          cell: {
-            light: colors.transparent,
           },
           draft: {
             light: black,

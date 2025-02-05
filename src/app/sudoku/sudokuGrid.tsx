@@ -25,6 +25,7 @@ interface Sudoku9x9GridProps {
   numberOfLives: number
   setNumberOfLives: (value: any) => number
   isVolcanoErupting: boolean
+  isDarkness: boolean
 }
 
 interface Sudoku3x3GridProps {
@@ -55,7 +56,7 @@ Sudoku9x9GridProps & {
 } | undefined>(undefined);
 
 export default function Sudoku9x9Grid(props: Sudoku9x9GridProps) {
-  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations, gameTimer, numberOfLives, setNumberOfLives, isVolcanoErupting } = props
+  const { emojiLocations, gameover, numberOfShields, mistakes, inputs, config, placedEffectLocations, gameTimer, numberOfLives, setNumberOfLives, isVolcanoErupting, isDarkness } = props
   const [isMaskItems, setIsMaskItems] = useState(false)
   const [displayedErrors, setDisplayedErrors] = useState<Map<number, [number, number, CellValue]>>(new Map())
   const maskStRef = useRef<NodeJS.Timeout>()
@@ -143,7 +144,7 @@ function Sudoku3x3Grid(props: Sudoku3x3GridProps) {
 
 function SudokuCell(props: SudokuCellProps) {
   const context = useContext(SudokuContext)!
-  const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, displayedErrors, setDisplayedErrors, config } = context
+  const { sudoku, hint, selectCell, selectedCell, emojiLocations, isMaskItems, decreaseLife, notes, putValueInCell, placedItemLocations, displayedErrors, setDisplayedErrors, config, isDarkness } = context
   const { row, col, mistakes, placedEffectLocations } = props
   const [isMistake, setIsMistake] = useState(false)
   const cell = sudoku.getCells()[row][col]
@@ -161,7 +162,7 @@ function SudokuCell(props: SudokuCellProps) {
     }
   }, undefined)
 
-  const backgroundColor = determineBackgroundColor()
+  const backgroundColor = determineBackgroundColor(isDarkness)
 
   const emoji = emojiLocations.find(el => el[1] === row && el[2] === col)?.[0]
   const placedItem = placedItemLocations.find(el => el[1] === row && el[2] === col)?.[0]
@@ -225,13 +226,22 @@ function SudokuCell(props: SudokuCellProps) {
     putValueInCell(value)
   }
 
-  function determineBackgroundColor(): string {
+  function determineBackgroundColor(isDarkness: boolean): string {
     if (isMistake) {
       return 'bg-sudoku-mistake-light'
     }
     if (hint && hint[0] === row && hint[1] === col) {
       return 'bg-sudoku-hint-light'
     }
+    
+    const bgColor = colorBasedOnSelection()
+    if (isDarkness) {
+      return bgColor + '-darkness'
+    }
+    return bgColor + '-normal'
+  }
+
+  function colorBasedOnSelection(): string {
     if (selectedCell && selectedCell[0] === row && selectedCell[1] === col) {
       return 'bg-sudoku-selected-light'
     }

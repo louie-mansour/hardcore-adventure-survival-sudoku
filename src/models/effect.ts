@@ -53,10 +53,6 @@ export class NegativeEffect {
 
 export enum NegativeEffectName {
   Fire = 'Fire',
-  // ExtinguishingSpraySmall = 'ExtinguishingSpraySmall',
-  // ExtinguishingSprayMedium = 'ExtinguishingSprayMedium',
-  // ExtinguishingSprayLarge = 'ExtinguishingSprayLarge',
-  // ExtinguishingSpray = 'ExtinguishingSpray',
   // Coal = 'Coal',
   Turtle = 'Turtle',
   Volcano = 'Volcano',
@@ -90,8 +86,8 @@ export const EFFECT_LIST = [
   NegativeEffect.factory(NegativeEffectName.Fire),
   NegativeEffect.factory(NegativeEffectName.Volcano),
   NegativeEffect.factory(NegativeEffectName.Dizzy),
+  NegativeEffect.factory(NegativeEffectName.Darkness),
   // NegativeEffect.factory(NegativeEffectName.Turtle),
-  // NegativeEffect.factory(NegativeEffectName.Darkness),
   // NegativeEffect.factory(NegativeEffectName.Mirror),
   // NegativeEffect.factory(NegativeEffectName.Rat),
   // NegativeEffect.factory(NegativeEffectName.Dagger),
@@ -109,6 +105,11 @@ export function determineEffectTimings(): Map<number, NegativeEffect[]> {
     for (let i = config.meanSecondsBetweenEruptions; i < maxSudokuTimeSeconds; i += config.meanSecondsBetweenEruptions) {
       const eruptionTime = Math.floor(Math.random() * config.meanSecondsBetweenEruptions) + i
       effectTimings.set(eruptionTime, [...(effectTimings.get(eruptionTime) ?? []), NegativeEffect.factory(NegativeEffectName.Volcano)])
+    }
+
+    for (let i = config.meanSecondsBetweenDarknes; i < maxSudokuTimeSeconds; i += config.meanSecondsBetweenDarknes) {
+      const darknessTime = Math.floor(Math.random() * config.meanSecondsBetweenDarknes) + i
+      effectTimings.set(darknessTime, [...(effectTimings.get(darknessTime) ?? []), NegativeEffect.factory(NegativeEffectName.Darkness)])
     }
 
     return effectTimings

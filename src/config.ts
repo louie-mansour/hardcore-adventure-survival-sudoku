@@ -11,6 +11,8 @@ export interface SudokuConfig {
   fireBurnsNumberMilliseconds: number,
   meanSecondsBetweenEruptions: number,
   volcanoTimeoutSeconds: number,
+  meanSecondsBetweenDarknes: number,
+  darknessTimeoutSeconds: number,
   plantGrowingMilliseconds: number,
 }
 
@@ -31,7 +33,10 @@ export const config: SudokuConfig = {
   extinguisherSprayMilliseconds: Number(process.env.EXTINGUISHER_SPRAY_MILLISECONDS) || 50,
 
   meanSecondsBetweenEruptions: Number(process.env.MEAN_SECONDS_BETWEEEN_ERUPTIONS) || 80,
-  volcanoTimeoutSeconds: Number(process.env.VOLCANO_TIMEOUT_MILLISECONDS) || 7,
+  volcanoTimeoutSeconds: Number(process.env.VOLCANO_TIMEOUT_SECONDS) || 5,
+
+  meanSecondsBetweenDarknes: Number(process.env.MEAN_SECONDS_BETWEEEN_DARKNESS) || 120,
+  darknessTimeoutSeconds: Number(process.env.DARKNESS_TIMEOUT_SECONDS) || 15,
 
   plantGrowingMilliseconds: Number(process.env.PLANT_GROWING_MILLISECONDS) || 5000
 }

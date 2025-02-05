@@ -44,6 +44,8 @@ export default function SudokuArea(props: SudokuAreaProps) {
   const [fireTimeouts, setFireTimeouts] = useState<Map<string, NodeJS.Timeout>>(new Map())
   const [isVolcanoErupting, setIsVolcanoErupting] = useState(false)
   const [volcanoTimeout, setVolcanoTimeout] = useState<NodeJS.Timeout>()
+  const [isDarkness, setIsDarkness] = useState(false)
+  const [darknessTimeout, setDarknessTimeout] = useState<NodeJS.Timeout>()
 
   // TODO: There is likely a way to do this without using useEffect
   useEffect(() => {
@@ -102,6 +104,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         numberOfLives={numberOfLives}
         setNumberOfLives={setNumberOfLives}
         isVolcanoErupting={isVolcanoErupting}
+        isDarkness={isDarkness}
       />
       <Toolbox
         putValueInCell={putValueInCell}
@@ -318,9 +321,26 @@ export default function SudokuArea(props: SudokuAreaProps) {
         return await enableFire(r, c);
       case NegativeEffectName.Volcano:
         return await enableVolcano();
+      case NegativeEffectName.Darkness:
+        return await enableDarkness();
       default:
         return alert('Not implemented yet')
     }
+  }
+
+  async function enableDarkness() {
+    const darknessEffect =  NegativeEffect.factory(NegativeEffectName.Darkness)
+    clearTimeout(darknessTimeout)
+    setIsDarkness(true)
+    setEffects(e => e.add(darknessEffect))
+    const newDarknessTimeout = setTimeout(() => {
+      setEffects(e => {
+        e.delete(darknessEffect)
+        return e
+      })
+      setIsDarkness(false)
+    }, config.darknessTimeoutSeconds * 1000)
+    setDarknessTimeout(newDarknessTimeout)
   }
 
   async function enableVolcano() {
