@@ -27,16 +27,16 @@ export const config: SudokuConfig = {
 
   maxSudokuTimeHours: Number(process.env.MAX_SUDOKU_TIME_HOURS) || 24,
 
-  meanSecondsBetweenFires: Number(process.env.MEAN_SECONDS_BETWEEN_FIRES) || 40,
+  meanSecondsBetweenFires: Number(process.env.MEAN_SECONDS_BETWEEN_FIRES) || 80,
   fireSpreadsMilliseconds: Number(process.env.FIRE_SPREADS_MILLISECONDS) || 3000,
   fireBurnsNumberMilliseconds: Number(process.env.FIRE_BURNS_NUMBER_MILLISECONDS) || 6000,
   extinguisherSprayMilliseconds: Number(process.env.EXTINGUISHER_SPRAY_MILLISECONDS) || 50,
 
-  meanSecondsBetweenEruptions: Number(process.env.MEAN_SECONDS_BETWEEEN_ERUPTIONS) || 80,
+  meanSecondsBetweenEruptions: Number(process.env.MEAN_SECONDS_BETWEEEN_ERUPTIONS) || 120,
   volcanoTimeoutSeconds: Number(process.env.VOLCANO_TIMEOUT_SECONDS) || 5,
 
-  meanSecondsBetweenDarknes: Number(process.env.MEAN_SECONDS_BETWEEEN_DARKNESS) || 120,
+  meanSecondsBetweenDarknes: Number(process.env.MEAN_SECONDS_BETWEEEN_DARKNESS) || 240,
   darknessTimeoutSeconds: Number(process.env.DARKNESS_TIMEOUT_SECONDS) || 20,
 
-  plantGrowingMilliseconds: Number(process.env.PLANT_GROWING_MILLISECONDS) || 5000
+  plantGrowingMilliseconds: Number(process.env.PLANT_GROWING_MILLISECONDS) || 7000
 }
