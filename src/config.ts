@@ -35,7 +35,7 @@ export const config: SudokuConfig = {
   meanSecondsBetweenEruptions: Number(process.env.MEAN_SECONDS_BETWEEEN_ERUPTIONS) || 120,
   volcanoTimeoutSeconds: Number(process.env.VOLCANO_TIMEOUT_SECONDS) || 5,
 
-  meanSecondsBetweenDarknes: Number(process.env.MEAN_SECONDS_BETWEEEN_DARKNESS) || 240,
+  meanSecondsBetweenDarknes: Number(process.env.MEAN_SECONDS_BETWEEEN_DARKNESS) || 150,
   darknessTimeoutSeconds: Number(process.env.DARKNESS_TIMEOUT_SECONDS) || 20,
 
   plantGrowingMilliseconds: Number(process.env.PLANT_GROWING_MILLISECONDS) || 7000
