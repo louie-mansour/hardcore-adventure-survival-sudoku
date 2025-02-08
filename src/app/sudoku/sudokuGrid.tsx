@@ -234,21 +234,24 @@ function SudokuCell(props: SudokuCellProps) {
       return 'bg-sudoku-hint-light'
     }
     
-    const bgColor = colorBasedOnSelection()
+    // Limitation of Tailwind means we can dynamically construct these
+    // https://tailwindcss.com/docs/detecting-classes-in-source-files#dynamic-class-names
     if (isDarkness) {
-      return bgColor + '-darkness'
+      if (selectedCell && selectedCell[0] === row && selectedCell[1] === col) {
+        return 'bg-sudoku-selected-light-darkness'
+      }
+      if (selectedCell && (selectedCell[0] === row || selectedCell[1] === col || (get3x3Range(selectedCell[0]).includes(row) && get3x3Range(selectedCell[1]).includes(col))))  {
+        return 'bg-sudoku-highlight-light-darkness'
+      }
+      return 'bg-sudoku-cell-light-darkness'
     }
-    return bgColor + '-normal'
-  }
-
-  function colorBasedOnSelection(): string {
     if (selectedCell && selectedCell[0] === row && selectedCell[1] === col) {
-      return 'bg-sudoku-selected-light'
+      return 'bg-sudoku-selected-light-normal'
     }
     if (selectedCell && (selectedCell[0] === row || selectedCell[1] === col || (get3x3Range(selectedCell[0]).includes(row) && get3x3Range(selectedCell[1]).includes(col))))  {
-      return 'bg-sudoku-highlight-light'
+      return 'bg-sudoku-highlight-light-normal'
     }
-    return 'bg-sudoku-cell-light'
+    return 'bg-sudoku-cell-light-normal'
   }
 }
 
