@@ -24,8 +24,8 @@ export class Item {
         return new Item(ItemName.Plant, ItemEmoji.Plant, 'Plant in a cell and it will grow into the correct value', 3)
       case ItemName.Shield:
         return new Item(ItemName.Shield, ItemEmoji.Shield, 'Protect against mistakes', 1)
-      // case ItemName.Flashlight:
-      //   return new Item(ItemName.Flashlight, ItemEmoji.Flashlight, 'Brightens up darkness', 'Infinite')
+      case ItemName.Flashlight:
+        return new Item(ItemName.Flashlight, ItemEmoji.Flashlight, 'Brightens up darkness', 5)
       // case ItemName.Sun:
       //   return new Item(ItemName.Sun, ItemEmoji.Sun, 'Temporarily remove all negative effects', 1)
       // case ItemName.Snowflake:
@@ -95,7 +95,7 @@ export enum ItemName {
   // Hand = 'Hand',
   // FireEngine = 'FireEngine',
   // Cheese = 'Cheese',
-  // Flashlight = 'Flashlight',
+  Flashlight = 'Flashlight',
   // Snowflake = 'Snowflake',
   // Sun = 'Sun',
 }
@@ -111,7 +111,7 @@ export enum ItemEmoji {
   PlantMedium = '🪴',
   PlantLarge = '🌴',
   // FireEngine = '🚒',
-  // Flashlight = '🔦',
+  Flashlight = '🔦',
   // Sun = '☀️',
   // Snowflake = '❄️',
   // Cheese = '🧀',
@@ -139,6 +139,8 @@ export function determineItemLocations(sudoku: Sudoku): [Item, number, number, b
     Item.factory(ItemName.CrystalBall),
     Item.factory(ItemName.Plant),
     Item.factory(ItemName.Plant),
+    Item.factory(ItemName.Flashlight),
+    Item.factory(ItemName.Flashlight),
     // Item.factory(ItemName.GameDie),
     // Item.factory(ItemName.GameDie),
   ]
@@ -160,7 +162,7 @@ export const ITEM_LIST = [
   Item.factory(ItemName.Plant),
   // Item.factory(ItemName.GameDie),
   Item.factory(ItemName.Shield),
-  // Item.factory(ItemName.Flashlight),
+  Item.factory(ItemName.Flashlight),
   // Item.factory(ItemName.Sun),
   // Item.factory(ItemName.Snowflake),
   // Item.factory(ItemName.FireEngine),

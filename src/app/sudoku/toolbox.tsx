@@ -48,7 +48,7 @@ export default function Toolbox(props: ToolboxProps) {
         <p className="text-xl self-start text-toolbox-text-light">
           {itemsText}
         </p>
-        <div className='grid grid-cols-5 gap-4'>
+        <div className='grid grid-cols-6 gap-4'>
         { items.map((el, i) => {
           const invisible = el.name === ItemName.Placeholder ? 'invisible' : ''
           return (

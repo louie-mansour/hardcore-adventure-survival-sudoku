@@ -214,6 +214,11 @@ export default function SudokuArea(props: SudokuAreaProps) {
           return setHint(sudoku.getHint())
         }
         return
+      case ItemName.Flashlight:
+          if (isDarkness && item.use()) {
+            return setIsDarkness(false)
+          }
+          return
       case ItemName.MagicWand:
         if (!currentCell.value && currentCell.cellType === CellType.Variable && item.use()) {
           return updateSudoku(sudoku.solved[row][col].value, row, col)
@@ -273,6 +278,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         Item.factory(ItemName.FireExtinguisher),
         Item.factory(ItemName.MagicWand),
         Item.factory(ItemName.CrystalBall),
+        Item.factory(ItemName.Flashlight),
         // Item.factory(ItemName.GameDie),
         Item.factory(ItemName.Plant),
 
