@@ -17,15 +17,15 @@ export class Item {
       case ItemName.GameDie:
         return new Item(ItemName.GameDie, ItemEmoji.GameDie, 'Reveal a random value between 1-6', 2)
       case ItemName.MagicWand:
-        return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any cell with the correct value', 2)
+        return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any cell with the correct value', 1)
       case ItemName.Placeholder:
         return new Item(ItemName.Placeholder, ItemEmoji.Placeholder, 'Not a real item. This is a placeholder', 1, false)
       case ItemName.Plant:
-        return new Item(ItemName.Plant, ItemEmoji.Plant, 'Plant in a cell and it will grow into the correct value', 3)
+        return new Item(ItemName.Plant, ItemEmoji.Plant, 'Plant in a cell and it will grow into the correct value', 2)
       case ItemName.Shield:
         return new Item(ItemName.Shield, ItemEmoji.Shield, 'Protect against mistakes', 1)
       case ItemName.Flashlight:
-        return new Item(ItemName.Flashlight, ItemEmoji.Flashlight, 'Brightens up darkness', 5)
+        return new Item(ItemName.Flashlight, ItemEmoji.Flashlight, 'Brightens up darkness', 3)
       // case ItemName.Sun:
       //   return new Item(ItemName.Sun, ItemEmoji.Sun, 'Temporarily remove all negative effects', 1)
       // case ItemName.Snowflake:

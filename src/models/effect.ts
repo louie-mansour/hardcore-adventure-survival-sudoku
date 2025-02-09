@@ -85,7 +85,7 @@ export enum NegativeEffectEmoji {
 export const EFFECT_LIST = [
   NegativeEffect.factory(NegativeEffectName.Fire),
   NegativeEffect.factory(NegativeEffectName.Volcano),
-  NegativeEffect.factory(NegativeEffectName.Dizzy),
+  // NegativeEffect.factory(NegativeEffectName.Dizzy),
   NegativeEffect.factory(NegativeEffectName.Darkness),
   // NegativeEffect.factory(NegativeEffectName.Turtle),
   // NegativeEffect.factory(NegativeEffectName.Mirror),
