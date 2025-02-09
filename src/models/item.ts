@@ -14,8 +14,8 @@ export class Item {
         return new Item(ItemName.CrystalBall, ItemEmoji.CrystalBall, 'Reveal a hint', 3)
       case ItemName.FireExtinguisher:
         return new Item(ItemName.FireExtinguisher, ItemEmoji.FireExtinguisher, 'Put out fires', 'Infinite')
-      // case ItemName.GameDie:
-      //   return new Item(ItemName.GameDie, ItemEmoji.GameDie, 'Reveal a random value between 1-6', 1)
+      case ItemName.GameDie:
+        return new Item(ItemName.GameDie, ItemEmoji.GameDie, 'Reveal a random value between 1-6', 2)
       case ItemName.MagicWand:
         return new Item(ItemName.MagicWand, ItemEmoji.MagicWand, 'Fill any cell with the correct value', 2)
       case ItemName.Placeholder:
@@ -86,7 +86,7 @@ export class Item {
 export enum ItemName {
   CrystalBall = 'CrystalBall',
   FireExtinguisher = 'FireExtinguisher',
-  // GameDie = 'GameDie',
+  GameDie = 'GameDie',
   MagicWand = 'MagicWand',
   Placeholder = 'Placeholder',
   Plant = 'Plant',
@@ -103,7 +103,7 @@ export enum ItemName {
 export enum ItemEmoji {
   CrystalBall = '🔮',
   FireExtinguisher = '🧯',
-  // GameDie = '🎲',
+  GameDie = '🎲',
   MagicWand = '🪄',
   Placeholder = '⬜',
   Plant = '🌱',
@@ -141,8 +141,8 @@ export function determineItemLocations(sudoku: Sudoku): [Item, number, number, b
     Item.factory(ItemName.Plant),
     Item.factory(ItemName.Flashlight),
     Item.factory(ItemName.Flashlight),
-    // Item.factory(ItemName.GameDie),
-    // Item.factory(ItemName.GameDie),
+    Item.factory(ItemName.GameDie),
+    Item.factory(ItemName.GameDie),
   ]
 
   const itemLocations: [Item, number, number, boolean][] = [] // Not sure what the boolean at the end is for
@@ -160,7 +160,7 @@ export const ITEM_LIST = [
   Item.factory(ItemName.CrystalBall),
   Item.factory(ItemName.MagicWand),
   Item.factory(ItemName.Plant),
-  // Item.factory(ItemName.GameDie),
+  Item.factory(ItemName.GameDie),
   Item.factory(ItemName.Shield),
   Item.factory(ItemName.Flashlight),
   // Item.factory(ItemName.Sun),

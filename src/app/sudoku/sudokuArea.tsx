@@ -209,6 +209,21 @@ export default function SudokuArea(props: SudokuAreaProps) {
     const col = selectedCell[1]
     const currentCell = sudoku.getCells()[row][col]
     switch (item.name) {
+      case ItemName.GameDie:
+        let possibilities: [number, number][] = []
+        if (item.use()) {
+          const sudokuCells = sudoku.getCells()
+          for (let r = 0; r < sudokuCells.length; r++) {
+            for (let c = 0; c < sudokuCells[0].length; c++) {
+              const solutionCells = sudoku.getSolution().getCells()
+              if ((['1', '2', '3', '4', '5', '6'].includes(solutionCells[r][c].value ?? '') && !sudokuCells[r][c].value)) {
+                possibilities.push([r, c])
+              }
+            }
+          }
+          const [rowToUpdate, colToUpdate] = possibilities[Math.floor(Math.random() * possibilities.length)]
+          return updateSudoku(sudoku.solved[rowToUpdate][colToUpdate].value, rowToUpdate, colToUpdate)
+        }
       case ItemName.CrystalBall:
         if (!hint && item.use()) {
           return setHint(sudoku.getHint())
@@ -279,7 +294,7 @@ export default function SudokuArea(props: SudokuAreaProps) {
         Item.factory(ItemName.MagicWand),
         Item.factory(ItemName.CrystalBall),
         Item.factory(ItemName.Flashlight),
-        // Item.factory(ItemName.GameDie),
+        Item.factory(ItemName.GameDie),
         Item.factory(ItemName.Plant),
 
         // Don't appear in item bar
@@ -288,10 +303,6 @@ export default function SudokuArea(props: SudokuAreaProps) {
     }
     return [
       Item.factory(ItemName.FireExtinguisher),
-      // Item.factory(ItemName.MagicWand),
-      // Item.factory(ItemName.CrystalBall),
-      // Item.factory(ItemName.GameDie),
-      // Item.factory(ItemName.Plant),
     ]
   }
 
